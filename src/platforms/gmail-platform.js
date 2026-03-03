@@ -48,6 +48,13 @@ class GmailPlatform extends BasePlatform {
   getLabels() {
     const labels = [];
     const seen = new Set();
+    const systemLabels = new Set([
+      '收件匣', '已加星號', '已延後', '重要郵件', '寄件備份', '草稿', '垃圾郵件', '垃圾桶',
+      '所有郵件', '排定時間', '論壇', '社群網路', '最新快訊', '購物交易', '促銷內容',
+      '[Imap]/寄件備份', '[Imap]/草稿', '建立新的', '管理標籤', '更多', '較少',
+      'Inbox', 'Starred', 'Snoozed', 'Important', 'Sent', 'Drafts', 'Spam', 'Trash',
+      'All Mail', 'Scheduled', 'Forums', 'Updates', 'Promotions', 'Social'
+    ]);
 
     // Selectors for specific label item parts in the navigation sidebar
     const selectors = [
@@ -75,7 +82,7 @@ class GmailPlatform extends BasePlatform {
           name = nameContainer.textContent.replace(/\s*\d+$/, '').trim();
         }
 
-        if (name && !seen.has(name) && name.length > 0 && name.length < 50) {
+        if (name && !seen.has(name) && !systemLabels.has(name) && name.length > 0 && name.length < 50) {
           seen.add(name);
           labels.push({ name, element: el });
         }

@@ -75,7 +75,7 @@
               chrome.runtime.sendMessage({
                 type: 'AI_BATCH_ANALYZE',
                 batchData,
-                availableCategories: categories.map(c => c.name)
+                availableCategories: labels.map(l => l.name)
               }, (response) => {
                 if (chrome.runtime.lastError) {
                   console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
@@ -91,11 +91,19 @@
               aiResult.results.forEach(res => {
                 const email = chunk[res.id];
                 if (email) {
+                  // Try to match with user's configured settings categories first for custom colors/emojis
                   const matchedCategory = categories.find(c => c.name === res.category);
                   if (matchedCategory) {
                     email.category = Object.assign({}, matchedCategory);
                   } else {
-                    email.category = { name: res.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe', id: 'ai-' + Date.now() };
+                    // Create a dynamic category from the Gmail label name
+                    email.category = {
+                      name: res.category,
+                      emoji: '🏷️',
+                      color: '#4285f4',
+                      bgColor: '#e8f0fe',
+                      id: 'ai-label-' + res.category
+                    };
                   }
                 }
               });
