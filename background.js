@@ -219,17 +219,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       },
       body: JSON.stringify({
         model: model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a fast email categorization assistant. Analyze the email sender and subject, and respond with ONLY valid JSON in this exact format: { "category": "category name" }. Choose the most appropriate general category.'
-          },
-          {
-            role: 'user',
-            content: 'Subject: Urgent: Your account will be locked\nFrom: security@paypal-verify.com\n\nBody: Please click the link to verify your identity within 24 hours.'
-          }
-        ],
-        max_completion_tokens: 3000
+        messages: [{ role: 'user', content: 'hi' }],
+        max_completion_tokens: 10
       })
     })
       .then(res => res.text())
@@ -238,6 +229,50 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true, message: rawText });
       })
       .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+  if (message.type === 'FETCH_AI_MODELS') {
+    const { baseUrl, apiKey } = message.settings;
+    if (!baseUrl || !apiKey) {
+      sendResponse({ success: false, error: '缺少 Base URL 或 API Key' });
+      return true;
+    }
+
+    let fetchUrl = baseUrl.replace(/\/chat\/completions\/?$/, '');
+    let headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (baseUrl.includes('generative')) {
+      // Gemini format (e.g. GET /v1beta/models?key=API_KEY)
+      fetchUrl = fetchUrl + '/models?key=' + apiKey;
+    } else {
+      // Standard OpenAI compatible
+      fetchUrl = fetchUrl + '/models';
+      headers['Authorization'] = 'Bearer ' + apiKey;
+    }
+
+    fetch(fetchUrl, { method: 'GET', headers })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        let models = [];
+        if (data.data && Array.isArray(data.data)) { // OpenAI
+          models = data.data.map(m => m.id);
+        } else if (data.models && Array.isArray(data.models)) { // Gemini
+          models = data.models.map(m => m.name.replace('models/', ''));
+        } else {
+          return sendResponse({ success: false, error: '無法解析模型清單格式' });
+        }
+        sendResponse({ success: true, models: models.sort() });
+      })
+      .catch(e => {
+        console.error('[Aegis] FETCH_MODELS error:', e);
+        sendResponse({ success: false, error: e.message });
+      });
+
     return true;
   }
 

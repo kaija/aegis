@@ -38,6 +38,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Test AI Connection button
   const testBtn = document.getElementById('testAiBtn');
   if (testBtn) testBtn.addEventListener('click', testAiConnection);
+
+  // Auto-fetch models on blur
+  const baseUrlInput = document.getElementById('aiBaseUrl');
+  const apiKeyInput = document.getElementById('aiApiKey');
+  baseUrlInput.addEventListener('blur', autoFetchModelsIfChanged);
+  apiKeyInput.addEventListener('blur', autoFetchModelsIfChanged);
+
+  // Initial load of cached models
+  loadCachedModels();
 });
 
 async function testAiConnection() {
@@ -93,6 +102,79 @@ async function testAiConnection() {
       statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
       statusEl.style.color = '#cf222e';
     }
+  });
+}
+
+async function autoFetchModelsIfChanged() {
+  const statusEl = document.getElementById('fetchModelsStatus');
+  const datalist = document.getElementById('aiModelList');
+
+  const baseUrl = document.getElementById('aiBaseUrl').value.trim() || 'https://api.openai.com/v1';
+  const apiKey = document.getElementById('aiApiKey').value.trim();
+
+  if (!apiKey) return;
+
+  // Check if we already fetched for this exact pair
+  const cachedData = await new Promise(resolve => chrome.storage.local.get(['modelCache'], resolve));
+  const cache = cachedData.modelCache || {};
+
+  if (cache.baseUrl === baseUrl && cache.apiKey === apiKey && cache.models && cache.models.length > 0) {
+    // Already cached, just ensure it's loaded
+    renderModelList(cache.models);
+    return;
+  }
+
+  statusEl.textContent = '⏳ 取得模型中...';
+  statusEl.style.color = '#0969da';
+
+  chrome.runtime.sendMessage({
+    type: 'FETCH_AI_MODELS',
+    settings: { baseUrl, apiKey }
+  }, (response) => {
+    if (chrome.runtime.lastError || !response) {
+      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.style.color = '#cf222e';
+    } else if (response.success && response.models) {
+      statusEl.textContent = `✅ 成功取得 ${response.models.length} 個模型`;
+      statusEl.style.color = '#1a7f37';
+
+      renderModelList(response.models);
+
+      // Save to local cache
+      chrome.storage.local.set({
+        modelCache: {
+          baseUrl,
+          apiKey,
+          models: response.models
+        }
+      });
+    } else {
+      statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
+      statusEl.style.color = '#cf222e';
+    }
+  });
+}
+
+async function loadCachedModels() {
+  const cachedData = await new Promise(resolve => chrome.storage.local.get(['modelCache'], resolve));
+  if (cachedData.modelCache && cachedData.modelCache.models) {
+    renderModelList(cachedData.modelCache.models);
+    const statusEl = document.getElementById('fetchModelsStatus');
+    statusEl.textContent = `✅ 已載入 ${cachedData.modelCache.models.length} 個模型`;
+    statusEl.style.color = '#1a7f37';
+  } else {
+    // If no cache but we have credentials from sync storage, try fetching
+    autoFetchModelsIfChanged();
+  }
+}
+
+function renderModelList(models) {
+  const datalist = document.getElementById('aiModelList');
+  datalist.innerHTML = '';
+  models.forEach(modelName => {
+    const option = document.createElement('option');
+    option.value = modelName;
+    datalist.appendChild(option);
   });
 }
 

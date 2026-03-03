@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aegis Mail 設定</title>
   <link rel="stylesheet" href="options.css">
 </head>
+
 <body>
   <div class="options-container">
     <header class="options-header">
@@ -44,11 +46,15 @@
         <input type="password" id="aiApiKey" placeholder="sk-...">
       </div>
       <div class="form-group">
-        <label for="aiModel">模型</label>
-        <input type="text" id="aiModel" placeholder="gpt-5-nano-2025-08-07">
+        <label for="aiModel" style="display:flex; justify-content:space-between; align-items:center;">
+          模型
+          <span id="fetchModelsStatus" style="font-size:12px; font-weight:normal;"></span>
+        </label>
+        <input type="text" id="aiModel" list="aiModelList" placeholder="gpt-5-nano-2025-08-07">
+        <datalist id="aiModelList"></datalist>
       </div>
       <div class="form-group action-group">
-        <button type="button" class="test-btn" id="testAiBtn">🔌 測試連線 (Hello)</button>
+        <button type="button" class="test-btn" id="testAiBtn">🔌 測試連線</button>
         <span class="test-status" id="testAiStatus" style="margin-left: 10px; font-weight: bold;"></span>
       </div>
     </section>
@@ -66,4 +72,5 @@
   </div>
   <script src="options.js"></script>
 </body>
+
 </html>
