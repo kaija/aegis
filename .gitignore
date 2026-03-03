@@ -1,0 +1,14 @@
+# Distribution
+dist/
+
+# Chrome extension signing key (keep private, never commit)
+*.pem
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

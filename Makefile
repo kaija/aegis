@@ -1,0 +1,95 @@
+EXTENSION_NAME := aegis-mail
+VERSION        := $(shell node -p "require('./manifest.json').version" 2>/dev/null || echo "1.0.0")
+OUT_DIR        := dist
+ZIP_FILE       := $(OUT_DIR)/$(EXTENSION_NAME)-$(VERSION).zip
+CRX_FILE       := $(OUT_DIR)/$(EXTENSION_NAME)-$(VERSION).crx
+KEY_FILE       := $(EXTENSION_NAME).pem
+
+CHROME := $(shell \
+	command -v google-chrome 2>/dev/null || \
+	command -v google-chrome-stable 2>/dev/null || \
+	echo "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+
+# Files to include in the package (exclude dev/system files)
+PACK_EXCLUDE := \
+	--exclude="*.pem" \
+	--exclude="*.DS_Store" \
+	--exclude=".git/*" \
+	--exclude=".claude/*" \
+	--exclude="dist/*" \
+	--exclude="CLAUDE.md" \
+	--exclude="Makefile" \
+	--exclude="*.map"
+
+.PHONY: all zip crx dev clean help
+
+all: zip ## Default: build zip package
+
+## ── Build targets ──────────────────────────────────────────────────────────
+
+dev: ## Copy extension files to dist/ for local unpacked loading
+	@rm -rf $(OUT_DIR)
+	@rsync -a \
+		--exclude="*.pem" \
+		--exclude=".DS_Store" \
+		--exclude=".git" \
+		--exclude=".claude" \
+		--exclude="dist" \
+		--exclude="CLAUDE.md" \
+		--exclude="Makefile" \
+		--exclude="*.map" \
+		. $(OUT_DIR)/
+	@echo "Ready: load $(OUT_DIR)/ as unpacked extension in Chrome"
+
+zip: $(ZIP_FILE) ## Pack extension as .zip (for Chrome Web Store)
+
+$(ZIP_FILE): $(OUT_DIR) manifest.json
+	@echo "Packing $(ZIP_FILE)..."
+	@zip -r -9 "$(ZIP_FILE)" . \
+		$(PACK_EXCLUDE) \
+		-x "$(OUT_DIR)/*"
+	@echo "Done: $(ZIP_FILE) ($$(du -sh $(ZIP_FILE) | cut -f1))"
+
+crx: $(OUT_DIR) ## Pack extension as .crx (self-distribution)
+	@echo "Packing $(CRX_FILE)..."
+	@if [ -f "$(KEY_FILE)" ]; then \
+		"$(CHROME)" \
+			--pack-extension="$(CURDIR)" \
+			--pack-extension-key="$(CURDIR)/$(KEY_FILE)" \
+			--no-message-box 2>/dev/null; \
+	else \
+		echo "No key file found — Chrome will generate $(KEY_FILE)"; \
+		"$(CHROME)" \
+			--pack-extension="$(CURDIR)" \
+			--no-message-box 2>/dev/null; \
+	fi
+	@if [ -f "../$(notdir $(CURDIR)).crx" ]; then \
+		mv "../$(notdir $(CURDIR)).crx" "$(CRX_FILE)"; \
+		echo "Done: $(CRX_FILE)"; \
+	elif [ -f "../$(notdir $(CURDIR)).pem" ] && [ ! -f "$(KEY_FILE)" ]; then \
+		mv "../$(notdir $(CURDIR)).pem" "$(KEY_FILE)"; \
+		echo "Generated key: $(KEY_FILE) — run 'make crx' again to produce .crx"; \
+	fi
+
+## ── Utilities ───────────────────────────────────────────────────────────────
+
+$(OUT_DIR):
+	@mkdir -p $(OUT_DIR)
+
+clean: ## Remove dist directory
+	@rm -rf $(OUT_DIR)
+	@echo "Cleaned dist/"
+
+info: ## Show extension info
+	@echo "Name:    $(EXTENSION_NAME)"
+	@echo "Version: $(VERSION)"
+	@echo "Chrome:  $(CHROME)"
+	@echo "Output:  $(OUT_DIR)/"
+
+help: ## Show this help
+	@echo "Usage: make [target]"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Output files go to: $(OUT_DIR)/"

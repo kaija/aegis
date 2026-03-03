@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis Mail 設定</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="options-header">
+      <img src="public/icons/icon32.png" alt="Aegis" width="28" height="28">
+      <h1>Aegis Mail 設定</h1>
+    </header>
+
+    <section class="options-section">
+      <h2>分析模式</h2>
+      <div class="mode-toggle">
+        <label class="toggle-option">
+          <input type="radio" name="analysisMode" value="local" checked>
+          <span class="toggle-label">
+            <strong>本地規則</strong>
+            <small>使用關鍵字規則分析，無需網路連線</small>
+          </span>
+        </label>
+        <label class="toggle-option">
+          <input type="radio" name="analysisMode" value="ai">
+          <span class="toggle-label">
+            <strong>AI 模式</strong>
+            <small>使用 OpenAI 相容 API 進行智慧分析</small>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="options-section" id="aiSettingsSection" style="display:none">
+      <h2>AI 設定</h2>
+      <div class="form-group">
+        <label for="aiBaseUrl">API Base URL</label>
+        <input type="url" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
+      </div>
+      <div class="form-group">
+        <label for="aiApiKey">API Key</label>
+        <input type="password" id="aiApiKey" placeholder="sk-...">
+      </div>
+      <div class="form-group">
+        <label for="aiModel">模型</label>
+        <input type="text" id="aiModel" placeholder="gpt-4o-mini">
+      </div>
+    </section>
+
+    <section class="options-section">
+      <h2>分類規則</h2>
+      <p class="section-desc">展開各分類以新增或移除關鍵字</p>
+      <div id="categoriesList"></div>
+    </section>
+
+    <div class="options-actions">
+      <button class="save-btn" id="saveBtn">💾 儲存設定</button>
+      <span class="save-status" id="saveStatus"></span>
+    </div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
