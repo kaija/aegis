@@ -48,23 +48,40 @@ class GmailPlatform extends BasePlatform {
   getLabels() {
     const labels = [];
     const seen = new Set();
+
+    // Selectors for specific label item parts in the navigation sidebar
     const selectors = [
-      '[data-tooltip][aria-label]',
+      'a[href*="#label/"]',
+      'a[href*="#inbox"]',
       '.aim .nU',
       'nav .aHS-bnt',
       '[role="navigation"] .aT4',
       'li[role="treeitem"] .n3'
     ];
+
     for (const sel of selectors) {
       const els = document.querySelectorAll(sel);
       els.forEach(el => {
-        const name = (el.getAttribute('aria-label') || el.getAttribute('data-tooltip') || el.textContent || '').trim();
+        // title usually holds the raw label name without unread counts.
+        // Fallbacks: aria-label (cleanup needed) or just textContent.
+        let name = el.getAttribute('title') || el.textContent || '';
+
+        name = name.trim();
+
+        // Strip ending unread count (e.g. "Work 2") if we fell back to textContent without a cleaner title
+        if (!el.getAttribute('title') && /\d+$/.test(name)) {
+          // If the element has a child that specifically holds the name, use that.
+          const nameContainer = el.querySelector('.nU') || el;
+          name = nameContainer.textContent.replace(/\s*\d+$/, '').trim();
+        }
+
         if (name && !seen.has(name) && name.length > 0 && name.length < 50) {
           seen.add(name);
           labels.push({ name, element: el });
         }
       });
-      if (labels.length > 0) break;
+      // We don't break early anymore so we can composite both #inbox and #labels 
+      // accurately.
     }
     return labels;
   }
@@ -123,12 +140,20 @@ class GmailPlatform extends BasePlatform {
     if (!moveBtn) return false;
     this._clickElement(moveBtn);
 
+    const target = labelName.trim().toLowerCase();
     const menuItem = await this._waitForElement(
       ['[role="menuitem"]', '[role="option"]', '.J-N'],
-      2000,
-      el => el.textContent.trim().toLowerCase() === labelName.toLowerCase()
+      3000,
+      el => {
+        const text = el.textContent.trim().toLowerCase();
+        const title = (el.getAttribute('title') || '').trim().toLowerCase();
+        return title === target || text === target || text.endsWith(target) || text.includes(target);
+      }
     );
+
     if (menuItem) {
+      menuItem.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      await this._sleep(100);
       this._clickElement(menuItem);
       return true;
     }
@@ -179,7 +204,7 @@ class GmailPlatform extends BasePlatform {
   _clickElement(el) {
     if (!el) return;
     try {
-      const ev = {bubbles: true, cancelable: true};
+      const ev = { bubbles: true, cancelable: true };
       el.dispatchEvent(new MouseEvent('mousedown', ev));
       el.dispatchEvent(new MouseEvent('mouseup', ev));
       el.click();
