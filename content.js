@@ -46,6 +46,24 @@
       console.log('[Aegis] runAnalysis mode:', settings.analysisMode, 'emails found:', emails.length);
       console.log('[Aegis] has apiKey:', !!(settings.aiSettings && settings.aiSettings.apiKey));
 
+      const renderCurrentState = (isLoading) => {
+        const groups = new Map();
+        for (const email of emails) {
+          // Only show emails that have a category assigned (local or AI)
+          if (email.category && email.category.id) {
+            if (!groups.has(email.category.id)) {
+              groups.set(email.category.id, { category: email.category, emails: [] });
+            }
+            groups.get(email.category.id).emails.push(email);
+          }
+        }
+        analysisPanel.show(groups, labels, {
+          filter: unreadOnly ? 'unread' : 'all',
+          onFilterChange: (filter) => runAnalysis(filter === 'unread'),
+          isLoading: isLoading
+        });
+      };
+
       // Process emails
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         console.log('[Aegis] AI mode active, processing', emails.length, 'emails');
@@ -112,32 +130,26 @@
             console.error('[Aegis] AI Batch Error:', e);
           }
 
+          // Render progressive updates
+          renderCurrentState(true);
+
           // Small delay between chunks
           if (i + chunkSize < emails.length) {
             await new Promise(r => setTimeout(r, 500));
           }
         }
+
+        // Final render after all chunks
+        renderCurrentState(false);
+
       } else {
         // Local analysis only
         emails.forEach(email => {
           const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
           email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
         });
+        renderCurrentState(false);
       }
-
-      // Group emails by category
-      const groups = new Map();
-      for (const email of emails) {
-        if (!groups.has(email.category.id)) {
-          groups.set(email.category.id, { category: email.category, emails: [] });
-        }
-        groups.get(email.category.id).emails.push(email);
-      }
-
-      analysisPanel.show(groups, labels, {
-        filter: unreadOnly ? 'unread' : 'all',
-        onFilterChange: (filter) => runAnalysis(filter === 'unread'),
-      });
     } catch (err) {
       console.error('[Aegis] Analysis error:', err);
     }

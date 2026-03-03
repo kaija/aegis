@@ -57,17 +57,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   analyzeBtn.addEventListener('click', async () => {
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = '⏳ 分析中...';
+    analyzeBtn.textContent = '⏳ 分類中...';
 
     try {
       await ensureContentScript(tab);
       await chrome.tabs.sendMessage(tab.id, { type: 'ANALYZE' });
-      analyzeBtn.textContent = '✓ 分析完成';
-      statusText.textContent = '側欄已開啟';
+      // Instantly close the popup to let the user see the in-page analysis panel
+      window.close();
     } catch (e) {
       console.error('[Aegis] Failed to send analyze message:', e);
       analyzeBtn.disabled = false;
-      analyzeBtn.textContent = '📊 分析郵件';
+      analyzeBtn.textContent = '📊 分類郵件';
       statusText.textContent = '注入失敗，請重新整理 Gmail';
     }
   });

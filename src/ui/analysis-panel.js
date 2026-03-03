@@ -93,6 +93,18 @@ class AnalysisPanel {
       return;
     }
 
+    if (isLoading) {
+      const loadingRow = document.createElement('div');
+      loadingRow.className = 'aegis-loading-row';
+      loadingRow.style.textAlign = 'center';
+      loadingRow.style.padding = '15px';
+      loadingRow.style.color = '#5f6368';
+      loadingRow.style.fontSize = '13px';
+      loadingRow.style.borderBottom = '1px solid #eee';
+      loadingRow.innerHTML = '<span style="display:inline-block; animation: pulse 1.5s infinite">✨</span> AI 繼續分析剩餘郵件中...';
+      body.appendChild(loadingRow);
+    }
+
     for (const [categoryId, { category, emails }] of groups) {
       totalEmails += emails.length;
       const groupEl = this._createCategoryGroup(category, emails, labels);
