@@ -3,16 +3,16 @@ const DEFAULT_SETTINGS = {
   aiSettings: {
     baseUrl: 'https://api.openai.com/v1',
     apiKey: '',
-    model: 'gpt-4o-mini'
+    model: 'gpt-5-nano-2025-08-07'
   },
   categories: [
-    { id: 'work', name: '工作', emoji: '💼', color: '#4285f4', bgColor: '#e8f0fe', keywords: ['meeting','會議','project','專案','deadline','invoice','發票','report','報告'] },
-    { id: 'shopping', name: '購物', emoji: '🛍', color: '#ff6d00', bgColor: '#fff3e0', keywords: ['order','訂單','shipping','出貨','receipt','purchase','delivery','配送'] },
-    { id: 'finance', name: '財務', emoji: '💰', color: '#00897b', bgColor: '#e0f2f1', keywords: ['payment','付款','bank','銀行','transfer','帳單','bill','credit','invoice'] },
-    { id: 'social', name: '社交', emoji: '👥', color: '#9c27b0', bgColor: '#f3e5f5', keywords: ['invitation','邀請','follow','friend','connect','linkedin','facebook'] },
-    { id: 'promotions', name: '促銷', emoji: '🎁', color: '#e91e63', bgColor: '#fce4ec', keywords: ['sale','特價','discount','折扣','offer','優惠','promo','newsletter'] },
-    { id: 'security', name: '安全', emoji: '🔐', color: '#f44336', bgColor: '#ffebee', keywords: ['verify','驗證','password','密碼','secure','unauthorized','breach','phishing'] },
-    { id: 'notifications', name: '通知', emoji: '🔔', color: '#607d8b', bgColor: '#eceff1', keywords: ['notification','通知','alert','update','reminder','otp','confirm'] }
+    { id: 'work', name: '工作', emoji: '💼', color: '#4285f4', bgColor: '#e8f0fe', keywords: ['meeting', '會議', 'project', '專案', 'deadline', 'invoice', '發票', 'report', '報告'] },
+    { id: 'shopping', name: '購物', emoji: '🛍', color: '#ff6d00', bgColor: '#fff3e0', keywords: ['order', '訂單', 'shipping', '出貨', 'receipt', 'purchase', 'delivery', '配送'] },
+    { id: 'finance', name: '財務', emoji: '💰', color: '#00897b', bgColor: '#e0f2f1', keywords: ['payment', '付款', 'bank', '銀行', 'transfer', '帳單', 'bill', 'credit', 'invoice'] },
+    { id: 'social', name: '社交', emoji: '👥', color: '#9c27b0', bgColor: '#f3e5f5', keywords: ['invitation', '邀請', 'follow', 'friend', 'connect', 'linkedin', 'facebook'] },
+    { id: 'promotions', name: '促銷', emoji: '🎁', color: '#e91e63', bgColor: '#fce4ec', keywords: ['sale', '特價', 'discount', '折扣', 'offer', '優惠', 'promo', 'newsletter'] },
+    { id: 'security', name: '安全', emoji: '🔐', color: '#f44336', bgColor: '#ffebee', keywords: ['verify', '驗證', 'password', '密碼', 'secure', 'unauthorized', 'breach', 'phishing'] },
+    { id: 'notifications', name: '通知', emoji: '🔔', color: '#607d8b', bgColor: '#eceff1', keywords: ['notification', '通知', 'alert', 'update', 'reminder', 'otp', 'confirm'] }
   ]
 };
 
@@ -54,6 +54,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.sync.get(null, (result) => {
       const settings = Object.assign({}, DEFAULT_SETTINGS, result);
 
+      const promptContent = buildUserMessage(message.emailData);
+      console.log('========== [Aegis] AI Prompt ==========');
+      console.log('System: You are a fast email categorization assistant. Analyze the email sender/subject and respond with ONLY valid JSON: { "category": "category name" }. Choose the most appropriate category name.');
+      console.log('User:\n' + promptContent);
+      console.log('=======================================');
+
       fetch(settings.aiSettings.baseUrl + '/chat/completions', {
         method: 'POST',
         headers: {
@@ -65,27 +71,94 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           messages: [
             {
               role: 'system',
-              content: 'You are an email security and categorization assistant. Analyze the email and respond with ONLY valid JSON in this exact format: { "category": "category name", "tags": ["tag1", "tag2"], "safetyScore": 85, "issues": ["issue description"] }. safetyScore is 0-100 where 100 is completely safe.'
+              content: 'You are a fast email categorization assistant. Analyze the email sender and subject, and respond with ONLY valid JSON in this exact format: { "category": "category name" }. Choose the most appropriate general category.'
             },
             {
               role: 'user',
-              content: buildUserMessage(message.emailData)
+              content: promptContent
             }
           ],
-          temperature: 0.1,
-          max_tokens: 500
+          max_completion_tokens: 3000
         })
       })
-        .then((res) => res.json())
-        .then((data) => {
+        .then((res) => res.text())
+        .then((rawText) => {
+          console.log('\n\n========== [Aegis] RAW HTTP RESPONSE ==========');
+          console.log(rawText);
+          console.log('===============================================\n\n');
+
+          let data;
+          try {
+            data = JSON.parse(rawText);
+          } catch (e) {
+            console.error('[Aegis] RAW Response is not valid JSON!');
+            return sendResponse({ error: 'API returned non-JSON response' });
+          }
+
+          if (data.error) {
+            console.error('[Aegis] API Error Response:', data.error);
+            return sendResponse({ error: data.error.message || 'API Error' });
+          }
+          if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.error('[Aegis] Unexpected API format:', data);
+            return sendResponse({ error: 'Unexpected API response format' });
+          }
+
           const content = data.choices[0].message.content;
-          const result = JSON.parse(content);
-          sendResponse(result);
+          console.log('========== [Aegis] AI Content ==========');
+          console.log(content);
+          console.log('========================================');
+
+          try {
+            // Bulletproof JSON extraction: find the first { and last }
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+              throw new Error('No JSON object found in response');
+            }
+            const result = JSON.parse(jsonMatch[0]);
+            sendResponse(result);
+          } catch (e) {
+            console.error('[Aegis] Invalid JSON Content:', content, e);
+            sendResponse({ error: 'Invalid JSON from AI' });
+          }
         })
         .catch((error) => {
+          console.error('[Aegis] Fetch error:', error);
           sendResponse({ error: error.message });
         });
     });
+    return true;
+  }
+
+  if (message.type === 'TEST_AI_API') {
+    const { baseUrl, apiKey, model } = message.settings;
+    fetch(baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a fast email categorization assistant. Analyze the email sender and subject, and respond with ONLY valid JSON in this exact format: { "category": "category name" }. Choose the most appropriate general category.'
+          },
+          {
+            role: 'user',
+            content: 'Subject: Urgent: Your account will be locked\nFrom: security@paypal-verify.com\n\nBody: Please click the link to verify your identity within 24 hours.'
+          }
+        ],
+        max_completion_tokens: 3000
+      })
+    })
+      .then(res => res.text())
+      .then(rawText => {
+        // Always return the exact, unparsed string for debugging realistic payload formatting
+        sendResponse({ success: true, message: rawText });
+      })
+      .catch(e => sendResponse({ success: false, error: e.message }));
     return true;
   }
 

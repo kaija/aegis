@@ -1,4 +1,4 @@
-(async function() {
+(async function () {
   'use strict';
 
   // Guard against double injection
@@ -31,11 +31,71 @@
       const emails = platform.getEmails(unreadOnly);
       const labels = platform.getLabels();
 
-      const groups = EmailAnalyzer.analyzeEmailList(
-        emails,
-        labels.map(l => l.name),
-        settings.categories || []
-      );
+      // Show temporary loading state
+      analysisPanel.show(new Map(), labels, {
+        filter: unreadOnly ? 'unread' : 'all',
+        onFilterChange: (filter) => runAnalysis(filter === 'unread'),
+      });
+      const headerStats = document.querySelector('.aegis-header-stats');
+      if (headerStats) headerStats.innerHTML = '✨ <span>AI 分析中...</span>';
+
+      // Determine categories to use
+      const categories = settings.categories || [];
+
+      console.log('[Aegis] runAnalysis mode:', settings.analysisMode, 'emails found:', emails.length);
+      console.log('[Aegis] has apiKey:', !!(settings.aiSettings && settings.aiSettings.apiKey));
+
+      // Process emails
+      if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
+        console.log('[Aegis] AI mode active, processing', emails.length, 'emails');
+        // Process sequentially to avoid dropping the hammer on OpenAI API rate limits
+        for (let i = 0; i < emails.length; i++) {
+          const email = emails[i];
+
+          // Fallback initial categorization
+          const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
+          email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+
+          // Try AI
+          try {
+            const emailData = { subject: email.subject, sender: email.sender, senderEmail: email.senderEmail, body: '', links: [] };
+            const aiResult = await new Promise((resolve) => {
+              chrome.runtime.sendMessage({ type: 'AI_ANALYZE', emailData }, (response) => {
+                if (chrome.runtime.lastError) {
+                  console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
+                  resolve({});
+                } else {
+                  resolve(response || {});
+                }
+              });
+            });
+            console.log('[Aegis] Batch AI result for', email.subject, ':', aiResult);
+            if (aiResult && !aiResult.error && aiResult.category) {
+              email.category = { name: aiResult.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe', id: aiResult.category };
+            }
+          } catch (e) {
+            console.error('[Aegis] AI Batch Error:', e);
+          }
+
+          // Small delay between requests to be gentle on the API
+          await new Promise(r => setTimeout(r, 200));
+        }
+      } else {
+        // Local analysis only
+        emails.forEach(email => {
+          const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
+          email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+        });
+      }
+
+      // Group emails by category
+      const groups = new Map();
+      for (const email of emails) {
+        if (!groups.has(email.category.id)) {
+          groups.set(email.category.id, { category: email.category, emails: [] });
+        }
+        groups.get(email.category.id).emails.push(email);
+      }
 
       analysisPanel.show(groups, labels, {
         filter: unreadOnly ? 'unread' : 'all',

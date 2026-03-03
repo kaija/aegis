@@ -21,8 +21,7 @@ const AIAnalyzer = (() => {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
-        temperature: 0.1,
-        max_tokens: 500
+        max_completion_tokens: 3000
       })
     });
 

@@ -34,7 +34,67 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Save button
   document.getElementById('saveBtn').addEventListener('click', saveSettings);
+
+  // Test AI Connection button
+  const testBtn = document.getElementById('testAiBtn');
+  if (testBtn) testBtn.addEventListener('click', testAiConnection);
 });
+
+async function testAiConnection() {
+  const statusEl = document.getElementById('testAiStatus');
+  const btn = document.getElementById('testAiBtn');
+
+  const baseUrl = document.getElementById('aiBaseUrl').value.trim() || 'https://api.openai.com/v1';
+  const apiKey = document.getElementById('aiApiKey').value.trim();
+  const model = document.getElementById('aiModel').value.trim() || 'gpt-5-nano-2025-08-07';
+
+  if (!apiKey) {
+    statusEl.textContent = '❌ 請先輸入 API Key';
+    statusEl.style.color = '#cf222e';
+    return;
+  }
+
+  statusEl.textContent = '⏳ 測試連線中...';
+  statusEl.style.color = '#0969da';
+  btn.disabled = true;
+
+  chrome.runtime.sendMessage({
+    type: 'TEST_AI_API',
+    settings: { baseUrl, apiKey, model }
+  }, (response) => {
+    btn.disabled = false;
+
+    // Cleanup any old test output textarea
+    const oldDump = document.getElementById('testRawOutput');
+    if (oldDump) oldDump.remove();
+
+    if (chrome.runtime.lastError || !response) {
+      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.style.color = '#cf222e';
+    } else if (response.success) {
+      statusEl.textContent = '✅ API 成功回傳！請查看下方原始資料：';
+      statusEl.style.color = '#1a7f37';
+
+      const dumpArea = document.createElement('textarea');
+      dumpArea.id = 'testRawOutput';
+      dumpArea.style.width = '100%';
+      dumpArea.style.height = '200px';
+      dumpArea.style.marginTop = '15px';
+      dumpArea.style.padding = '10px';
+      dumpArea.style.fontFamily = 'monospace';
+      dumpArea.style.border = '1px solid #d0d7de';
+      dumpArea.style.borderRadius = '6px';
+      dumpArea.readOnly = true;
+      dumpArea.value = response.message;
+
+      // Append below the action group
+      btn.parentElement.after(dumpArea);
+    } else {
+      statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
+      statusEl.style.color = '#cf222e';
+    }
+  });
+}
 
 function renderCategories(categories) {
   const container = document.getElementById('categoriesList');
@@ -143,7 +203,7 @@ async function saveSettings() {
     aiSettings: {
       baseUrl: document.getElementById('aiBaseUrl').value.trim() || 'https://api.openai.com/v1',
       apiKey: document.getElementById('aiApiKey').value.trim(),
-      model: document.getElementById('aiModel').value.trim() || 'gpt-4o-mini'
+      model: document.getElementById('aiModel').value.trim() || 'gpt-5-nano-2025-08-07'
     },
     categories: settings.categories
   };
