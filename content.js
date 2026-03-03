@@ -35,6 +35,7 @@
       analysisPanel.show(new Map(), labels, {
         filter: unreadOnly ? 'unread' : 'all',
         onFilterChange: (filter) => runAnalysis(filter === 'unread'),
+        isLoading: true // Enable new loading UI
       });
       const headerStats = document.querySelector('.aegis-header-stats');
       if (headerStats) headerStats.innerHTML = '✨ <span>AI 分析中...</span>';
@@ -48,19 +49,34 @@
       // Process emails
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         console.log('[Aegis] AI mode active, processing', emails.length, 'emails');
-        // Process sequentially to avoid dropping the hammer on OpenAI API rate limits
-        for (let i = 0; i < emails.length; i++) {
-          const email = emails[i];
+
+        // Process in chunks (batches of 10) to reduce API requests
+        const chunkSize = 10;
+        for (let i = 0; i < emails.length; i += chunkSize) {
+          const chunk = emails.slice(i, i + chunkSize);
 
           // Fallback initial categorization
-          const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
-          email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+          chunk.forEach(email => {
+            const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
+            email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+          });
 
-          // Try AI
+          // Build batch payload
+          const batchData = chunk.map((email, index) => ({
+            id: index,
+            subject: email.subject,
+            sender: email.sender,
+            senderEmail: email.senderEmail
+          }));
+
+          // Try AI Batch
           try {
-            const emailData = { subject: email.subject, sender: email.sender, senderEmail: email.senderEmail, body: '', links: [] };
             const aiResult = await new Promise((resolve) => {
-              chrome.runtime.sendMessage({ type: 'AI_ANALYZE', emailData }, (response) => {
+              chrome.runtime.sendMessage({
+                type: 'AI_BATCH_ANALYZE',
+                batchData,
+                availableCategories: categories.map(c => c.name)
+              }, (response) => {
                 if (chrome.runtime.lastError) {
                   console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
                   resolve({});
@@ -69,16 +85,29 @@
                 }
               });
             });
-            console.log('[Aegis] Batch AI result for', email.subject, ':', aiResult);
-            if (aiResult && !aiResult.error && aiResult.category) {
-              email.category = { name: aiResult.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe', id: aiResult.category };
+            console.log('[Aegis] AI Array result:', aiResult);
+
+            if (aiResult && !aiResult.error && Array.isArray(aiResult.results)) {
+              aiResult.results.forEach(res => {
+                const email = chunk[res.id];
+                if (email) {
+                  const matchedCategory = categories.find(c => c.name === res.category);
+                  if (matchedCategory) {
+                    email.category = Object.assign({}, matchedCategory);
+                  } else {
+                    email.category = { name: res.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe', id: 'ai-' + Date.now() };
+                  }
+                }
+              });
             }
           } catch (e) {
             console.error('[Aegis] AI Batch Error:', e);
           }
 
-          // Small delay between requests to be gentle on the API
-          await new Promise(r => setTimeout(r, 200));
+          // Small delay between chunks
+          if (i + chunkSize < emails.length) {
+            await new Promise(r => setTimeout(r, 500));
+          }
         }
       } else {
         // Local analysis only

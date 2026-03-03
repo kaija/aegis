@@ -56,7 +56,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       const promptContent = buildUserMessage(message.emailData);
       console.log('========== [Aegis] AI Prompt ==========');
-      console.log('System: You are a fast email categorization assistant. Analyze the email sender/subject and respond with ONLY valid JSON: { "category": "category name" }. Choose the most appropriate category name.');
+      const categoryListStr = message.availableCategories ? message.availableCategories.join(', ') : 'no specific categories';
+      const batchSystemPrompt = `You are a fast email categorization assistant. Analyze the email sender and subject, and respond with ONLY valid JSON in this exact format: { "category": "category name" }. You MUST choose the most appropriate category strictly from this list: [${categoryListStr}]. Do not invent new categories.`;
+
+      console.log('System: ' + batchSystemPrompt);
       console.log('User:\n' + promptContent);
       console.log('=======================================');
 
@@ -71,7 +74,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           messages: [
             {
               role: 'system',
-              content: 'You are a fast email categorization assistant. Analyze the email sender and subject, and respond with ONLY valid JSON in this exact format: { "category": "category name" }. Choose the most appropriate general category.'
+              content: batchSystemPrompt
             },
             {
               role: 'user',
@@ -115,6 +118,82 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (!jsonMatch) {
               throw new Error('No JSON object found in response');
             }
+            const result = JSON.parse(jsonMatch[0]);
+            sendResponse(result);
+          } catch (e) {
+            console.error('[Aegis] Invalid JSON Content:', content, e);
+            sendResponse({ error: 'Invalid JSON from AI' });
+          }
+        })
+        .catch((error) => {
+          console.error('[Aegis] Fetch error:', error);
+          sendResponse({ error: error.message });
+        });
+    });
+    return true;
+  }
+
+  if (message.type === 'AI_BATCH_ANALYZE') {
+    chrome.storage.sync.get(null, (result) => {
+      const settings = Object.assign({}, DEFAULT_SETTINGS, result);
+
+      const promptContent = JSON.stringify(message.batchData, null, 2);
+      const categoryListStr = message.availableCategories ? message.availableCategories.join(', ') : 'no specific categories';
+      const batchSystemPrompt = `You are a fast email categorization assistant. Analyze the following list of emails (provided as a JSON array). Respond with ONLY a valid JSON object containing a "results" array. Format: { "results": [ { "id": ID_NUMBER, "category": "category name" } ] }. You MUST map every id from the input to an output. You MUST choose the most appropriate category strictly from this list: [${categoryListStr}]. Do not invent new categories.`;
+
+      console.log('System: ' + batchSystemPrompt);
+      console.log('User:\n' + promptContent);
+      console.log('=======================================');
+
+      fetch(settings.aiSettings.baseUrl + '/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + settings.aiSettings.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: settings.aiSettings.model,
+          messages: [
+            {
+              role: 'system',
+              content: batchSystemPrompt
+            },
+            {
+              role: 'user',
+              content: promptContent
+            }
+          ],
+          max_completion_tokens: 3000
+        })
+      })
+        .then((res) => res.text())
+        .then((rawText) => {
+          console.log('\n\n========== [Aegis] BATCH RAW HTTP RESPONSE ==========');
+          console.log(rawText);
+          console.log('===============================================\n\n');
+
+          let data;
+          try {
+            data = JSON.parse(rawText);
+          } catch (e) {
+            console.error('[Aegis] BATCH RAW Response is not valid JSON!');
+            return sendResponse({ error: 'API returned non-JSON response' });
+          }
+
+          if (data.error) {
+            console.error('[Aegis] API Error Response:', data.error);
+            return sendResponse({ error: data.error.message || 'API Error' });
+          }
+          if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.error('[Aegis] Unexpected API format:', data);
+            return sendResponse({ error: 'Unexpected API response format' });
+          }
+
+          const content = data.choices[0].message.content;
+
+          try {
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error('No JSON object found in response');
             const result = JSON.parse(jsonMatch[0]);
             sendResponse(result);
           } catch (e) {

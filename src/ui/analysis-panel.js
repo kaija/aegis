@@ -11,7 +11,7 @@ class AnalysisPanel {
     this._onFilterChange = options.onFilterChange || null;
     this.hide();
     this.panel = this._createPanel();
-    this._render(groups, labels || []);
+    this._render(groups, labels || [], options.isLoading);
   }
 
   hide() {
@@ -64,7 +64,7 @@ class AnalysisPanel {
     return panel;
   }
 
-  _render(groups, labels) {
+  _render(groups, labels, isLoading = false) {
     const body = this.panel.querySelector('#aegis-panel-body');
     const footer = this.panel.querySelector('#aegis-panel-footer');
     body.innerHTML = '';
@@ -72,13 +72,24 @@ class AnalysisPanel {
     let totalEmails = 0;
 
     if (groups.size === 0) {
-      body.innerHTML = `
-        <div class="aegis-empty-state">
-          <div class="aegis-empty-icon">📭</div>
-          <div>沒有找到未讀郵件</div>
-        </div>
-      `;
-      footer.textContent = '共 0 封未讀郵件';
+      if (isLoading) {
+        body.innerHTML = `
+          <div class="aegis-empty-state">
+            <div class="aegis-empty-icon" style="animation: pulse 1.5s infinite">✨</div>
+            <div>AI 正在認真閱讀與分類...</div>
+            <div style="font-size: 12px; color: #5f6368; margin-top: 5px;">請稍候片刻</div>
+          </div>
+        `;
+        footer.textContent = '載入中...';
+      } else {
+        body.innerHTML = `
+          <div class="aegis-empty-state">
+            <div class="aegis-empty-icon">📭</div>
+            <div>沒有找到未讀郵件</div>
+          </div>
+        `;
+        footer.textContent = '共 0 封未讀郵件';
+      }
       return;
     }
 
@@ -132,7 +143,8 @@ class AnalysisPanel {
     const actions = document.createElement('div');
     actions.className = 'aegis-category-actions';
     actions.innerHTML = `
-      <button class="aegis-action-btn aegis-move-btn">移至標籤 ▼</button>
+      <button class="aegis-action-btn aegis-move-all-btn" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;">全部移至「${category.name}」標籤</button>
+      <button class="aegis-action-btn aegis-move-btn">移至其他標籤 ▼</button>
       <button class="aegis-action-btn aegis-delete-btn">🗑 刪除</button>
     `;
 
@@ -177,6 +189,60 @@ class AnalysisPanel {
         alert('郵件刪除操作異常，請檢查 Gmail 已正常完成刪除流程。');
       }
     });
+
+    // Wire up move all to category label button
+    const moveAllBtn = actions.querySelector('.aegis-move-all-btn');
+    if (moveAllBtn) {
+      moveAllBtn.addEventListener('click', async () => {
+        // 1. Verify label exists first
+        const targetLabelText = category.name;
+        const labelExists = labels.find(l => l.name === targetLabelText);
+        if (!labelExists) {
+          alert(`分類標籤「${targetLabelText}」不存在！\n請先在 Gmail 左側選單建立此標籤，再執行移動。`);
+          return;
+        }
+
+        // 2. Check selections, auto-select all if none selected
+        const allItems = [...list.querySelectorAll('.aegis-email-item')];
+        let selectedItems = allItems.filter(item => item.querySelector('.aegis-email-checkbox').checked);
+
+        if (selectedItems.length === 0) {
+          // Auto select all
+          allItems.forEach(item => {
+            item.querySelector('.aegis-email-checkbox').checked = true;
+          });
+          const selectAllHeaderCb = header.querySelector('.aegis-select-all');
+          if (selectAllHeaderCb) selectAllHeaderCb.checked = true;
+          selectedItems = allItems; // use all
+        }
+
+        const rows = selectedItems.map(item => item._emailRow).filter(Boolean);
+        if (rows.length === 0 || !this.platform) return;
+
+        moveAllBtn.textContent = '移動中...';
+        moveAllBtn.disabled = true;
+
+        // 3. Perform move
+        let success = true;
+        try {
+          success = await this.platform.moveToLabel(rows, targetLabelText);
+        } catch (e) {
+          success = false;
+        }
+
+        if (success !== false) {
+          selectedItems.forEach(item => item.remove());
+          const remaining = list.querySelectorAll('.aegis-email-item').length;
+          header.querySelector('.aegis-category-count').textContent = remaining;
+          if (remaining === 0) group.remove();
+        } else {
+          alert(`移動失敗。請再次確認 Gmail 中已有「${targetLabelText}」標籤。`);
+        }
+
+        moveAllBtn.textContent = `全部移至「${category.name}」標籤`;
+        moveAllBtn.disabled = false;
+      });
+    }
 
     // Wire up move to label
     actions.querySelector('.aegis-move-btn').addEventListener('click', (e) => {
