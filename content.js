@@ -24,10 +24,11 @@
   }
 
   // Analyze email list and show panel
-  async function runAnalysis() {
+  // unreadOnly: true = 未讀, false = 全部
+  async function runAnalysis(unreadOnly = true) {
     try {
       settings = await getSettings();
-      const emails = platform.getUnreadEmails();
+      const emails = platform.getEmails(unreadOnly);
       const labels = platform.getLabels();
 
       const groups = EmailAnalyzer.analyzeEmailList(
@@ -36,7 +37,10 @@
         settings.categories || []
       );
 
-      analysisPanel.show(groups, labels);
+      analysisPanel.show(groups, labels, {
+        filter: unreadOnly ? 'unread' : 'all',
+        onFilterChange: (filter) => runAnalysis(filter === 'unread'),
+      });
     } catch (err) {
       console.error('[Aegis] Analysis error:', err);
     }

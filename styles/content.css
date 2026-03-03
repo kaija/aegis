@@ -49,6 +49,35 @@
   color: #202124;
 }
 
+.aegis-filter-toggle {
+  display: flex;
+  border: 1px solid var(--aegis-border);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.aegis-filter-btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-family: var(--aegis-font);
+  border: none;
+  background: white;
+  color: #5f6368;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.aegis-filter-btn:not(:last-child) {
+  border-right: 1px solid var(--aegis-border);
+}
+
+.aegis-filter-btn.active {
+  background: var(--aegis-primary);
+  color: white;
+  font-weight: 600;
+}
+
 .aegis-close-btn {
   background: none;
   border: none;

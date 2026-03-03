@@ -6,7 +6,9 @@ class AnalysisPanel {
     this.panel = null;
   }
 
-  show(groups, labels) {
+  show(groups, labels, options = {}) {
+    this._filter = options.filter || 'unread';
+    this._onFilterChange = options.onFilterChange || null;
     this.hide();
     this.panel = this._createPanel();
     this._render(groups, labels || []);
@@ -27,6 +29,10 @@ class AnalysisPanel {
     panel.innerHTML = `
       <div class="aegis-panel-header">
         <h3>📧 Aegis 郵件分析</h3>
+        <div class="aegis-filter-toggle">
+          <button class="aegis-filter-btn ${this._filter === 'unread' ? 'active' : ''}" data-filter="unread">未讀</button>
+          <button class="aegis-filter-btn ${this._filter === 'all' ? 'active' : ''}" data-filter="all">全部</button>
+        </div>
         <div class="aegis-spinner" id="aegis-spinner"></div>
         <button class="aegis-close-btn" id="aegis-panel-close">✕</button>
       </div>
@@ -37,6 +43,16 @@ class AnalysisPanel {
     document.body.appendChild(panel);
 
     panel.querySelector('#aegis-panel-close').addEventListener('click', () => this.hide());
+
+    panel.querySelectorAll('.aegis-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        if (filter === this._filter) return;
+        this._filter = filter;
+        panel.querySelectorAll('.aegis-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+        if (this._onFilterChange) this._onFilterChange(filter);
+      });
+    });
 
     // Trigger open animation
     requestAnimationFrame(() => {
@@ -144,17 +160,22 @@ class AnalysisPanel {
 
       const rows = selectedItems.map(item => item._emailRow).filter(Boolean);
 
+      let success = true;
       if (rows.length > 0 && this.platform) {
-        await this.platform.deleteEmails(rows);
+        success = await this.platform.deleteEmails(rows).catch(() => false);
       }
 
-      selectedItems.forEach(item => item.remove());
+      if (success !== false) { // deletion was confirmed or there was nothing to delete
+        selectedItems.forEach(item => item.remove());
 
-      // Update count
-      const remaining = list.querySelectorAll('.aegis-email-item').length;
-      header.querySelector('.aegis-category-count').textContent = remaining;
+        // Update count
+        const remaining = list.querySelectorAll('.aegis-email-item').length;
+        header.querySelector('.aegis-category-count').textContent = remaining;
 
-      if (remaining === 0) group.remove();
+        if (remaining === 0) group.remove();
+      } else {
+        alert('郵件刪除操作異常，請檢查 Gmail 已正常完成刪除流程。');
+      }
     });
 
     // Wire up move to label
@@ -192,13 +213,19 @@ class AnalysisPanel {
       item.textContent = label.name;
       item.addEventListener('click', async () => {
         picker.remove();
+        let success = true;
         if (rows.length > 0 && this.platform) {
-          await this.platform.moveToLabel(rows, label.name);
+          success = await this.platform.moveToLabel(rows, label.name).catch(() => false);
         }
-        selectedItems.forEach(item => item.remove());
-        const remaining = list.querySelectorAll('.aegis-email-item').length;
-        header.querySelector('.aegis-category-count').textContent = remaining;
-        if (remaining === 0) group.remove();
+
+        if (success !== false) {
+          selectedItems.forEach(item => item.remove());
+          const remaining = list.querySelectorAll('.aegis-email-item').length;
+          header.querySelector('.aegis-category-count').textContent = remaining;
+          if (remaining === 0) group.remove();
+        } else {
+          alert('郵件移動操作異常，請檢查 Gmail 已正常完成流程。');
+        }
       });
       picker.appendChild(item);
     });

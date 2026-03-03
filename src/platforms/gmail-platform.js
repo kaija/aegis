@@ -1,5 +1,22 @@
 'use strict';
 
+const GMAIL_ACTIONS = {
+  trash: {
+    tooltips: ['Move to Trash', '移至垃圾桶'],
+    ariaLabels: ['Move to Trash', '移至垃圾桶', '刪除'],
+    classes: ['.bkJ'],
+    attrs: ['[act="10"]'],
+    tooltipContains: ['Trash', '垃圾桶', '刪除']
+  },
+  moveTo: {
+    tooltips: ['Move to', '移至'],
+    ariaLabels: ['Move to', '移至'],
+    classes: ['.ns7Hcb'],
+    attrs: ['[act="3"]'],
+    tooltipContains: ['Move', '移至']
+  }
+};
+
 class GmailPlatform extends BasePlatform {
   getName() {
     return 'Gmail';
@@ -9,8 +26,9 @@ class GmailPlatform extends BasePlatform {
     return url.includes('mail.google.com');
   }
 
-  getUnreadEmails() {
-    const rows = document.querySelectorAll('tr.zA.zE');
+  getEmails(unreadOnly = true) {
+    const selector = unreadOnly ? 'tr.zA.zE' : 'tr.zA';
+    const rows = document.querySelectorAll(selector);
     const emails = [];
     rows.forEach((row, index) => {
       const subjectEl = row.querySelector('span.bog');
@@ -30,7 +48,6 @@ class GmailPlatform extends BasePlatform {
   getLabels() {
     const labels = [];
     const seen = new Set();
-    // Try multiple selectors for Gmail labels in sidebar
     const selectors = [
       '[data-tooltip][aria-label]',
       '.aim .nU',
@@ -77,101 +94,127 @@ class GmailPlatform extends BasePlatform {
   }
 
   async deleteEmails(rows) {
-    if (!rows || rows.length === 0) return;
+    if (!rows || rows.length === 0) return true;
 
-    // Select each row by clicking its checkbox
-    for (const row of rows) {
-      const checkbox = row.querySelector('[role="checkbox"], div.oZ-jc, td.xY.aJ5');
-      if (checkbox) {
-        checkbox.click();
-        await this._sleep(100);
-      }
+    await this._uncheckAll();
+    await this._selectRows(rows);
+
+    const trashBtn = await this._waitForElement(this._buildActionSelectors('trash'), 3000);
+    if (trashBtn) {
+      this._clickElement(trashBtn);
+      return true;
     }
 
-    await this._sleep(400);
-
-    // Click trash button in toolbar
-    const trashSelectors = [
-      '.bkJ[data-tooltip]',
-      '[data-tooltip="Move to Trash"]',
-      '[data-tooltip="移至垃圾桶"]',
-      '[aria-label="Move to Trash"]',
-      '[aria-label="移至垃圾桶"]',
-      '.bkJ',
-      '[act="10"]'
-    ];
-
-    for (const sel of trashSelectors) {
-      const btn = document.querySelector(sel);
-      if (btn) {
-        btn.click();
-        return;
-      }
-    }
-
-    // Fallback: try keyboard shortcut
-    const focused = document.activeElement;
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: '#', bubbles: true }));
+    // Fallback: Gmail keyboard shortcut '#' (Shift+3)
+    document.body.focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: '#', keyCode: 51, shiftKey: true, bubbles: true, cancelable: true,
+    }));
+    return true;
   }
 
   async moveToLabel(rows, labelName) {
-    if (!rows || rows.length === 0) return;
+    if (!rows || rows.length === 0) return true;
 
-    // Select each row
-    for (const row of rows) {
-      const checkbox = row.querySelector('[role="checkbox"], div.oZ-jc, td.xY.aJ5');
-      if (checkbox) {
-        checkbox.click();
-        await this._sleep(100);
-      }
+    await this._uncheckAll();
+    await this._selectRows(rows);
+
+    const moveBtn = await this._waitForElement(this._buildActionSelectors('moveTo'), 3000);
+    if (!moveBtn) return false;
+    this._clickElement(moveBtn);
+
+    const menuItem = await this._waitForElement(
+      ['[role="menuitem"]', '[role="option"]', '.J-N'],
+      2000,
+      el => el.textContent.trim().toLowerCase() === labelName.toLowerCase()
+    );
+    if (menuItem) {
+      this._clickElement(menuItem);
+      return true;
     }
+    return false;
+  }
 
-    await this._sleep(400);
+  _buildActionSelectors(actionKey) {
+    const cfg = GMAIL_ACTIONS[actionKey];
+    if (!cfg) return [];
 
-    // Find "Move to" button
-    const moveSelectors = [
-      '[data-tooltip="Move to"]',
-      '[aria-label="Move to"]',
-      '[data-tooltip*="Move"]',
-      '.ns7Hcb',
-      '[act="3"]'
-    ];
+    const selectors = [];
+    (cfg.tooltips || []).forEach(t => selectors.push(`[data-tooltip="${t}"]`));
+    (cfg.ariaLabels || []).forEach(t => selectors.push(`[aria-label="${t}"]`));
+    (cfg.classes || []).forEach(cls => selectors.push(cls));
+    (cfg.attrs || []).forEach(attr => selectors.push(attr));
+    (cfg.tooltipContains || []).forEach(t => selectors.push(`[data-tooltip*="${t}"]`));
+    return selectors;
+  }
 
-    let moveBtn = null;
-    for (const sel of moveSelectors) {
-      moveBtn = document.querySelector(sel);
-      if (moveBtn) break;
-    }
-
-    if (!moveBtn) return;
-    moveBtn.click();
-
-    await this._sleep(300);
-
-    // Find label in dropdown
-    const menuItems = document.querySelectorAll('[role="menuitem"], [role="option"], .J-N');
-    for (const item of menuItems) {
-      if (item.textContent.trim().toLowerCase() === labelName.toLowerCase()) {
-        item.click();
-        return;
-      }
+  async _uncheckAll() {
+    const checkedBoxes = document.querySelectorAll('tr.zA [role="checkbox"][aria-checked="true"]');
+    if (checkedBoxes.length > 0) {
+      checkedBoxes.forEach(cb => this._clickElement(cb));
+      await this._sleep(300);
     }
   }
 
+  async _selectRows(rows) {
+    for (const row of rows) {
+      row.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      await this._sleep(50);
+
+      row.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      await this._sleep(80);
+
+      const checkbox = row.querySelector('[role="checkbox"]') ||
+        row.querySelector('td.WA div') ||
+        row.querySelector('td.xY div[aria-checked]');
+      if (checkbox) {
+        this._clickElement(checkbox);
+        await this._sleep(120);
+      }
+    }
+    await this._sleep(300);
+  }
+
+  _clickElement(el) {
+    if (!el) return;
+    try {
+      const ev = {bubbles: true, cancelable: true};
+      el.dispatchEvent(new MouseEvent('mousedown', ev));
+      el.dispatchEvent(new MouseEvent('mouseup', ev));
+      el.click();
+    } catch (err) {
+      // Fallback to simple click
+      el.click();
+    }
+  }
+
+  _waitForElement(selectors, timeout = 3000, predicate = null) {
+    return new Promise(resolve => {
+      const start = Date.now();
+      const check = () => {
+        for (const sel of selectors) {
+          for (const el of document.querySelectorAll(sel)) {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              if (!predicate || predicate(el)) { resolve(el); return; }
+            }
+          }
+        }
+        if (Date.now() - start < timeout) setTimeout(check, 100);
+        else resolve(null);
+      };
+      check();
+    });
+  }
+
   observeNavigate(callback) {
-    // Watch title changes (Gmail SPA navigation)
     const titleEl = document.querySelector('title');
     if (titleEl) {
-      const observer = new MutationObserver(() => {
-        callback();
-      });
+      const observer = new MutationObserver(() => callback());
       observer.observe(titleEl, { childList: true });
     }
-
-    // Also watch hashchange
     window.addEventListener('hashchange', callback);
-
-    // Watch URL changes via MutationObserver on document
     let lastUrl = location.href;
     const urlObserver = new MutationObserver(() => {
       if (location.href !== lastUrl) {

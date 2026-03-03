@@ -9,7 +9,7 @@ class BasePlatform {
     throw new Error('Not implemented');
   }
 
-  getUnreadEmails() {
+  getEmails(unreadOnly = true) {
     throw new Error('Not implemented');
   }
 
