@@ -24,6 +24,26 @@ const EmailAnalyzer = (() => {
 
   const FREE_EMAIL_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com', '163.com', 'qq.com'];
 
+  // Check if domain is public email service
+  function _isPublicEmailDomain(domain, whitelist) {
+    if (!whitelist || !whitelist.publicEmailDomains || !domain) return false;
+    const baseDomain = _extractBaseDomain(domain.toLowerCase());
+    return whitelist.publicEmailDomains.some(d => {
+      const publicBase = _extractBaseDomain(d.toLowerCase());
+      return baseDomain === publicBase;
+    });
+  }
+
+  // Check if domain is suspicious (temp mail, etc.)
+  function _isSuspiciousDomain(domain, whitelist) {
+    if (!whitelist || !whitelist.suspiciousDomains || !domain) return false;
+    const baseDomain = _extractBaseDomain(domain.toLowerCase());
+    return whitelist.suspiciousDomains.some(d => {
+      const suspiciousBase = _extractBaseDomain(d.toLowerCase());
+      return baseDomain === suspiciousBase;
+    });
+  }
+
   function categorizeByKeywords(text, categories, userLabels) {
     const lowerText = text.toLowerCase();
     let bestCategory = null;
@@ -65,13 +85,14 @@ const EmailAnalyzer = (() => {
     return groups;
   }
 
-  function analyzeSender(sender, senderEmail) {
+  function analyzeSender(sender, senderEmail, whitelist) {
     D.group('寄件人分析');
     D.log('寄件人名稱:', sender || '(無)', '| 郵件:', senderEmail || '(無)');
 
     let deductions = 0;
     const issues = [];
     const checks = [];
+    const flags = [];
 
     if (!senderEmail) {
       deductions += 20;
@@ -80,12 +101,33 @@ const EmailAnalyzer = (() => {
       D.table(checks);
       D.log('總扣分:', -deductions);
       D.groupEnd();
-      return { deductions, issues };
+      return { deductions, issues, flags };
     }
 
     const localPart = senderEmail.split('@')[0] || '';
     const domain = senderEmail.split('@')[1] || '';
     D.log('本地部分:', localPart, '| 網域:', domain);
+
+    // Check for suspicious domain (temp mail services)
+    if (_isSuspiciousDomain(domain, whitelist)) {
+      deductions += 30;
+      issues.push('使用臨時/拋棄式郵件服務');
+      flags.push('suspicious_domain');
+      checks.push({ 規則: '可疑域名（臨時郵件）', 結果: `✗ 命中: "${domain}"`, 扣分: -30 });
+      D.warn('⚠ 檢測到臨時郵件服務域名');
+    } else {
+      checks.push({ 規則: '可疑域名（臨時郵件）', 結果: '✓ 正常', 扣分: 0 });
+    }
+
+    // Check for public email domain
+    const isPublicEmail = _isPublicEmailDomain(domain, whitelist);
+    if (isPublicEmail) {
+      flags.push('public_email');
+      checks.push({ 規則: '公開個人郵件服務', 結果: `ℹ 個人郵件: "${domain}"`, 扣分: 0 });
+      D.log('ℹ 使用公開個人郵件服務（Gmail/Yahoo等）');
+    } else {
+      checks.push({ 規則: '公開個人郵件服務', 結果: '— 企業/組織郵件', 扣分: 0 });
+    }
 
     if (/\d{4,}/.test(localPart)) {
       deductions += 10;
@@ -117,8 +159,9 @@ const EmailAnalyzer = (() => {
 
     D.table(checks);
     D.log('總扣分:', -deductions);
+    if (flags.length > 0) D.log('標記:', flags.join(', '));
     D.groupEnd();
-    return { deductions, issues };
+    return { deductions, issues, flags };
   }
 
   function analyzeContent(subject, body) {
@@ -435,10 +478,12 @@ const EmailAnalyzer = (() => {
 
     let safetyScore = 100;
     const allIssues = [];
+    const allFlags = [];
 
-    const senderAnalysis = analyzeSender(sender, senderEmail);
+    const senderAnalysis = analyzeSender(sender, senderEmail, whitelist);
     safetyScore -= senderAnalysis.deductions;
     allIssues.push(...senderAnalysis.issues);
+    if (senderAnalysis.flags) allFlags.push(...senderAnalysis.flags);
 
     const contentAnalysis = analyzeContent(subject, body);
     safetyScore -= contentAnalysis.deductions;
@@ -475,6 +520,9 @@ const EmailAnalyzer = (() => {
     D.log('安全等級:', safetyLevel === 'safe' ? '✓ 安全' : safetyLevel === 'caution' ? '⚠ 注意' : '✗ 危險', `(${safetyScore}分)`);
     D.log('分類:', `${category.emoji} ${category.name}`);
     D.log('標籤:', tags.length ? tags.join(', ') : '(無)');
+    if (allFlags.length) {
+      D.log('特殊標記:', allFlags.join(', '));
+    }
     if (allIssues.length) {
       D.warn('問題清單:', allIssues);
     } else {
@@ -490,6 +538,7 @@ const EmailAnalyzer = (() => {
       safetyLevel,
       safetyColor,
       issues: allIssues,
+      flags: allFlags,
       linkResults: linkAnalysis.linkResults
     };
   }

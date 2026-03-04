@@ -95,6 +95,26 @@ const WhitelistManager = (() => {
     });
   }
 
+  // Check if a domain is a public email service (personal email)
+  function isPublicEmailDomain(domain) {
+    if (!_whitelist || !_whitelist.publicEmailDomains || !domain) return false;
+    const baseDomain = extractBaseDomain(domain.toLowerCase());
+    return _whitelist.publicEmailDomains.some(d => {
+      const publicBase = extractBaseDomain(d.toLowerCase());
+      return baseDomain === publicBase;
+    });
+  }
+
+  // Check if a domain is known to be suspicious (temp mail, etc.)
+  function isSuspiciousDomain(domain) {
+    if (!_whitelist || !_whitelist.suspiciousDomains || !domain) return false;
+    const baseDomain = extractBaseDomain(domain.toLowerCase());
+    return _whitelist.suspiciousDomains.some(d => {
+      const suspiciousBase = extractBaseDomain(d.toLowerCase());
+      return baseDomain === suspiciousBase;
+    });
+  }
+
   return {
     init,
     getWhitelist,
@@ -102,7 +122,9 @@ const WhitelistManager = (() => {
     findServicesByKeywords,
     isKnownShortUrl,
     isDomainInService,
-    extractBaseDomain
+    extractBaseDomain,
+    isPublicEmailDomain,
+    isSuspiciousDomain
   };
 })();
 

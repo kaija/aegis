@@ -177,7 +177,481 @@
       "baseDomains": ["zoom.us"],
       "senderDomains": ["zoom.us"],
       "serviceDomains": ["zoom.us"]
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "keywords": ["facebook", "fb", "meta"],
+      "baseDomains": ["facebook.com", "fb.com", "fb.me"],
+      "senderDomains": ["facebook.com", "fb.com", "fb.me"],
+      "serviceDomains": ["facebook.com", "fb.com", "fb.me"]
+    },
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "keywords": ["instagram", "ig"],
+      "baseDomains": ["instagram.com"],
+      "senderDomains": ["instagram.com"],
+      "serviceDomains": ["instagram.com"]
+    },
+    {
+      "id": "twitter",
+      "name": "Twitter / X",
+      "keywords": ["twitter", "x.com"],
+      "baseDomains": ["twitter.com", "x.com", "t.co"],
+      "senderDomains": ["twitter.com", "x.com"],
+      "serviceDomains": ["twitter.com", "x.com", "t.co"]
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "keywords": ["youtube", "youtu.be"],
+      "baseDomains": ["youtube.com", "youtu.be"],
+      "senderDomains": ["youtube.com"],
+      "serviceDomains": ["youtube.com", "youtu.be"]
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "keywords": ["whatsapp"],
+      "baseDomains": ["whatsapp.com"],
+      "senderDomains": ["whatsapp.com"],
+      "serviceDomains": ["whatsapp.com"]
+    },
+    {
+      "id": "telegram",
+      "name": "Telegram",
+      "keywords": ["telegram"],
+      "baseDomains": ["telegram.org", "t.me"],
+      "senderDomains": ["telegram.org"],
+      "serviceDomains": ["telegram.org", "t.me"]
+    },
+    {
+      "id": "discord",
+      "name": "Discord",
+      "keywords": ["discord"],
+      "baseDomains": ["discord.com", "discordapp.com"],
+      "senderDomains": ["discord.com", "discordapp.com"],
+      "serviceDomains": ["discord.com", "discordapp.com"]
+    },
+    {
+      "id": "aws",
+      "name": "Amazon Web Services",
+      "keywords": ["aws", "amazon web services"],
+      "baseDomains": ["amazonaws.com", "aws.amazon.com"],
+      "senderDomains": ["amazonaws.com", "aws.amazon.com"],
+      "serviceDomains": ["amazonaws.com", "aws.amazon.com"]
+    },
+    {
+      "id": "azure",
+      "name": "Microsoft Azure",
+      "keywords": ["azure"],
+      "baseDomains": ["azure.com", "azurewebsites.net", "windows.net"],
+      "senderDomains": ["azure.com", "microsoft.com"],
+      "serviceDomains": ["azure.com", "azurewebsites.net", "windows.net"]
+    },
+    {
+      "id": "gcp",
+      "name": "Google Cloud Platform",
+      "keywords": ["google cloud", "gcp"],
+      "baseDomains": ["cloud.google.com", "googleapis.com"],
+      "senderDomains": ["google.com", "cloud.google.com"],
+      "serviceDomains": ["cloud.google.com", "googleapis.com"]
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "keywords": ["cloudflare"],
+      "baseDomains": ["cloudflare.com", "cloudflarestream.com"],
+      "senderDomains": ["cloudflare.com"],
+      "serviceDomains": ["cloudflare.com", "cloudflarestream.com"]
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "keywords": ["docker", "docker hub"],
+      "baseDomains": ["docker.com", "docker.io"],
+      "senderDomains": ["docker.com"],
+      "serviceDomains": ["docker.com", "docker.io"]
+    },
+    {
+      "id": "digitalocean",
+      "name": "DigitalOcean",
+      "keywords": ["digitalocean"],
+      "baseDomains": ["digitalocean.com"],
+      "senderDomains": ["digitalocean.com"],
+      "serviceDomains": ["digitalocean.com"]
+    },
+    {
+      "id": "heroku",
+      "name": "Heroku",
+      "keywords": ["heroku"],
+      "baseDomains": ["heroku.com", "herokuapp.com"],
+      "senderDomains": ["heroku.com"],
+      "serviceDomains": ["heroku.com", "herokuapp.com"]
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "keywords": ["vercel"],
+      "baseDomains": ["vercel.com", "vercel.app"],
+      "senderDomains": ["vercel.com"],
+      "serviceDomains": ["vercel.com", "vercel.app"]
+    },
+    {
+      "id": "netlify",
+      "name": "Netlify",
+      "keywords": ["netlify"],
+      "baseDomains": ["netlify.com", "netlify.app"],
+      "senderDomains": ["netlify.com"],
+      "serviceDomains": ["netlify.com", "netlify.app"]
+    },
+    {
+      "id": "gitlab",
+      "name": "GitLab",
+      "keywords": ["gitlab"],
+      "baseDomains": ["gitlab.com"],
+      "senderDomains": ["gitlab.com"],
+      "serviceDomains": ["gitlab.com"]
+    },
+    {
+      "id": "bitbucket",
+      "name": "Bitbucket",
+      "keywords": ["bitbucket"],
+      "baseDomains": ["bitbucket.org"],
+      "senderDomains": ["bitbucket.org"],
+      "serviceDomains": ["bitbucket.org"]
+    },
+    {
+      "id": "atlassian",
+      "name": "Atlassian",
+      "keywords": ["atlassian", "jira", "confluence", "trello"],
+      "baseDomains": ["atlassian.com", "atlassian.net"],
+      "senderDomains": ["atlassian.com", "atlassian.net"],
+      "serviceDomains": ["atlassian.com", "atlassian.net"]
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "keywords": ["notion"],
+      "baseDomains": ["notion.so", "notion.site"],
+      "senderDomains": ["notion.so"],
+      "serviceDomains": ["notion.so", "notion.site"]
+    },
+    {
+      "id": "dropbox",
+      "name": "Dropbox",
+      "keywords": ["dropbox"],
+      "baseDomains": ["dropbox.com"],
+      "senderDomains": ["dropbox.com"],
+      "serviceDomains": ["dropbox.com"]
+    },
+    {
+      "id": "box",
+      "name": "Box",
+      "keywords": ["box"],
+      "baseDomains": ["box.com"],
+      "senderDomains": ["box.com"],
+      "serviceDomains": ["box.com"]
+    },
+    {
+      "id": "onedrive",
+      "name": "OneDrive",
+      "keywords": ["onedrive"],
+      "baseDomains": ["onedrive.com", "1drv.ms"],
+      "senderDomains": ["microsoft.com"],
+      "serviceDomains": ["onedrive.com", "1drv.ms"]
+    },
+    {
+      "id": "gdrive",
+      "name": "Google Drive",
+      "keywords": ["google drive", "drive"],
+      "baseDomains": ["drive.google.com"],
+      "senderDomains": ["google.com"],
+      "serviceDomains": ["drive.google.com"]
+    },
+    {
+      "id": "salesforce",
+      "name": "Salesforce",
+      "keywords": ["salesforce"],
+      "baseDomains": ["salesforce.com", "force.com"],
+      "senderDomains": ["salesforce.com"],
+      "serviceDomains": ["salesforce.com", "force.com"]
+    },
+    {
+      "id": "hubspot",
+      "name": "HubSpot",
+      "keywords": ["hubspot"],
+      "baseDomains": ["hubspot.com"],
+      "senderDomains": ["hubspot.com"],
+      "serviceDomains": ["hubspot.com"]
+    },
+    {
+      "id": "mailchimp",
+      "name": "Mailchimp",
+      "keywords": ["mailchimp"],
+      "baseDomains": ["mailchimp.com"],
+      "senderDomains": ["mailchimp.com"],
+      "serviceDomains": ["mailchimp.com"]
+    },
+    {
+      "id": "sendgrid",
+      "name": "SendGrid",
+      "keywords": ["sendgrid"],
+      "baseDomains": ["sendgrid.com", "sendgrid.net"],
+      "senderDomains": ["sendgrid.com", "sendgrid.net"],
+      "serviceDomains": ["sendgrid.com", "sendgrid.net"]
+    },
+    {
+      "id": "twilio",
+      "name": "Twilio",
+      "keywords": ["twilio"],
+      "baseDomains": ["twilio.com"],
+      "senderDomains": ["twilio.com"],
+      "serviceDomains": ["twilio.com"]
+    },
+    {
+      "id": "shopify",
+      "name": "Shopify",
+      "keywords": ["shopify"],
+      "baseDomains": ["shopify.com", "myshopify.com"],
+      "senderDomains": ["shopify.com"],
+      "serviceDomains": ["shopify.com", "myshopify.com"]
+    },
+    {
+      "id": "wordpress",
+      "name": "WordPress",
+      "keywords": ["wordpress"],
+      "baseDomains": ["wordpress.com", "wordpress.org"],
+      "senderDomains": ["wordpress.com"],
+      "serviceDomains": ["wordpress.com", "wordpress.org"]
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "keywords": ["medium"],
+      "baseDomains": ["medium.com"],
+      "senderDomains": ["medium.com"],
+      "serviceDomains": ["medium.com"]
+    },
+    {
+      "id": "reddit",
+      "name": "Reddit",
+      "keywords": ["reddit"],
+      "baseDomains": ["reddit.com", "redd.it"],
+      "senderDomains": ["reddit.com"],
+      "serviceDomains": ["reddit.com", "redd.it"]
+    },
+    {
+      "id": "stackoverflow",
+      "name": "Stack Overflow",
+      "keywords": ["stack overflow", "stackoverflow"],
+      "baseDomains": ["stackoverflow.com", "stackexchange.com"],
+      "senderDomains": ["stackoverflow.com", "stackexchange.com"],
+      "serviceDomains": ["stackoverflow.com", "stackexchange.com"]
+    },
+    {
+      "id": "npm",
+      "name": "npm",
+      "keywords": ["npm", "npmjs"],
+      "baseDomains": ["npmjs.com", "npmjs.org"],
+      "senderDomains": ["npmjs.com"],
+      "serviceDomains": ["npmjs.com", "npmjs.org"]
+    },
+    {
+      "id": "pypi",
+      "name": "PyPI",
+      "keywords": ["pypi", "python package"],
+      "baseDomains": ["pypi.org"],
+      "senderDomains": ["pypi.org"],
+      "serviceDomains": ["pypi.org"]
+    },
+    {
+      "id": "mongodb",
+      "name": "MongoDB",
+      "keywords": ["mongodb", "mongo"],
+      "baseDomains": ["mongodb.com", "mongodb.net"],
+      "senderDomains": ["mongodb.com"],
+      "serviceDomains": ["mongodb.com", "mongodb.net"]
+    },
+    {
+      "id": "redis",
+      "name": "Redis",
+      "keywords": ["redis"],
+      "baseDomains": ["redis.io", "redis.com"],
+      "senderDomains": ["redis.io", "redis.com"],
+      "serviceDomains": ["redis.io", "redis.com"]
+    },
+    {
+      "id": "elastic",
+      "name": "Elastic",
+      "keywords": ["elastic", "elasticsearch"],
+      "baseDomains": ["elastic.co"],
+      "senderDomains": ["elastic.co"],
+      "serviceDomains": ["elastic.co"]
+    },
+    {
+      "id": "datadog",
+      "name": "Datadog",
+      "keywords": ["datadog"],
+      "baseDomains": ["datadoghq.com"],
+      "senderDomains": ["datadoghq.com"],
+      "serviceDomains": ["datadoghq.com"]
+    },
+    {
+      "id": "newrelic",
+      "name": "New Relic",
+      "keywords": ["new relic", "newrelic"],
+      "baseDomains": ["newrelic.com"],
+      "senderDomains": ["newrelic.com"],
+      "serviceDomains": ["newrelic.com"]
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry",
+      "keywords": ["sentry"],
+      "baseDomains": ["sentry.io"],
+      "senderDomains": ["sentry.io"],
+      "serviceDomains": ["sentry.io"]
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "keywords": ["figma"],
+      "baseDomains": ["figma.com"],
+      "senderDomains": ["figma.com"],
+      "serviceDomains": ["figma.com"]
+    },
+    {
+      "id": "canva",
+      "name": "Canva",
+      "keywords": ["canva"],
+      "baseDomains": ["canva.com"],
+      "senderDomains": ["canva.com"],
+      "serviceDomains": ["canva.com"]
+    },
+    {
+      "id": "adobe",
+      "name": "Adobe",
+      "keywords": ["adobe"],
+      "baseDomains": ["adobe.com"],
+      "senderDomains": ["adobe.com"],
+      "serviceDomains": ["adobe.com"]
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "keywords": ["spotify"],
+      "baseDomains": ["spotify.com"],
+      "senderDomains": ["spotify.com"],
+      "serviceDomains": ["spotify.com"]
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "keywords": ["netflix"],
+      "baseDomains": ["netflix.com"],
+      "senderDomains": ["netflix.com"],
+      "serviceDomains": ["netflix.com"]
+    },
+    {
+      "id": "twitch",
+      "name": "Twitch",
+      "keywords": ["twitch"],
+      "baseDomains": ["twitch.tv"],
+      "senderDomains": ["twitch.tv"],
+      "serviceDomains": ["twitch.tv"]
+    },
+    {
+      "id": "steam",
+      "name": "Steam",
+      "keywords": ["steam"],
+      "baseDomains": ["steampowered.com", "steamcommunity.com"],
+      "senderDomains": ["steampowered.com"],
+      "serviceDomains": ["steampowered.com", "steamcommunity.com"]
+    },
+    {
+      "id": "ebay",
+      "name": "eBay",
+      "keywords": ["ebay"],
+      "baseDomains": ["ebay.com"],
+      "senderDomains": ["ebay.com"],
+      "serviceDomains": ["ebay.com"]
+    },
+    {
+      "id": "etsy",
+      "name": "Etsy",
+      "keywords": ["etsy"],
+      "baseDomains": ["etsy.com"],
+      "senderDomains": ["etsy.com"],
+      "serviceDomains": ["etsy.com"]
+    },
+    {
+      "id": "uber",
+      "name": "Uber",
+      "keywords": ["uber"],
+      "baseDomains": ["uber.com"],
+      "senderDomains": ["uber.com"],
+      "serviceDomains": ["uber.com"]
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "keywords": ["airbnb"],
+      "baseDomains": ["airbnb.com"],
+      "senderDomains": ["airbnb.com"],
+      "serviceDomains": ["airbnb.com"]
+    },
+    {
+      "id": "booking",
+      "name": "Booking.com",
+      "keywords": ["booking"],
+      "baseDomains": ["booking.com"],
+      "senderDomains": ["booking.com"],
+      "serviceDomains": ["booking.com"]
     }
+  ],
+  "publicEmailDomains": [
+    "gmail.com",
+    "yahoo.com",
+    "yahoo.com.tw",
+    "hotmail.com",
+    "outlook.com",
+    "live.com",
+    "icloud.com",
+    "me.com",
+    "aol.com",
+    "protonmail.com",
+    "mail.com",
+    "zoho.com",
+    "yandex.com",
+    "gmx.com",
+    "163.com",
+    "126.com",
+    "qq.com",
+    "sina.com",
+    "sohu.com",
+    "yeah.net",
+    "naver.com",
+    "daum.net",
+    "hanmail.net"
+  ],
+  "suspiciousDomains": [
+    "tempmail.com",
+    "guerrillamail.com",
+    "10minutemail.com",
+    "mailinator.com",
+    "throwaway.email",
+    "temp-mail.org",
+    "fakeinbox.com",
+    "maildrop.cc",
+    "trashmail.com",
+    "yopmail.com",
+    "getnada.com",
+    "mohmal.com",
+    "sharklasers.com",
+    "spam4.me",
+    "mintemail.com"
   ],
   "shortUrlServices": [
     "bit.ly",
