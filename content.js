@@ -17,6 +17,20 @@
   // Initialize whitelist (non-blocking)
   WhitelistManager.init().catch(e => console.warn('[Aegis] WhitelistManager init:', e));
 
+  // Extract the effective TLD from a domain string
+  // e.g. 'mail.hsbc.com.tw' → 'com.tw', 'example.com' → 'com'
+  function extractTld(domain) {
+    if (!domain) return '';
+    const parts = domain.split('.');
+    if (parts.length < 2) return domain;
+    const last2 = parts.slice(-2).join('.');
+    const knownCcTlds = ['com.tw', 'net.tw', 'org.tw', 'gov.tw', 'edu.tw',
+      'co.uk', 'co.jp', 'com.au', 'co.nz', 'com.sg', 'co.kr', 'com.hk'];
+    return knownCcTlds.includes(last2) ? last2 : parts[parts.length - 1];
+  }
+
+  const SUSPICIOUS_TLDS_SET = new Set(['.xyz', '.top', '.click', '.loan', '.work', '.date', '.win', '.bid', '.stream']);
+
   // Resolve known short URLs via background service worker
   async function resolveShortUrls(links) {
     const resolved = [];
@@ -86,6 +100,9 @@
           onFilterChange: (filter) => runAnalysis(filter === 'unread'),
           isLoading: isLoading
         });
+        if (!isLoading && window.AegisTracker) {
+          AegisTracker.analysisComplete(groups.size, emails.length, settings.analysisMode);
+        }
       };
 
       // Process emails
@@ -231,6 +248,41 @@
       }
 
       emailPopup.show(analysis);
+
+      if (window.AegisTracker) {
+        // Event 4: single email analyzed
+        AegisTracker.emailDetailAnalyzed(settings.analysisMode);
+
+        // Event 5: safety result + category
+        AegisTracker.emailSafetyResult(
+          analysis.safetyLevel,
+          analysis.safetyScore,
+          analysis.category.id,
+          analysis.category.name
+        );
+
+        // Event 6 & 7: sender domain
+        const senderDomain = (emailData.senderEmail || '').split('@')[1] || '';
+        const senderTld = extractTld(senderDomain);
+        const matchedService = WhitelistManager.findServiceBySenderDomain(emailData.senderEmail);
+        AegisTracker.senderDomain(senderTld, !!matchedService, matchedService ? matchedService.name : null);
+
+        // Event 7: unknown sender TLD (not in whitelist, not a suspicious TLD)
+        const isSuspSender = senderDomain && [...SUSPICIOUS_TLDS_SET].some(t => senderDomain.endsWith(t));
+        if (!matchedService && senderDomain && !isSuspSender) {
+          AegisTracker.unknownDomain('sender_tld', senderTld);
+        }
+
+        // Event 7: unknown link domains (reachable but unclassified)
+        (analysis.linkResults || []).forEach(lr => {
+          if (!lr.isWhitelisted && !lr.isSuspicious && !lr.isOffWhitelist && lr.url) {
+            try {
+              const linkTld = extractTld(new URL(lr.url).hostname);
+              AegisTracker.unknownDomain('link_domain', linkTld);
+            } catch (_) {}
+          }
+        });
+      }
     } catch (err) {
       console.error('[Aegis] Email analysis error:', err);
     }

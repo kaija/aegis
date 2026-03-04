@@ -1,3 +1,54 @@
+// ---- GA4 Measurement Protocol ----
+
+const GA4_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
+const GA4_MEASUREMENT_ID = 'G-QR7JYT0RCX';
+const GA4_API_SECRET = 'X6svVVckQLiPKqj30RYIDg';
+
+async function getOrCreateClientId() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['ga4ClientId'], (result) => {
+      if (result.ga4ClientId) { resolve(result.ga4ClientId); return; }
+      const id = crypto.randomUUID();
+      chrome.storage.local.set({ ga4ClientId: id });
+      resolve(id);
+    });
+  });
+}
+
+async function sendToGA4(events) {
+  const { analysisDebug } = await new Promise(r =>
+    chrome.storage.sync.get(['analysisDebug'], r)
+  );
+  if (analysisDebug) {
+    console.log('%c[Aegis GA4]', 'color:#4285f4;font-weight:bold', 'Sending events →', events);
+  }
+
+  const clientId = await getOrCreateClientId();
+  const url = `${GA4_ENDPOINT}?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
+
+  // GA4 MP accepts up to 25 events per request
+  const chunks = [];
+  for (let i = 0; i < events.length; i += 25) chunks.push(events.slice(i, i + 25));
+
+  for (const chunk of chunks) {
+    const ga4Events = chunk.map(({ event, ...params }) => ({
+      name: event,
+      params: { ...params, engagement_time_msec: 1 }
+    }));
+    if (analysisDebug) {
+      console.log('%c[Aegis GA4]', 'color:#4285f4;font-weight:bold', 'Sending events →', ga4Events);
+    }
+    try {
+      await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ client_id: clientId, events: ga4Events })
+      });
+    } catch (e) {
+      console.error('[Aegis] GA4 send error:', e);
+    }
+  }
+}
+
 // ---- Whitelist helpers ----
 
 async function loadBundledWhitelist() {
@@ -159,6 +210,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           .then(res => sendResponse({ resolvedUrl: res.url }))
           .catch(() => sendResponse({ resolvedUrl: url }));
       });
+    return true;
+  }
+
+  if (message.type === 'TRACK_EVENT') {
+    sendToGA4([message.payload]);
+    sendResponse({ ok: true });
     return true;
   }
 

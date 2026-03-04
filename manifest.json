@@ -9,6 +9,7 @@
     {
       "matches": ["https://mail.google.com/*"],
       "js": [
+        "src/analytics/tracker.js",
         "src/analysis/whitelist-manager.js",
         "src/analysis/email-analyzer.js",
         "src/analysis/ai-analyzer.js",

@@ -128,6 +128,10 @@ class AnalysisPanel {
       <span class="aegis-category-name">${category.name}</span>
       <span class="aegis-category-count">${emails.length}</span>
     `;
+    header.addEventListener('click', (e) => {
+      if (e.target.type === 'checkbox') return;
+      if (window.AegisTracker) AegisTracker.categoryClick(category.id, category.name, emails.length);
+    });
 
     // Email list
     const list = document.createElement('div');
@@ -190,6 +194,7 @@ class AnalysisPanel {
       }
 
       if (success !== false) { // deletion was confirmed or there was nothing to delete
+        if (window.AegisTracker) AegisTracker.emailAction('delete', selectedItems.length, category.id, category.name);
         selectedItems.forEach(item => item.remove());
 
         // Update count
@@ -243,6 +248,7 @@ class AnalysisPanel {
         }
 
         if (success !== false) {
+          if (window.AegisTracker) AegisTracker.emailAction('move_label', selectedItems.length, category.id, category.name);
           selectedItems.forEach(item => item.remove());
           const remaining = list.querySelectorAll('.aegis-email-item').length;
           header.querySelector('.aegis-category-count').textContent = remaining;
@@ -297,6 +303,7 @@ class AnalysisPanel {
         }
 
         if (success !== false) {
+          if (window.AegisTracker) AegisTracker.emailAction('move_label', selectedItems.length, category.id, category.name);
           selectedItems.forEach(item => item.remove());
           const remaining = list.querySelectorAll('.aegis-email-item').length;
           header.querySelector('.aegis-category-count').textContent = remaining;
