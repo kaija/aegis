@@ -168,29 +168,68 @@ const EmailAnalyzer = (() => {
     return { deductions, issues };
   }
 
+  // Find services by matching keywords in email content
+  function _findServicesByKeywords(emailContent, whitelist) {
+    if (!whitelist || !whitelist.services || !emailContent) return [];
+    const lowerContent = emailContent.toLowerCase();
+    return whitelist.services.filter(s =>
+      s.keywords && s.keywords.some(kw => lowerContent.includes(kw.toLowerCase()))
+    );
+  }
+
+  // Extract base domain (TLD + 1 level)
+  function _extractBaseDomain(hostname) {
+    if (!hostname) return '';
+    const parts = hostname.toLowerCase().split('.');
+    if (parts.length < 2) return hostname.toLowerCase();
+    // Handle special TLDs like .co.jp, .com.tw
+    if (parts.length >= 3 && parts[parts.length - 2].length <= 3 &&
+        ['co', 'com', 'net', 'org', 'gov', 'edu', 'ac'].includes(parts[parts.length - 2])) {
+      return parts.slice(-3).join('.');
+    }
+    return parts.slice(-2).join('.');
+  }
+
   // Find the whitelist service entry matching a sender email domain
   function _findWhitelistService(senderEmail, whitelist) {
     if (!whitelist || !whitelist.services || !senderEmail) return null;
     const domain = (senderEmail.split('@')[1] || '').toLowerCase();
     if (!domain) return null;
+    const baseDomain = _extractBaseDomain(domain);
+
     return whitelist.services.find(s =>
       s.senderDomains.some(d => {
         const sd = d.toLowerCase();
-        return domain === sd || domain.endsWith('.' + sd);
+        const senderBase = _extractBaseDomain(sd);
+        return baseDomain === senderBase || domain === sd || domain.endsWith('.' + sd);
       })
     ) || null;
   }
 
-  // Check if a hostname belongs to a service's allowed domains
+  // Check if a hostname belongs to a service's base domains
   function _domainInService(hostname, service) {
+    if (!hostname || !service) return false;
+    const baseDomain = _extractBaseDomain(hostname);
+
+    // Check against service's baseDomains
+    if (service.baseDomains) {
+      const match = service.baseDomains.some(bd => {
+        const serviceBase = _extractBaseDomain(bd.toLowerCase());
+        return baseDomain === serviceBase;
+      });
+      if (match) return true;
+    }
+
+    // Fallback to serviceDomains for backward compatibility
     const h = hostname.toLowerCase();
     return service.serviceDomains.some(sd => {
       const s = sd.toLowerCase();
-      return h === s || h.endsWith('.' + s);
+      const serviceBase = _extractBaseDomain(s);
+      return baseDomain === serviceBase || h === s || h.endsWith('.' + s);
     });
   }
 
-  function analyzeLinks(links, senderEmail, whitelist) {
+  function analyzeLinks(links, senderEmail, whitelist, emailContent = '') {
     D.group('連結分析');
     D.log('連結數量:', links.length);
 
@@ -203,11 +242,26 @@ const EmailAnalyzer = (() => {
     let whitelistedCount = 0;
     let offWhitelistCount = 0;
 
-    const matchedService = _findWhitelistService(senderEmail, whitelist);
+    // First, try to match service by sender domain
+    let matchedService = _findWhitelistService(senderEmail, whitelist);
+
+    // If no match by sender, try to match by keywords in email content
+    let keywordMatchedServices = [];
+    if (!matchedService && emailContent) {
+      keywordMatchedServices = _findServicesByKeywords(emailContent, whitelist);
+      if (keywordMatchedServices.length > 0) {
+        D.log('關鍵字匹配到服務:', keywordMatchedServices.map(s => s.name).join(', '));
+      }
+    }
+
     if (whitelist) {
-      D.log('白名單狀態:', matchedService
-        ? `✓ 寄件人網域匹配服務「${matchedService.name}」`
-        : '— 無匹配服務（無白名單加成/懲罰）');
+      if (matchedService) {
+        D.log('白名單狀態:', `✓ 寄件人網域匹配服務「${matchedService.name}」`);
+      } else if (keywordMatchedServices.length > 0) {
+        D.log('白名單狀態:', `⚠ 內容關鍵字匹配服務: ${keywordMatchedServices.map(s => s.name).join(', ')}（但寄件人網域不符）`);
+      } else {
+        D.log('白名單狀態:', '— 無匹配服務（無白名單加成/懲罰）');
+      }
     } else {
       D.log('白名單: 未載入');
     }
@@ -218,6 +272,7 @@ const EmailAnalyzer = (() => {
       let isSuspicious = false;
       let isWhitelisted = false;
       let isOffWhitelist = false;
+      let isPotentialSpoof = false;
       const reasons = [];
       let linkHostname = '';
       const row = { URL: link.slice(0, 60) + (link.length > 60 ? '…' : ''), 主機: '', 白名單: '', HTTP: '', 結構: '', 結果: '' };
@@ -225,6 +280,7 @@ const EmailAnalyzer = (() => {
       try {
         const url = new URL(link);
         linkHostname = url.hostname.toLowerCase();
+        const linkBaseDomain = _extractBaseDomain(linkHostname);
         row.主機 = linkHostname;
 
         if (url.protocol === 'http:') {
@@ -235,6 +291,7 @@ const EmailAnalyzer = (() => {
           row.HTTP = '✓';
         }
 
+        // Check against sender-matched service
         if (matchedService) {
           if (_domainInService(linkHostname, matchedService)) {
             isWhitelisted = true;
@@ -246,11 +303,29 @@ const EmailAnalyzer = (() => {
             reasons.push(`非 ${matchedService.name} 官方網域`);
             row.白名單 = `✗ 非 ${matchedService.name} 網域`;
           }
+        }
+        // Check against keyword-matched services (potential spoofing)
+        else if (keywordMatchedServices.length > 0) {
+          let matchedByKeyword = false;
+          for (const kwService of keywordMatchedServices) {
+            if (_domainInService(linkHostname, kwService)) {
+              // Link domain matches keyword-detected service, but sender doesn't
+              isPotentialSpoof = true;
+              suspiciousCount++;
+              reasons.push(`連結指向 ${kwService.name}，但寄件人網域不符（疑似偽冒）`);
+              row.白名單 = `⚠ 偽冒 ${kwService.name}?`;
+              matchedByKeyword = true;
+              break;
+            }
+          }
+          if (!matchedByKeyword) {
+            row.白名單 = '— 關鍵字不符';
+          }
         } else {
           row.白名單 = '—';
         }
 
-        if (!isWhitelisted) {
+        if (!isWhitelisted && !isPotentialSpoof) {
           const structIssues = [];
           if (/^\d+\.\d+\.\d+\.\d+$/.test(url.hostname)) {
             isSuspicious = true;
@@ -277,16 +352,17 @@ const EmailAnalyzer = (() => {
         row.結構 = '✗ 無效URL';
       }
 
-      if (isSuspicious || isOffWhitelist || reasons.length > 0) suspiciousCount++;
+      if (isSuspicious || isOffWhitelist || isPotentialSpoof || reasons.length > 0) suspiciousCount++;
 
-      row.結果 = isWhitelisted ? '✓ 白名單' : (isSuspicious || isOffWhitelist) ? '✗ 可疑' : '✓ 正常';
+      row.結果 = isWhitelisted ? '✓ 白名單' : isPotentialSpoof ? '✗ 疑似偽冒' : (isSuspicious || isOffWhitelist) ? '✗ 可疑' : '✓ 正常';
       linkDebugRows.push(row);
 
       linkResults.push({
         url: link,
-        isSuspicious: (isSuspicious || isOffWhitelist) && !isWhitelisted,
+        isSuspicious: (isSuspicious || isOffWhitelist || isPotentialSpoof) && !isWhitelisted,
         isWhitelisted,
         isOffWhitelist,
+        isPotentialSpoof,
         whitelistService: matchedService ? matchedService.name : null,
         reason: reasons.join(', ')
       });
@@ -294,28 +370,36 @@ const EmailAnalyzer = (() => {
 
     if (links.length > 0) D.table(linkDebugRows);
 
-    let httpDeduction = 0, suspiciousDeduction = 0;
+    let httpDeduction = 0, suspiciousDeduction = 0, spoofDeduction = 0;
     if (httpCount > 0) {
       httpDeduction = Math.min(httpCount * 5, 15);
       deductions += httpDeduction;
       issues.push(`${httpCount} 個連結使用不安全的 HTTP`);
     }
 
+    // Higher penalty for potential spoofing
+    const spoofCount = linkResults.filter(r => r.isPotentialSpoof).length;
+    if (spoofCount > 0) {
+      spoofDeduction = Math.min(spoofCount * 25, 40);
+      deductions += spoofDeduction;
+      issues.push(`${spoofCount} 個連結疑似偽冒知名服務（內容提及服務但寄件人與連結網域不符）`);
+    }
+
     if (matchedService && offWhitelistCount > 0) {
       suspiciousDeduction = Math.min(offWhitelistCount * 15, 30);
       deductions += suspiciousDeduction;
       issues.push(`${offWhitelistCount} 個連結網域不屬於 ${matchedService.name}（疑似偽冒）`);
-    } else if (suspiciousCount > 0) {
+    } else if (suspiciousCount > 0 && spoofCount === 0) {
       suspiciousDeduction = Math.min(suspiciousCount * 15, 30);
       deductions += suspiciousDeduction;
       issues.push(`${suspiciousCount} 個可疑連結`);
     }
 
-    if (whitelistedCount > 0 && offWhitelistCount === 0) {
+    if (whitelistedCount > 0 && offWhitelistCount === 0 && spoofCount === 0) {
       issues.push(`${whitelistedCount} 個連結已通過 ${matchedService.name} 白名單驗證`);
     }
 
-    D.log(`扣分明細 — HTTP: -${httpDeduction}  可疑/偽冒: -${suspiciousDeduction}  總計: -${deductions}`);
+    D.log(`扣分明細 — HTTP: -${httpDeduction}  偽冒: -${spoofDeduction}  可疑: -${suspiciousDeduction}  總計: -${deductions}`);
     D.groupEnd();
     return { deductions, issues, linkResults };
   }
@@ -342,6 +426,7 @@ const EmailAnalyzer = (() => {
     D.log('寄件人:', `${sender} <${senderEmail}>`);
     D.log('內文長度:', body.length, '字元 | 連結數:', links.length);
 
+    const emailContent = `${subject} ${body}`;
     const category = categorizeByKeywords(
       `${subject} ${sender} ${senderEmail} ${body.slice(0, 500)}`,
       categories,
@@ -359,7 +444,7 @@ const EmailAnalyzer = (() => {
     safetyScore -= contentAnalysis.deductions;
     allIssues.push(...contentAnalysis.issues);
 
-    const linkAnalysis = analyzeLinks(links, senderEmail, whitelist);
+    const linkAnalysis = analyzeLinks(links, senderEmail, whitelist, emailContent);
     safetyScore -= linkAnalysis.deductions;
     allIssues.push(...linkAnalysis.issues);
 

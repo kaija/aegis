@@ -1,138 +1,182 @@
 {
-  "version": "1",
+  "version": "2",
   "updatedAt": "2026-03-04",
   "services": [
     {
       "id": "hsbc_tw",
       "name": "匯豐台灣",
-      "senderDomains": ["hsbc.com.tw", "email.hsbc.com.tw", "notify.hsbc.com.tw"],
-      "serviceDomains": ["hsbc.com.tw", "online.hsbc.com.tw", "hsbc.com"]
+      "keywords": ["hsbc", "匯豐", "滙豐"],
+      "baseDomains": ["hsbc.com.tw", "hsbc.com"],
+      "senderDomains": ["hsbc.com.tw", "hsbc.com"],
+      "serviceDomains": ["hsbc.com.tw", "hsbc.com"]
     },
     {
       "id": "gov_tw",
       "name": "台灣政府",
+      "keywords": ["政府", "government", "gov"],
+      "baseDomains": ["gov.tw"],
       "senderDomains": ["gov.tw"],
       "serviceDomains": ["gov.tw"]
     },
     {
       "id": "yuanta",
       "name": "元大金融",
+      "keywords": ["yuanta", "元大"],
+      "baseDomains": ["yuanta.com.tw", "yuanta.com"],
       "senderDomains": ["yuanta.com.tw", "yuanta.com"],
       "serviceDomains": ["yuanta.com.tw", "yuanta.com"]
     },
     {
       "id": "bot_tw",
       "name": "台灣銀行",
+      "keywords": ["台灣銀行", "bank of taiwan", "bot"],
+      "baseDomains": ["bot.com.tw"],
       "senderDomains": ["bot.com.tw"],
-      "serviceDomains": ["bot.com.tw", "ebank.bot.com.tw"]
+      "serviceDomains": ["bot.com.tw"]
     },
     {
       "id": "cht",
       "name": "中華電信",
-      "senderDomains": ["cht.com.tw", "emome.net"],
+      "keywords": ["中華電信", "chunghwa", "cht", "emome", "hicloud"],
+      "baseDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"],
+      "senderDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"],
       "serviceDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"]
     },
     {
       "id": "cathaybk",
       "name": "國泰世華",
-      "senderDomains": ["cathaybk.com.tw", "cathaymail.com.tw"],
-      "serviceDomains": ["cathaybk.com.tw", "cathaycorp.com.tw"]
+      "keywords": ["國泰", "cathay"],
+      "baseDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"],
+      "senderDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"],
+      "serviceDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"]
     },
     {
       "id": "esunbank",
       "name": "玉山銀行",
+      "keywords": ["玉山", "esun"],
+      "baseDomains": ["esunbank.com.tw"],
       "senderDomains": ["esunbank.com.tw"],
       "serviceDomains": ["esunbank.com.tw"]
     },
     {
       "id": "fubon",
       "name": "富邦金融",
+      "keywords": ["富邦", "fubon", "myfone"],
+      "baseDomains": ["fubon.com", "myfone.com.tw"],
       "senderDomains": ["fubon.com", "myfone.com.tw"],
-      "serviceDomains": ["fubon.com", "myfone.com.tw", "eservice.fubon.com"]
+      "serviceDomains": ["fubon.com", "myfone.com.tw"]
     },
     {
       "id": "sinopac",
       "name": "永豐銀行",
+      "keywords": ["永豐", "sinopac"],
+      "baseDomains": ["sinopac.com"],
       "senderDomains": ["sinopac.com"],
-      "serviceDomains": ["sinopac.com", "mobilebank.sinopac.com"]
+      "serviceDomains": ["sinopac.com"]
     },
     {
       "id": "ctbcbank",
       "name": "中信銀行",
-      "senderDomains": ["ctbcbank.com"],
+      "keywords": ["中信", "ctbc"],
+      "baseDomains": ["ctbcbank.com", "ctbcholding.com"],
+      "senderDomains": ["ctbcbank.com", "ctbcholding.com"],
       "serviceDomains": ["ctbcbank.com", "ctbcholding.com"]
     },
     {
       "id": "firstbank",
       "name": "第一銀行",
+      "keywords": ["第一銀行", "first bank"],
+      "baseDomains": ["firstbank.com.tw"],
       "senderDomains": ["firstbank.com.tw"],
-      "serviceDomains": ["firstbank.com.tw", "ibank.firstbank.com.tw"]
+      "serviceDomains": ["firstbank.com.tw"]
     },
     {
       "id": "linkedin",
       "name": "LinkedIn",
-      "senderDomains": ["linkedin.com", "e.linkedin.com", "em.linkedin.com"],
+      "keywords": ["linkedin"],
+      "baseDomains": ["linkedin.com", "lnkd.in"],
+      "senderDomains": ["linkedin.com", "lnkd.in"],
       "serviceDomains": ["linkedin.com", "lnkd.in"]
     },
     {
       "id": "workday",
       "name": "Workday",
+      "keywords": ["workday"],
+      "baseDomains": ["workday.com", "myworkday.com"],
       "senderDomains": ["workday.com", "myworkday.com"],
-      "serviceDomains": ["myworkday.com", "workday.com", "wd5.myworkday.com"]
+      "serviceDomains": ["workday.com", "myworkday.com"]
     },
     {
       "id": "google",
       "name": "Google",
-      "senderDomains": ["google.com", "accounts.google.com"],
-      "serviceDomains": ["google.com", "accounts.google.com", "myaccount.google.com", "workspace.google.com"]
+      "keywords": ["google", "gmail", "workspace", "gstatic", "谷歌"],
+      "baseDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"],
+      "senderDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"],
+      "serviceDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"]
     },
     {
       "id": "microsoft",
       "name": "Microsoft",
-      "senderDomains": ["microsoft.com", "outlook.com"],
-      "serviceDomains": ["microsoft.com", "office.com", "office365.com", "live.com", "outlook.com", "microsoftonline.com"]
+      "keywords": ["microsoft", "outlook", "office", "微軟"],
+      "baseDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"],
+      "senderDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"],
+      "serviceDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"]
     },
     {
       "id": "apple",
       "name": "Apple",
-      "senderDomains": ["apple.com", "email.apple.com"],
-      "serviceDomains": ["apple.com", "appleid.apple.com", "support.apple.com"]
+      "keywords": ["apple", "icloud", "蘋果"],
+      "baseDomains": ["apple.com", "icloud.com"],
+      "senderDomains": ["apple.com", "icloud.com"],
+      "serviceDomains": ["apple.com", "icloud.com"]
     },
     {
       "id": "amazon",
       "name": "Amazon",
-      "senderDomains": ["amazon.com", "amazon.co.jp"],
-      "serviceDomains": ["amazon.com", "amazon.co.jp", "aws.amazon.com", "console.aws.amazon.com"]
+      "keywords": ["amazon", "aws", "亞馬遜"],
+      "baseDomains": ["amazon.com", "amazon.co.jp", "amzn.to"],
+      "senderDomains": ["amazon.com", "amazon.co.jp", "amzn.to"],
+      "serviceDomains": ["amazon.com", "amazon.co.jp", "amzn.to"]
     },
     {
       "id": "paypal",
       "name": "PayPal",
-      "senderDomains": ["paypal.com", "e.paypal.com"],
-      "serviceDomains": ["paypal.com", "www.paypal.com"]
+      "keywords": ["paypal"],
+      "baseDomains": ["paypal.com"],
+      "senderDomains": ["paypal.com"],
+      "serviceDomains": ["paypal.com"]
     },
     {
       "id": "stripe",
       "name": "Stripe",
+      "keywords": ["stripe"],
+      "baseDomains": ["stripe.com"],
       "senderDomains": ["stripe.com"],
-      "serviceDomains": ["stripe.com", "dashboard.stripe.com", "billing.stripe.com"]
+      "serviceDomains": ["stripe.com"]
     },
     {
       "id": "github",
       "name": "GitHub",
-      "senderDomains": ["github.com", "noreply.github.com"],
+      "keywords": ["github"],
+      "baseDomains": ["github.com"],
+      "senderDomains": ["github.com"],
       "serviceDomains": ["github.com"]
     },
     {
       "id": "slack",
       "name": "Slack",
+      "keywords": ["slack"],
+      "baseDomains": ["slack.com"],
       "senderDomains": ["slack.com"],
-      "serviceDomains": ["slack.com", "app.slack.com"]
+      "serviceDomains": ["slack.com"]
     },
     {
       "id": "zoom",
       "name": "Zoom",
+      "keywords": ["zoom"],
+      "baseDomains": ["zoom.us"],
       "senderDomains": ["zoom.us"],
-      "serviceDomains": ["zoom.us", "us02web.zoom.us"]
+      "serviceDomains": ["zoom.us"]
     }
   ],
   "shortUrlServices": [
