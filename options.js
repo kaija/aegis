@@ -4,6 +4,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load all settings
   settings = await new Promise(resolve => chrome.storage.sync.get(null, resolve));
 
+  // Load whitelist URL from sync storage
+  const whitelistUrlEl = document.getElementById('whitelistUrl');
+  if (settings.whitelistUrl) whitelistUrlEl.value = settings.whitelistUrl;
+
+  // Load debug toggle
+  document.getElementById('analysisDebug').checked = !!settings.analysisDebug;
+
+  // Load and show whitelist status
+  loadWhitelistStatus();
+
+  document.getElementById('updateWhitelistBtn').addEventListener('click', updateWhitelistNow);
+
   // Set analysis mode radio
   const modeInputs = document.querySelectorAll('input[name="analysisMode"]');
   modeInputs.forEach(input => {
@@ -287,6 +299,8 @@ async function saveSettings() {
       apiKey: document.getElementById('aiApiKey').value.trim(),
       model: document.getElementById('aiModel').value.trim() || 'gpt-5-nano-2025-08-07'
     },
+    whitelistUrl: document.getElementById('whitelistUrl').value.trim(),
+    analysisDebug: document.getElementById('analysisDebug').checked,
     categories: settings.categories
   };
 
@@ -305,4 +319,53 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function loadWhitelistStatus() {
+  chrome.runtime.sendMessage({ type: 'GET_WHITELIST_STATUS' }, (res) => {
+    if (chrome.runtime.lastError || !res) return;
+    const infoEl = document.getElementById('whitelistInfo');
+    if (!infoEl) return;
+    const parts = [];
+    if (res.serviceCount) parts.push(`${res.serviceCount} 個服務`);
+    if (res.shortUrlCount) parts.push(`${res.shortUrlCount} 個短網址服務`);
+    if (res.lastUpdated) {
+      const d = new Date(res.lastUpdated);
+      parts.push(`上次更新：${d.toLocaleString('zh-TW')}`);
+    }
+    infoEl.textContent = parts.join(' | ');
+  });
+}
+
+async function updateWhitelistNow() {
+  const btn = document.getElementById('updateWhitelistBtn');
+  const statusEl = document.getElementById('whitelistStatus');
+  const url = document.getElementById('whitelistUrl').value.trim();
+
+  if (!url) {
+    statusEl.textContent = '❌ 請先填寫白名單 URL';
+    statusEl.style.color = '#cf222e';
+    return;
+  }
+
+  btn.disabled = true;
+  statusEl.textContent = '⏳ 下載中...';
+  statusEl.style.color = '#0969da';
+
+  chrome.runtime.sendMessage({ type: 'FETCH_WHITELIST', url }, (res) => {
+    btn.disabled = false;
+    if (chrome.runtime.lastError || !res) {
+      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.style.color = '#cf222e';
+      return;
+    }
+    if (res.success) {
+      statusEl.textContent = `✅ 更新成功（${res.serviceCount} 個服務）`;
+      statusEl.style.color = '#1a7f37';
+      loadWhitelistStatus();
+    } else {
+      statusEl.textContent = `❌ ${res.error || '下載失敗'}`;
+      statusEl.style.color = '#cf222e';
+    }
+  });
 }

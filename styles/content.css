@@ -506,6 +506,8 @@
 
 .aegis-link-risk.safe { background: #e6f4ea; color: #1a7f37; }
 .aegis-link-risk.risky { background: #fce8e6; color: #d93025; }
+.aegis-link-risk.whitelisted { background: #dafbe1; color: #116329; font-weight: 600; }
+.aegis-link-risk.off-whitelist { background: #fff8c5; color: #7d4e00; }
 
 /* ========== Spinner ========== */
 .aegis-spinner {

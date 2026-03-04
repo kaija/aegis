@@ -1,5 +1,61 @@
+// ---- Whitelist helpers ----
+
+async function loadBundledWhitelist() {
+  try {
+    const url = chrome.runtime.getURL('src/data/service-whitelist.json');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error('[Aegis] Failed to load bundled whitelist:', e);
+    return null;
+  }
+}
+
+async function getWhitelistFromStorage() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['whitelistData', 'whitelistLastUpdated'], (result) => {
+      resolve({ data: result.whitelistData || null, lastUpdated: result.whitelistLastUpdated || null });
+    });
+  });
+}
+
+async function saveWhitelistToStorage(data) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ whitelistData: data, whitelistLastUpdated: Date.now() }, resolve);
+  });
+}
+
+async function fetchWhitelistFromUrl(url) {
+  const res = await fetch(url, { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+async function autoRefreshWhitelist() {
+  try {
+    const { whitelistUrl } = await new Promise(r => chrome.storage.sync.get(['whitelistUrl'], r));
+    if (!whitelistUrl) return;
+    const data = await fetchWhitelistFromUrl(whitelistUrl);
+    await saveWhitelistToStorage(data);
+    console.log('[Aegis] Whitelist auto-refreshed from', whitelistUrl);
+  } catch (e) {
+    console.error('[Aegis] Auto-refresh whitelist failed:', e);
+  }
+}
+
+// Weekly refresh alarm
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'aegis-whitelist-update') {
+    autoRefreshWhitelist();
+  }
+});
+
+// ---- Default settings ----
+
 const DEFAULT_SETTINGS = {
   analysisMode: 'local',
+  analysisDebug: false,
   aiSettings: {
     baseUrl: 'https://api.openai.com/v1',
     apiKey: '',
@@ -29,6 +85,16 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (Object.keys(merged).length > 0) {
     await chrome.storage.sync.set(merged);
   }
+
+  // Seed bundled whitelist if not yet cached
+  const { data } = await getWhitelistFromStorage();
+  if (!data) {
+    const bundled = await loadBundledWhitelist();
+    if (bundled) await saveWhitelistToStorage(bundled);
+  }
+
+  // Schedule weekly whitelist refresh
+  chrome.alarms.create('aegis-whitelist-update', { periodInMinutes: 10080 });
 });
 
 function buildUserMessage(emailData) {
@@ -43,6 +109,59 @@ ${(emailData.links || []).slice(0, 10).join('\n')}`;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'GET_WHITELIST') {
+    getWhitelistFromStorage().then(async ({ data }) => {
+      if (data) {
+        sendResponse({ whitelist: data });
+      } else {
+        const bundled = await loadBundledWhitelist();
+        if (bundled) await saveWhitelistToStorage(bundled);
+        sendResponse({ whitelist: bundled });
+      }
+    });
+    return true;
+  }
+
+  if (message.type === 'FETCH_WHITELIST') {
+    const { url } = message;
+    if (!url) {
+      sendResponse({ success: false, error: '未設定白名單 URL' });
+      return true;
+    }
+    fetchWhitelistFromUrl(url)
+      .then(async (data) => {
+        await saveWhitelistToStorage(data);
+        sendResponse({ success: true, serviceCount: data.services ? data.services.length : 0 });
+      })
+      .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+
+  if (message.type === 'GET_WHITELIST_STATUS') {
+    getWhitelistFromStorage().then(({ data, lastUpdated }) => {
+      sendResponse({
+        lastUpdated,
+        serviceCount: data && data.services ? data.services.length : 0,
+        shortUrlCount: data && data.shortUrlServices ? data.shortUrlServices.length : 0
+      });
+    });
+    return true;
+  }
+
+  if (message.type === 'RESOLVE_SHORT_URL') {
+    const { url } = message;
+    // Follow redirect in service worker and return final URL
+    fetch(url, { method: 'HEAD', redirect: 'follow' })
+      .then(res => sendResponse({ resolvedUrl: res.url }))
+      .catch(() => {
+        // Fallback to GET if HEAD is blocked
+        fetch(url, { method: 'GET', redirect: 'follow' })
+          .then(res => sendResponse({ resolvedUrl: res.url }))
+          .catch(() => sendResponse({ resolvedUrl: url }));
+      });
+    return true;
+  }
+
   if (message.type === 'GET_SETTINGS') {
     chrome.storage.sync.get(null, (result) => {
       sendResponse(Object.assign({}, DEFAULT_SETTINGS, result));

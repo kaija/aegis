@@ -1,0 +1,160 @@
+{
+  "version": "1",
+  "updatedAt": "2026-03-04",
+  "services": [
+    {
+      "id": "hsbc_tw",
+      "name": "匯豐台灣",
+      "senderDomains": ["hsbc.com.tw", "email.hsbc.com.tw", "notify.hsbc.com.tw"],
+      "serviceDomains": ["hsbc.com.tw", "online.hsbc.com.tw", "hsbc.com"]
+    },
+    {
+      "id": "gov_tw",
+      "name": "台灣政府",
+      "senderDomains": ["gov.tw"],
+      "serviceDomains": ["gov.tw"]
+    },
+    {
+      "id": "yuanta",
+      "name": "元大金融",
+      "senderDomains": ["yuanta.com.tw", "yuanta.com"],
+      "serviceDomains": ["yuanta.com.tw", "yuanta.com"]
+    },
+    {
+      "id": "bot_tw",
+      "name": "台灣銀行",
+      "senderDomains": ["bot.com.tw"],
+      "serviceDomains": ["bot.com.tw", "ebank.bot.com.tw"]
+    },
+    {
+      "id": "cht",
+      "name": "中華電信",
+      "senderDomains": ["cht.com.tw", "emome.net"],
+      "serviceDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"]
+    },
+    {
+      "id": "cathaybk",
+      "name": "國泰世華",
+      "senderDomains": ["cathaybk.com.tw", "cathaymail.com.tw"],
+      "serviceDomains": ["cathaybk.com.tw", "cathaycorp.com.tw"]
+    },
+    {
+      "id": "esunbank",
+      "name": "玉山銀行",
+      "senderDomains": ["esunbank.com.tw"],
+      "serviceDomains": ["esunbank.com.tw"]
+    },
+    {
+      "id": "fubon",
+      "name": "富邦金融",
+      "senderDomains": ["fubon.com", "myfone.com.tw"],
+      "serviceDomains": ["fubon.com", "myfone.com.tw", "eservice.fubon.com"]
+    },
+    {
+      "id": "sinopac",
+      "name": "永豐銀行",
+      "senderDomains": ["sinopac.com"],
+      "serviceDomains": ["sinopac.com", "mobilebank.sinopac.com"]
+    },
+    {
+      "id": "ctbcbank",
+      "name": "中信銀行",
+      "senderDomains": ["ctbcbank.com"],
+      "serviceDomains": ["ctbcbank.com", "ctbcholding.com"]
+    },
+    {
+      "id": "firstbank",
+      "name": "第一銀行",
+      "senderDomains": ["firstbank.com.tw"],
+      "serviceDomains": ["firstbank.com.tw", "ibank.firstbank.com.tw"]
+    },
+    {
+      "id": "linkedin",
+      "name": "LinkedIn",
+      "senderDomains": ["linkedin.com", "e.linkedin.com", "em.linkedin.com"],
+      "serviceDomains": ["linkedin.com", "lnkd.in"]
+    },
+    {
+      "id": "workday",
+      "name": "Workday",
+      "senderDomains": ["workday.com", "myworkday.com"],
+      "serviceDomains": ["myworkday.com", "workday.com", "wd5.myworkday.com"]
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "senderDomains": ["google.com", "accounts.google.com"],
+      "serviceDomains": ["google.com", "accounts.google.com", "myaccount.google.com", "workspace.google.com"]
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "senderDomains": ["microsoft.com", "outlook.com"],
+      "serviceDomains": ["microsoft.com", "office.com", "office365.com", "live.com", "outlook.com", "microsoftonline.com"]
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "senderDomains": ["apple.com", "email.apple.com"],
+      "serviceDomains": ["apple.com", "appleid.apple.com", "support.apple.com"]
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "senderDomains": ["amazon.com", "amazon.co.jp"],
+      "serviceDomains": ["amazon.com", "amazon.co.jp", "aws.amazon.com", "console.aws.amazon.com"]
+    },
+    {
+      "id": "paypal",
+      "name": "PayPal",
+      "senderDomains": ["paypal.com", "e.paypal.com"],
+      "serviceDomains": ["paypal.com", "www.paypal.com"]
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "senderDomains": ["stripe.com"],
+      "serviceDomains": ["stripe.com", "dashboard.stripe.com", "billing.stripe.com"]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "senderDomains": ["github.com", "noreply.github.com"],
+      "serviceDomains": ["github.com"]
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "senderDomains": ["slack.com"],
+      "serviceDomains": ["slack.com", "app.slack.com"]
+    },
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "senderDomains": ["zoom.us"],
+      "serviceDomains": ["zoom.us", "us02web.zoom.us"]
+    }
+  ],
+  "shortUrlServices": [
+    "bit.ly",
+    "tinyurl.com",
+    "t.co",
+    "goo.gl",
+    "ow.ly",
+    "buff.ly",
+    "rebrand.ly",
+    "short.io",
+    "cutt.ly",
+    "is.gd",
+    "v.gd",
+    "shorturl.at",
+    "tiny.cc",
+    "rb.gy",
+    "lnkd.in",
+    "youtu.be",
+    "amzn.to",
+    "fb.me",
+    "go.microsoft.com",
+    "aka.ms"
+  ]
+}

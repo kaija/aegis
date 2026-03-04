@@ -46,17 +46,32 @@ class EmailPopup {
     // Links HTML
     const linksHtml = linkResults && linkResults.length > 0 ? `
       <div class="aegis-links-section">
-        <div class="aegis-links-title" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.aegis-links-toggle').textContent = this.nextElementSibling.classList.contains('open') ? '▲' : '▼'">
+        <div class="aegis-links-title">
           🔗 連結分析 (${linkResults.length})
           <span class="aegis-links-toggle">▼</span>
         </div>
         <div class="aegis-links-body">
-          ${linkResults.map(lr => `
+          ${linkResults.map(lr => {
+            let riskClass, riskLabel;
+            if (lr.isWhitelisted) {
+              riskClass = 'whitelisted';
+              riskLabel = `✓ ${lr.whitelistService || '白名單'}`;
+            } else if (lr.isOffWhitelist) {
+              riskClass = 'off-whitelist';
+              riskLabel = '⚠ 非預期網域';
+            } else if (lr.isSuspicious) {
+              riskClass = 'risky';
+              riskLabel = '⚠ 可疑';
+            } else {
+              riskClass = 'safe';
+              riskLabel = '✓ 正常';
+            }
+            return `
             <div class="aegis-link-item">
               <span class="aegis-link-url" title="${this._escapeHtml(lr.url)}">${this._escapeHtml(lr.url.slice(0, 40))}${lr.url.length > 40 ? '…' : ''}</span>
-              <span class="aegis-link-risk ${lr.isSuspicious ? 'risky' : 'safe'}">${lr.isSuspicious ? '⚠ 可疑' : '✓ 正常'}</span>
-            </div>
-          `).join('')}
+              <span class="aegis-link-risk ${riskClass}">${riskLabel}</span>
+            </div>`;
+          }).join('')}
         </div>
       </div>
     ` : '';
@@ -96,6 +111,16 @@ class EmailPopup {
     `;
 
     popup.querySelector('.aegis-popup-close').addEventListener('click', () => this.hide());
+
+    const linksTitle = popup.querySelector('.aegis-links-title');
+    if (linksTitle) {
+      linksTitle.addEventListener('click', () => {
+        const body = linksTitle.nextElementSibling;
+        const toggle = linksTitle.querySelector('.aegis-links-toggle');
+        body.classList.toggle('open');
+        toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+      });
+    }
 
     return popup;
   }

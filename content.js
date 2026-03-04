@@ -14,11 +14,35 @@
 
   let settings = null;
 
+  // Initialize whitelist (non-blocking)
+  WhitelistManager.init().catch(e => console.warn('[Aegis] WhitelistManager init:', e));
+
+  // Resolve known short URLs via background service worker
+  async function resolveShortUrls(links) {
+    const resolved = [];
+    for (const link of links) {
+      if (WhitelistManager.isKnownShortUrl(link)) {
+        const resolvedUrl = await new Promise((resolve) => {
+          chrome.runtime.sendMessage({ type: 'RESOLVE_SHORT_URL', url: link }, (res) => {
+            if (chrome.runtime.lastError || !res) { resolve(link); return; }
+            resolve(res.resolvedUrl || link);
+          });
+        });
+        resolved.push(resolvedUrl);
+      } else {
+        resolved.push(link);
+      }
+    }
+    return resolved;
+  }
+
   // Load settings from background
   async function getSettings() {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
-        resolve(response || {});
+        const result = response || {};
+        window.__aegisDebug = !!result.analysisDebug;
+        resolve(result);
       });
     });
   }
@@ -165,6 +189,10 @@
 
       let analysis;
 
+      // Resolve short URLs before analysis
+      emailData.links = await resolveShortUrls(emailData.links || []);
+      const whitelist = WhitelistManager.getWhitelist();
+
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         try {
           const aiResult = await new Promise((resolve) => {
@@ -174,7 +202,7 @@
           });
 
           if (aiResult && !aiResult.error) {
-            const localAnalysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || []);
+            const localAnalysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
             analysis = {
               ...localAnalysis,
               category: aiResult.category ? { name: aiResult.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe' } : localAnalysis.category,
@@ -182,7 +210,6 @@
               safetyScore: typeof aiResult.safetyScore === 'number' ? aiResult.safetyScore : localAnalysis.safetyScore,
               issues: [...(aiResult.issues || []), ...localAnalysis.issues].slice(0, 5)
             };
-            // Recalculate safety level/color based on merged score
             if (analysis.safetyScore >= 80) {
               analysis.safetyLevel = 'safe';
               analysis.safetyColor = '#1a7f37';
@@ -194,13 +221,13 @@
               analysis.safetyColor = '#cf222e';
             }
           } else {
-            analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || []);
+            analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
           }
         } catch (e) {
-          analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || []);
+          analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
         }
       } else {
-        analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || []);
+        analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
       }
 
       emailPopup.show(analysis);

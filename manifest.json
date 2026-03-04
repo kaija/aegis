@@ -3,11 +3,13 @@
   "name": "Aegis Mail",
   "version": "1.0.0",
   "description": "Organize your Gmail with smart email categorization",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "alarms"],
+  "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
       "js": [
+        "src/analysis/whitelist-manager.js",
         "src/analysis/email-analyzer.js",
         "src/analysis/ai-analyzer.js",
         "src/platforms/base-platform.js",
