@@ -16,10 +16,22 @@ PACK_EXCLUDE := \
 	--exclude="*.DS_Store" \
 	--exclude=".git/*" \
 	--exclude=".claude/*" \
+	--exclude=".kiro/*" \
+	--exclude="__tests__/*" \
+	--exclude="node_modules/*" \
+	--exclude="coverage/*" \
+	--exclude="scripts/*" \
 	--exclude="dist/*" \
+	--exclude="*.md" \
+	--exclude="TEST-*.txt" \
+	--exclude="TEST-*.md" \
 	--exclude="CLAUDE.md" \
 	--exclude="Makefile" \
-	--exclude="*.map"
+	--exclude="*.map" \
+	--exclude="package.json" \
+	--exclude="package-lock.json" \
+	--exclude="jest.config.js" \
+	--exclude=".gitignore"
 
 .PHONY: all zip crx dev clean help
 
@@ -33,11 +45,31 @@ dev: ## Copy extension files to dist/ for local unpacked loading
 		--exclude="*.pem" \
 		--exclude=".DS_Store" \
 		--exclude=".git" \
+		--exclude=".git/" \
 		--exclude=".claude" \
+		--exclude=".claude/" \
+		--exclude=".kiro" \
+		--exclude=".kiro/" \
+		--exclude="__tests__" \
+		--exclude="__tests__/" \
+		--exclude="node_modules" \
+		--exclude="node_modules/" \
+		--exclude="coverage" \
+		--exclude="coverage/" \
 		--exclude="dist" \
+		--exclude="dist/" \
+		--exclude="scripts" \
+		--exclude="scripts/" \
+		--exclude="*.md" \
+		--exclude="TEST-*.txt" \
+		--exclude="TEST-*.md" \
 		--exclude="CLAUDE.md" \
 		--exclude="Makefile" \
 		--exclude="*.map" \
+		--exclude="package.json" \
+		--exclude="package-lock.json" \
+		--exclude="jest.config.js" \
+		--exclude=".gitignore" \
 		. $(OUT_DIR)/
 	@echo "Ready: load $(OUT_DIR)/ as unpacked extension in Chrome"
 

@@ -25,7 +25,7 @@ class EmailPopup {
   }
 
   _createPopup(analysis) {
-    const { category, tags, safetyScore, safetyLevel, safetyColor, issues, linkResults } = analysis;
+    const { category, tags, safetyScore, safetyLevel, safetyColor, issues, linkResults, suspiciousKeywords } = analysis;
 
     const popup = document.createElement('div');
     popup.id = 'aegis-email-popup';
@@ -35,11 +35,27 @@ class EmailPopup {
     const dashArray = (safetyScore / 100) * circumference;
     const safetyLevelText = safetyLevel === 'safe' ? '安全' : safetyLevel === 'caution' ? '注意' : '危險';
 
+    // Process issues to add keyword details
+    const processedIssues = issues.map(issue => {
+      // Check if this is the suspicious keywords issue
+      const match = issue.match(/內容含 (\d+) 個可疑關鍵字/);
+      if (match && suspiciousKeywords && suspiciousKeywords.length > 0) {
+        // Add keywords with color coding
+        const keywordTags = suspiciousKeywords.map((kw, idx) => {
+          const colors = ['#cf222e', '#d1242f', '#e85d75', '#fb8500', '#ff9500'];
+          const color = colors[idx % colors.length];
+          return `<span style="display:inline-block;background:${color};color:white;padding:2px 6px;border-radius:3px;margin:0 3px;font-size:11px;">${this._escapeHtml(kw)}</span>`;
+        }).join('');
+        return `${issue}：${keywordTags}`;
+      }
+      return issue;
+    });
+
     // Issues HTML
-    const issuesHtml = issues && issues.length > 0 ? `
+    const issuesHtml = processedIssues && processedIssues.length > 0 ? `
       <div class="aegis-issues-list">
         <div class="aegis-issues-title">⚠️ 安全警示</div>
-        ${issues.map(issue => `<div class="aegis-issue-item">• ${this._escapeHtml(issue)}</div>`).join('')}
+        ${processedIssues.map(issue => `<div class="aegis-issue-item">• ${issue}</div>`).join('')}
       </div>
     ` : '';
 

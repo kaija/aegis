@@ -189,26 +189,9 @@ const EmailAnalyzer = (() => {
       D.log('釣魚關鍵字: ✓ 無命中');
     }
 
-    // Only consider tokens that contain at least one Latin letter;
-    // judge caps by the Latin letters alone (ignores CJK / digits / symbols).
-    const latinWords = subject.split(/\s+/).filter(w => /[a-zA-Z]/.test(w));
-    if (latinWords.length > 0) {
-      const capsWords = latinWords.filter(w => {
-        const latin = w.match(/[a-zA-Z]/g);
-        return latin.every(c => c >= 'A' && c <= 'Z');
-      });
-      const capsRatio = capsWords.length / latinWords.length;
-      D.log(`大寫比例: ${capsWords.length}/${latinWords.length} 英文詞 = ${(capsRatio * 100).toFixed(0)}%`, capsRatio > 0.3 ? '✗ 超標 (>30%)' : '✓ 正常');
-      if (capsRatio > 0.3) {
-        deductions += 10;
-        issues.push('主旨含大量全大寫文字');
-        D.warn('全大寫扣分: -10');
-      }
-    }
-
     D.log('總扣分:', -deductions);
     D.groupEnd();
-    return { deductions, issues };
+    return { deductions, issues, hitKeywords };
   }
 
   // Find services by matching keywords in email content
@@ -539,7 +522,8 @@ const EmailAnalyzer = (() => {
       safetyColor,
       issues: allIssues,
       flags: allFlags,
-      linkResults: linkAnalysis.linkResults
+      linkResults: linkAnalysis.linkResults,
+      suspiciousKeywords: contentAnalysis.hitKeywords || []
     };
   }
 
