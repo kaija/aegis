@@ -297,7 +297,7 @@ function renderCategories(categories) {
         item.querySelector('.keyword-add-btn').outerHTML = `
             <div class="keyword-add-row inline-add-row" style="display:inline-flex;">
               <input type="text" class="keyword-input" id="input-${cat.id}" placeholder="Type keyword...">
-              <button class="keyword-save-btn" data-cat-id="${cat.id}">Save</button>
+              <button class="keyword-save-btn" data-cat-id="${cat.id}">Add</button>
             </div>
           `;
 
@@ -311,6 +311,7 @@ function renderCategories(categories) {
         });
 
         input.addEventListener('keydown', (e) => {
+          if (e.isComposing || e.keyCode === 229) return;
           if (e.key === 'Enter') addKeyword(cat.id);
           if (e.key === 'Escape') renderCategories(settings.categories); // reset render
         });
@@ -351,12 +352,16 @@ function addKeyword(catId) {
   const cat = settings.categories.find(c => c.id === catId);
   if (cat && !cat.keywords.includes(keyword)) {
     cat.keywords.push(keyword);
-    // Full re-render to put the "+ Add keyword" button back
-    renderCategories(settings.categories);
+    // Render the new tag to the UI immediately
+    renderKeywordTags(cat);
+    // Clear the input so the user can easily add the next one
+    input.value = '';
+    input.focus();
     debouncedSaveKeywords();
   } else {
-    // If not valid or exists, just re-render to hide input
-    renderCategories(settings.categories);
+    // If invalid or exists, just clear the input
+    input.value = '';
+    input.focus();
   }
 }
 

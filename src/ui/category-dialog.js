@@ -246,6 +246,9 @@ const CategoryDialog = (() => {
     keywordContainer.appendChild(keywordInput);
 
     keywordInput.addEventListener('keydown', (e) => {
+      // Prevent IME composition from triggering Enter prematurely
+      if (e.isComposing || e.keyCode === 229) return;
+
       if (e.key === 'Enter') {
         e.preventDefault();
         const val = keywordInput.value.trim();

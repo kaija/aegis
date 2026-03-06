@@ -154,8 +154,15 @@ class AnalysisPanel {
     // Actions
     const actions = document.createElement('div');
     actions.className = 'aegis-category-actions';
+
+    // Only show "Move All" if the label actually exists in Gmail
+    const labelExists = labels.find(l => l.name === category.name);
+    const moveAllBtnHtml = labelExists
+      ? `<button class="aegis-action-btn aegis-move-all-btn" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;">全部移至「${category.name}」標籤</button>`
+      : '';
+
     actions.innerHTML = `
-      <button class="aegis-action-btn aegis-move-all-btn" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;">全部移至「${category.name}」標籤</button>
+      ${moveAllBtnHtml}
       <button class="aegis-action-btn aegis-move-btn">移至其他標籤 ▼</button>
       <button class="aegis-action-btn aegis-delete-btn">🗑 刪除</button>
     `;
@@ -206,13 +213,7 @@ class AnalysisPanel {
     const moveAllBtn = actions.querySelector('.aegis-move-all-btn');
     if (moveAllBtn) {
       moveAllBtn.addEventListener('click', async () => {
-        // 1. Verify label exists first
         const targetLabelText = category.name;
-        const labelExists = labels.find(l => l.name === targetLabelText);
-        if (!labelExists) {
-          this._showNotification(`分類標籤「${targetLabelText}」不存在！\n請先在 Gmail 左側選單建立此標籤，再執行移動。`, 'warning');
-          return;
-        }
 
         // 2. Check selections, auto-select all if none selected
         const allItems = [...list.querySelectorAll('.aegis-email-item')];
