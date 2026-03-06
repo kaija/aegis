@@ -36,6 +36,73 @@
     return resolved;
   }
 
+  // Icon Mapping for Gmail Labels in AI Mode
+  const ICON_MAPPING = {
+    'credit-card': ['發票', '收據', '帳單', '付款', 'invoice', 'receipt', 'bill', 'payment', 'finance', '銀行', 'bank', 'credit', 'pay'],
+    'shopping-cart': ['訂單', '購物', 'order', 'shopping', 'store', '買', '蝦皮', 'momo', 'pchome', 'amazon'],
+    'package': ['出貨', '包裹', '運送', '物流', 'shipping', 'delivery', 'package', 'tracking'],
+    'calendar': ['會議', '行程', '預約', '活動', 'meeting', 'calendar', 'event', 'appointment', 'schedule'],
+    'alert-triangle': ['警告', '警示', '重要', 'urgent', 'alert', 'important', 'warning'],
+    'heart': ['喜歡', '最愛', 'favorite', 'heart', 'love', 'family', '家庭'],
+    'check-circle': ['完成', '確認', 'done', 'confirmed', 'success'],
+    'image': ['照片', '圖片', '相簿', 'photo', 'image', 'picture', 'album'],
+    'bar-chart': ['報表', '分析', '統計', 'report', 'analytics', 'stats', 'chart'],
+    'shield': ['安全', '資安', '密碼', 'security', 'password', 'login', '登入', '驗證'],
+    'phone': ['聯絡', '電話', '客服', 'contact', 'support', 'call', 'phone'],
+    'globe': ['網路', '網站', '網域', 'network', 'web', 'domain', 'internet'],
+    'video': ['影片', 'youtube', 'video', 'media', 'zoom', 'meet'],
+    'coffee': ['休閒', '休息', 'break', 'coffee', 'cafe', 'tea'],
+    'gift': ['促銷', '優惠', '折扣', '廣告', 'promo', 'discount', 'offer', 'sale', 'gift', 'free'],
+    'trash': ['垃圾', 'spam', 'trash', 'junk'],
+    'book': ['學習', '課程', '學校', 'education', 'course', 'school', 'learn', 'study', 'class'],
+    'send': ['飛機', '旅行', '航班', 'travel', 'flight', 'trip'],
+    'mail': ['信件', '郵件', 'mail', 'newsletter', '電子報'],
+    'paperclip': ['附件', '檔案', 'attachment', 'file'],
+    'briefcase': ['工作', '公司', '業務', 'work', 'job', 'business', 'company'],
+    'user': ['個人', '朋友', 'personal', 'friend'],
+    'star': ['星號', '特殊', 'star', 'special'],
+    'folder': ['其他', 'other', 'misc']
+  };
+
+  const LABEL_COLORS = {
+    'credit-card': { color: '#00897b', bgColor: '#e0f2f1' },
+    'shopping-cart': { color: '#e65100', bgColor: '#ffe0b2' },
+    'package': { color: '#8d6e63', bgColor: '#efebe9' },
+    'calendar': { color: '#1e88e5', bgColor: '#e3f2fd' },
+    'alert-triangle': { color: '#d32f2f', bgColor: '#ffebee' },
+    'heart': { color: '#c2185b', bgColor: '#fce4ec' },
+    'check-circle': { color: '#388e3c', bgColor: '#e8f5e9' },
+    'image': { color: '#7b1fa2', bgColor: '#f3e5f5' },
+    'bar-chart': { color: '#303f9f', bgColor: '#e8eaf6' },
+    'shield': { color: '#0288d1', bgColor: '#e1f5fe' },
+    'phone': { color: '#0097a7', bgColor: '#e0f7fa' },
+    'globe': { color: '#388e3c', bgColor: '#e8f5e9' },
+    'video': { color: '#d32f2f', bgColor: '#ffebee' },
+    'coffee': { color: '#5d4037', bgColor: '#efebe9' },
+    'gift': { color: '#c2185b', bgColor: '#fce4ec' },
+    'trash': { color: '#616161', bgColor: '#f5f5f5' },
+    'book': { color: '#512da8', bgColor: '#ede7f6' },
+    'send': { color: '#0288d1', bgColor: '#e1f5fe' },
+    'mail': { color: '#1976d2', bgColor: '#e3f2fd' },
+    'paperclip': { color: '#455a64', bgColor: '#eceff1' },
+    'briefcase': { color: '#f57c00', bgColor: '#ffe0b2' },
+    'user': { color: '#7b1fa2', bgColor: '#f3e5f5' },
+    'star': { color: '#fbc02d', bgColor: '#fff9c4' },
+    'folder': { color: '#616161', bgColor: '#f5f5f5' },
+    'tag': { color: '#1976d2', bgColor: '#e3f2fd' }
+  };
+
+  function getIconForLabel(labelName) {
+    if (!labelName) return 'tag';
+    const lower = labelName.toLowerCase();
+    for (const [icon, keywords] of Object.entries(ICON_MAPPING)) {
+      if (keywords.some(kw => lower.includes(kw))) {
+        return icon;
+      }
+    }
+    return 'tag';
+  }
+
   // Load settings from background
   async function getSettings() {
     return new Promise((resolve) => {
@@ -120,15 +187,15 @@
             chrome.runtime.sendMessage({
               type: 'AI_BATCH_ANALYZE',
               batchData,
-              availableCategories: categories.map(c => c.name)
-              }, (response) => {
-                if (chrome.runtime.lastError) {
-                  console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
-                  resolve({ error: true, chunkIndex });
-                } else {
-                  resolve({ ...response, chunkIndex });
-                }
-              });
+              availableCategories: labels.map(l => l.name)
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
+                resolve({ error: true, chunkIndex });
+              } else {
+                resolve({ ...response, chunkIndex });
+              }
+            });
           });
         });
 
@@ -147,12 +214,14 @@
                 if (matchedCategory) {
                   email.category = Object.assign({}, matchedCategory);
                 } else {
-                  // Create a dynamic category from the Gmail label name
+                  // Create dynamic category from the AI classified Gmail label
+                  const mappedIcon = getIconForLabel(res.category);
+                  const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
                   email.category = {
                     name: res.category,
-                    emoji: '🏷️',
-                    color: '#4285f4',
-                    bgColor: '#e8f0fe',
+                    emoji: mappedIcon,
+                    color: colors.color,
+                    bgColor: colors.bgColor,
                     id: 'ai-label-' + res.category
                   };
                 }
@@ -196,11 +265,12 @@
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         try {
           const categories = settings.categories || [];
+          const labels = platform.getLabels();
           const aiResult = await new Promise((resolve) => {
-            chrome.runtime.sendMessage({ 
-              type: 'AI_ANALYZE', 
+            chrome.runtime.sendMessage({
+              type: 'AI_ANALYZE',
               emailData,
-              availableCategories: categories.map(c => c.name)
+              availableCategories: labels.map(l => l.name)
             }, (response) => {
               resolve(response || {});
             });
@@ -208,9 +278,28 @@
 
           if (aiResult && !aiResult.error) {
             const localAnalysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
+
+            let matchedCategory = (settings.categories || []).find(c => c.name === aiResult.category);
+            let finalCategory;
+            if (matchedCategory) {
+              finalCategory = Object.assign({}, matchedCategory);
+            } else if (aiResult.category) {
+              const mappedIcon = getIconForLabel(aiResult.category);
+              const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
+              finalCategory = {
+                name: aiResult.category,
+                emoji: mappedIcon,
+                color: colors.color,
+                bgColor: colors.bgColor,
+                id: 'ai-label-' + aiResult.category
+              };
+            } else {
+              finalCategory = localAnalysis.category;
+            }
+
             analysis = {
               ...localAnalysis,
-              category: aiResult.category ? { name: aiResult.category, emoji: '🤖', color: '#4285f4', bgColor: '#e8f0fe' } : localAnalysis.category,
+              category: finalCategory,
               tags: aiResult.tags || localAnalysis.tags,
               safetyScore: typeof aiResult.safetyScore === 'number' ? aiResult.safetyScore : localAnalysis.safetyScore,
               issues: [...(aiResult.issues || []), ...localAnalysis.issues].slice(0, 5)
@@ -284,7 +373,7 @@
     if (areaName === 'sync' && changes.categories) {
       console.log('[Aegis] Categories updated, reloading settings');
       settings = null; // Clear cached settings
-      
+
       // If analysis panel is visible, refresh it
       if (analysisPanel && analysisPanel.isVisible && analysisPanel.isVisible()) {
         const currentFilter = analysisPanel.getCurrentFilter ? analysisPanel.getCurrentFilter() : 'unread';
