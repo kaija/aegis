@@ -114,6 +114,16 @@
     });
   }
 
+  // Helper to update scan stats
+  function updateStats(classifiedCount, scannedCount = 0) {
+    chrome.storage.local.get(['aegis_stats'], (res) => {
+      let st = res.aegis_stats || { classified: 0, scanned: 0 };
+      st.classified = (st.classified || 0) + classifiedCount;
+      st.scanned = (st.scanned || 0) + scannedCount;
+      chrome.storage.local.set({ aegis_stats: st });
+    });
+  }
+
   // Analyze email list and show panel
   // unreadOnly: true = 未讀, false = 全部
   async function runAnalysis(unreadOnly = true) {
@@ -234,6 +244,8 @@
 
         // Final render after all chunks
         renderCurrentState(false);
+        const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
+        updateStats(classifiedCount, 0);
 
       } else {
         // Local analysis only
@@ -242,6 +254,8 @@
           email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
         });
         renderCurrentState(false);
+        const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
+        updateStats(classifiedCount, 0);
       }
     } catch (err) {
       console.error('[Aegis] Analysis error:', err);
@@ -325,6 +339,7 @@
       }
 
       emailPopup.show(analysis);
+      updateStats(0, 1);
     } catch (err) {
       console.error('[Aegis] Email analysis error:', err);
     }

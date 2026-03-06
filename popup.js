@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeBadge = document.getElementById('modeBadge');
   const modeDot = document.getElementById('modeDot');
   const versionText = document.getElementById('versionText');
+  const statsClassified = document.getElementById('statsClassified');
   const statsScanned = document.getElementById('statsScanned');
-  const statsBlocked = document.getElementById('statsBlocked');
 
   // Set version
   const manifest = chrome.runtime.getManifest();
@@ -42,9 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load stats from local storage (if any)
   try {
     const localData = await new Promise(r => chrome.storage.local.get(['aegis_stats'], r));
-    const stats = localData.aegis_stats || { scannedToday: 0, threatsBlocked: 0 };
-    if (statsScanned) statsScanned.textContent = stats.scannedToday;
-    if (statsBlocked) statsBlocked.textContent = stats.threatsBlocked;
+    const stats = localData.aegis_stats || { classified: 0, scanned: 0 };
+    if (statsClassified) statsClassified.textContent = stats.classified;
+    if (statsScanned) statsScanned.textContent = stats.scanned;
   } catch (e) {
     console.error('Failed to load stats', e);
   }
@@ -96,12 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await ensureContentScript(tab);
       await chrome.tabs.sendMessage(tab.id, { type: 'ANALYZE' });
 
-      // Update local stats artificially for demo if needed
-      chrome.storage.local.get(['aegis_stats'], (res) => {
-        let st = res.aegis_stats || { scannedToday: 0, threatsBlocked: 0 };
-        st.scannedToday += 1;
-        chrome.storage.local.set({ aegis_stats: st });
-      });
+      // Removed fake demo stat increment, stats are now updated accurately by content.js during analysis
 
       // Instantly close the popup to let the user see the in-page analysis panel
       window.close();
