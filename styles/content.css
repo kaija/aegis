@@ -286,7 +286,7 @@
   background: white;
   border: 1px solid var(--aegis-border);
   border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 100001;
   min-width: 160px;
   max-height: 200px;
@@ -504,10 +504,26 @@
   flex-shrink: 0;
 }
 
-.aegis-link-risk.safe { background: #e6f4ea; color: #1a7f37; }
-.aegis-link-risk.risky { background: #fce8e6; color: #d93025; }
-.aegis-link-risk.whitelisted { background: #dafbe1; color: #116329; font-weight: 600; }
-.aegis-link-risk.off-whitelist { background: #fff8c5; color: #7d4e00; }
+.aegis-link-risk.safe {
+  background: #e6f4ea;
+  color: #1a7f37;
+}
+
+.aegis-link-risk.risky {
+  background: #fce8e6;
+  color: #d93025;
+}
+
+.aegis-link-risk.whitelisted {
+  background: #dafbe1;
+  color: #116329;
+  font-weight: 600;
+}
+
+.aegis-link-risk.off-whitelist {
+  background: #fff8c5;
+  color: #7d4e00;
+}
 
 /* ========== Spinner ========== */
 .aegis-spinner {
@@ -526,17 +542,31 @@
 
 /* ========== Animations ========== */
 @keyframes aegis-slide-in {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes aegis-fade-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes aegis-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ========== Color Picker Component ========== */
@@ -676,6 +706,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -835,4 +866,57 @@
   color: #856404;
   font-size: 13px;
   line-height: 1.4;
+}
+
+/* ========== Custom Notification ========== */
+.aegis-notification {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: white;
+  border-left: 4px solid var(--aegis-primary);
+  border-radius: var(--aegis-radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  z-index: 100005;
+  font-family: var(--aegis-font);
+  font-size: 14px;
+  color: #202124;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 450px;
+  cursor: pointer;
+}
+
+.aegis-notification.aegis-notification-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.aegis-notification-warning {
+  border-left-color: #fbbc04;
+}
+
+.aegis-notification-error {
+  border-left-color: #ea4335;
+}
+
+.aegis-notification-info {
+  border-left-color: var(--aegis-primary);
+}
+
+.aegis-notification-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.aegis-notification-text {
+  line-height: 1.4;
+  font-weight: 500;
 }

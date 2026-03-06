@@ -178,7 +178,7 @@ class AnalysisPanel {
         .filter(item => item.querySelector('.aegis-email-checkbox').checked);
 
       if (selectedItems.length === 0) {
-        alert('請先選擇要刪除的郵件');
+        this._showNotification('請先選擇要刪除的郵件', 'warning');
         return;
       }
 
@@ -198,7 +198,7 @@ class AnalysisPanel {
 
         if (remaining === 0) group.remove();
       } else {
-        alert('郵件刪除操作異常，請檢查 Gmail 已正常完成刪除流程。');
+        this._showNotification('郵件刪除操作異常，請檢查 Gmail 已正常完成刪除流程。', 'error');
       }
     });
 
@@ -210,7 +210,7 @@ class AnalysisPanel {
         const targetLabelText = category.name;
         const labelExists = labels.find(l => l.name === targetLabelText);
         if (!labelExists) {
-          alert(`分類標籤「${targetLabelText}」不存在！\n請先在 Gmail 左側選單建立此標籤，再執行移動。`);
+          this._showNotification(`分類標籤「${targetLabelText}」不存在！\n請先在 Gmail 左側選單建立此標籤，再執行移動。`, 'warning');
           return;
         }
 
@@ -248,7 +248,7 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          alert(`移動失敗。請再次確認 Gmail 中已有「${targetLabelText}」標籤。`);
+          this._showNotification(`移動失敗。請再次確認 Gmail 中已有「${targetLabelText}」標籤。`, 'error');
         }
 
         moveAllBtn.textContent = `全部移至「${category.name}」標籤`;
@@ -262,7 +262,7 @@ class AnalysisPanel {
         .filter(item => item.querySelector('.aegis-email-checkbox').checked);
 
       if (selectedItems.length === 0) {
-        alert('請先選擇要移動的郵件');
+        this._showNotification('請先選擇要移動的郵件', 'warning');
         return;
       }
 
@@ -278,7 +278,7 @@ class AnalysisPanel {
     document.querySelectorAll('.aegis-label-picker').forEach(el => el.remove());
 
     if (labels.length === 0) {
-      alert('未找到標籤，請確認 Gmail 側欄已載入');
+      this._showNotification('未找到標籤，請確認 Gmail 側欄已載入', 'error');
       return;
     }
 
@@ -302,7 +302,7 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          alert('郵件移動操作異常，請檢查 Gmail 已正常完成流程。');
+          this._showNotification('郵件移動操作異常，請檢查 Gmail 已正常完成流程。', 'error');
         }
       });
       picker.appendChild(item);
@@ -318,6 +318,42 @@ class AnalysisPanel {
         if (!picker.contains(e.target)) picker.remove();
       }, { once: true });
     }, 10);
+  }
+
+  _showNotification(message, type = 'info') {
+    // Remove existing
+    document.querySelectorAll('.aegis-notification').forEach(el => el.remove());
+
+    const notif = document.createElement('div');
+    notif.className = `aegis-notification aegis-notification-${type}`;
+
+    let icon = 'ℹ️';
+    if (type === 'warning') icon = '⚠️';
+    if (type === 'error') icon = '❌';
+
+    notif.innerHTML = `
+      <div class="aegis-notification-icon">${icon}</div>
+      <div class="aegis-notification-text">${this._escapeHtml(message).replace(/\\n/g, '<br>')}</div>
+    `;
+
+    document.body.appendChild(notif);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        notif.classList.add('aegis-notification-show');
+      });
+    });
+
+    // Dismiss on click
+    setTimeout(() => {
+      const dismissHandler = () => {
+        notif.classList.remove('aegis-notification-show');
+        setTimeout(() => notif.remove(), 300);
+        document.removeEventListener('click', dismissHandler, true);
+      };
+      document.addEventListener('click', dismissHandler, true);
+    }, 50);
   }
 
   _escapeHtml(str) {
