@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #5a4bda; /* The purple-ish blue from mockup */
+  --primary: #5a4bda;
+  /* The purple-ish blue from mockup */
   --primary-hover: #4c3fcc;
   --text-main: #1e293b;
   --text-muted: #64748b;
@@ -106,8 +107,9 @@ body {
   height: 100%;
 }
 
-.ae-card input[type="radio"]:checked + .ae-card-content {
-  border-color: #273469; /* Dark blue outline from mockup */
+.ae-card input[type="radio"]:checked+.ae-card-content {
+  border-color: #273469;
+  /* Dark blue outline from mockup */
   box-shadow: 0 0 0 1px #273469;
 }
 
@@ -121,11 +123,11 @@ body {
   position: relative;
 }
 
-.ae-card input[type="radio"]:checked + .ae-card-content .ae-radio-circle {
+.ae-card input[type="radio"]:checked+.ae-card-content .ae-radio-circle {
   border-color: #273469;
 }
 
-.ae-card input[type="radio"]:checked + .ae-card-content .ae-radio-circle::after {
+.ae-card input[type="radio"]:checked+.ae-card-content .ae-radio-circle::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -243,7 +245,8 @@ body {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
-  height: 40px; /* match input height */
+  height: 40px;
+  /* match input height */
 }
 
 .test-connection-btn:hover {
@@ -262,7 +265,8 @@ body {
   font-size: 13px;
   color: var(--text-muted);
   margin-top: -12px;
-  margin-left: 32px; /* align with title text, skipping icon */
+  margin-left: 32px;
+  /* align with title text, skipping icon */
 }
 
 .add-category-btn-new {
@@ -370,7 +374,8 @@ body {
 }
 
 .category-keywords {
-  padding: 0 16px 16px 72px; /* align with text stack */
+  padding: 0 16px 16px 72px;
+  /* align with text stack */
   display: none;
 }
 
@@ -476,7 +481,10 @@ body {
 /* Modal Dialog */
 .aegis-dialog-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(15, 23, 42, 0.4);
   display: flex;
   align-items: center;
@@ -717,6 +725,11 @@ body {
 
 .aegis-dialog-btn-primary:hover {
   background: var(--primary-hover);
+}
+
+.aegis-dialog-btn-danger:hover {
+  background: #fee2e2 !important;
+  /* light red */
 }
 
 /* Notifications and Overlays */

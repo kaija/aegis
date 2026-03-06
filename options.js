@@ -496,6 +496,8 @@ function editCategory(categoryId) {
     } catch (error) {
       showErrorMessage(error.message);
     }
+  }, async (catId) => {
+    await deleteCategory(catId);
   });
 }
 

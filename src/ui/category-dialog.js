@@ -16,6 +16,7 @@ const CategoryDialog = (() => {
   let currentCategoryId = null;
   let onSaveCallback = null;
   let onCancelCallback = null;
+  let onDeleteCallback = null;
 
   // Selected state
   let selectedColor = '#FF5252';
@@ -266,12 +267,28 @@ const CategoryDialog = (() => {
     cancelBtn.textContent = 'Cancel';
     cancelBtn.addEventListener('click', hide);
 
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'aegis-dialog-btn aegis-dialog-btn-danger';
+    deleteBtn.style.marginRight = 'auto'; // Push to left
+    deleteBtn.style.color = '#ef4444';
+    deleteBtn.style.background = 'transparent';
+    deleteBtn.style.border = 'none';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.addEventListener('click', () => {
+      if (onDeleteCallback && currentCategoryId) {
+        onDeleteCallback(currentCategoryId);
+        hide();
+      }
+    });
+
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'aegis-dialog-btn aegis-dialog-btn-primary';
     saveBtn.textContent = 'Create Category';
     saveBtn.addEventListener('click', handleFormSubmit);
 
+    footer.appendChild(deleteBtn);
     footer.appendChild(cancelBtn);
     footer.appendChild(saveBtn);
 
@@ -328,8 +345,9 @@ const CategoryDialog = (() => {
     });
   }
 
-  function show(mode, categoryData, callback) {
+  function show(mode, categoryData, callback, onDelete) {
     if (callback) onSaveCallback = callback;
+    if (onDelete) onDeleteCallback = onDelete;
     initializeDialog();
 
     currentMode = mode;
@@ -341,6 +359,11 @@ const CategoryDialog = (() => {
 
     const saveBtn = dialogElement.querySelector('.aegis-dialog-btn-primary');
     saveBtn.textContent = mode === 'create' ? 'Create Category' : 'Save Changes';
+
+    const deleteBtn = dialogElement.querySelector('.aegis-dialog-btn-danger');
+    if (deleteBtn) {
+      deleteBtn.style.display = mode === 'edit' ? 'block' : 'none';
+    }
 
     clearErrors();
 
