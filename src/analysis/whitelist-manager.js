@@ -74,24 +74,22 @@ const WhitelistManager = (() => {
 
   // Check if a domain belongs to a service's base domains (using base domain matching)
   function isDomainInService(hostname, service) {
-    if (!hostname || !service) return false;
-    const baseDomain = extractBaseDomain(hostname);
-
-    // Check against service's baseDomains
-    if (service.baseDomains) {
-      const match = service.baseDomains.some(bd => {
-        const serviceBase = extractBaseDomain(bd.toLowerCase());
-        return baseDomain === serviceBase;
-      });
-      if (match) return true;
-    }
-
-    // Fallback to serviceDomains for backward compatibility
+    if (!hostname || !service || !service.baseDomains) return false;
     const h = hostname.toLowerCase();
-    return service.serviceDomains.some(sd => {
-      const s = sd.toLowerCase();
-      const serviceBase = extractBaseDomain(s);
-      return baseDomain === serviceBase || h === s || h.endsWith('.' + s);
+    const baseDomain = extractBaseDomain(h);
+
+    return service.baseDomains.some(bd => {
+      const bdLower = bd.toLowerCase();
+      const serviceBase = extractBaseDomain(bdLower);
+      
+      // Exact base domain match
+      if (baseDomain === serviceBase) return true;
+      
+      // Check if hostname ends with the whitelist domain (for subdomains)
+      // e.g., service.ntpc.gov.tw should match gov.tw
+      if (h === bdLower || h.endsWith('.' + bdLower)) return true;
+      
+      return false;
     });
   }
 

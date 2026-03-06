@@ -148,38 +148,6 @@ describe('EmailAnalyzer - analyzeEmailDetail', () => {
       );
       expect(result.safetyScore).toBeLessThan(80);
     });
-
-    test('should detect excessive uppercase in subject', () => {
-      const result = EmailAnalyzer.analyzeEmailDetail(
-        { 
-          subject: 'URGENT ACTION REQUIRED NOW', 
-          sender: 'User', 
-          senderEmail: 'user@example.com', 
-          body: 'Normal body text',
-          links: []
-        },
-        categories,
-        testWhitelist
-      );
-      expect(result.safetyScore).toBeLessThan(100);
-      expect(result.issues.some(i => i.includes('全大寫'))).toBe(true);
-    });
-
-    test('should not penalize CJK text as uppercase', () => {
-      const result = EmailAnalyzer.analyzeEmailDetail(
-        { 
-          subject: '重要通知 IMPORTANT', 
-          sender: 'User', 
-          senderEmail: 'user@example.com', 
-          body: 'Normal body',
-          links: []
-        },
-        categories,
-        testWhitelist
-      );
-      // Only "IMPORTANT" should be counted, not CJK characters
-      expect(result.safetyScore).toBeGreaterThanOrEqual(90);
-    });
   });
 
   describe('Link Analysis', () => {

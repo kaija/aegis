@@ -208,11 +208,15 @@ const EmailAnalyzer = (() => {
     if (!hostname) return '';
     const parts = hostname.toLowerCase().split('.');
     if (parts.length < 2) return hostname.toLowerCase();
-    // Handle special TLDs like .co.jp, .com.tw
+    
+    // Handle special TLDs like .co.jp, .com.tw, .gov.tw
+    // For these, we want to extract the last 3 parts (e.g., example.gov.tw)
     if (parts.length >= 3 && parts[parts.length - 2].length <= 3 &&
         ['co', 'com', 'net', 'org', 'gov', 'edu', 'ac'].includes(parts[parts.length - 2])) {
       return parts.slice(-3).join('.');
     }
+    
+    // For regular TLDs, extract last 2 parts (e.g., example.com)
     return parts.slice(-2).join('.');
   }
 
@@ -234,24 +238,22 @@ const EmailAnalyzer = (() => {
 
   // Check if a hostname belongs to a service's base domains
   function _domainInService(hostname, service) {
-    if (!hostname || !service) return false;
-    const baseDomain = _extractBaseDomain(hostname);
-
-    // Check against service's baseDomains
-    if (service.baseDomains) {
-      const match = service.baseDomains.some(bd => {
-        const serviceBase = _extractBaseDomain(bd.toLowerCase());
-        return baseDomain === serviceBase;
-      });
-      if (match) return true;
-    }
-
-    // Fallback to serviceDomains for backward compatibility
+    if (!hostname || !service || !service.baseDomains) return false;
     const h = hostname.toLowerCase();
-    return service.serviceDomains.some(sd => {
-      const s = sd.toLowerCase();
-      const serviceBase = _extractBaseDomain(s);
-      return baseDomain === serviceBase || h === s || h.endsWith('.' + s);
+    const baseDomain = _extractBaseDomain(h);
+
+    return service.baseDomains.some(bd => {
+      const bdLower = bd.toLowerCase();
+      const serviceBase = _extractBaseDomain(bdLower);
+      
+      // Exact base domain match
+      if (baseDomain === serviceBase) return true;
+      
+      // Check if hostname ends with the whitelist domain (for subdomains)
+      // e.g., service.ntpc.gov.tw should match gov.tw
+      if (h === bdLower || h.endsWith('.' + bdLower)) return true;
+      
+      return false;
     });
   }
 

@@ -5,610 +5,1119 @@
     {
       "id": "hsbc_tw",
       "name": "匯豐台灣",
-      "keywords": ["hsbc", "匯豐", "滙豐"],
-      "baseDomains": ["hsbc.com.tw", "hsbc.com"],
-      "senderDomains": ["hsbc.com.tw", "hsbc.com"],
-      "serviceDomains": ["hsbc.com.tw", "hsbc.com"]
+      "keywords": [
+        "hsbc",
+        "匯豐",
+        "滙豐"
+      ],
+      "baseDomains": [
+        "hsbc.com.tw",
+        "hsbc.com"
+      ],
+      "senderDomains": [
+        "hsbc.com.tw",
+        "hsbc.com"
+      ]
     },
     {
       "id": "gov_tw",
       "name": "台灣政府",
-      "keywords": ["政府", "government", "gov"],
-      "baseDomains": ["gov.tw"],
-      "senderDomains": ["gov.tw"],
-      "serviceDomains": ["gov.tw"]
+      "keywords": [
+        "政府",
+        "government",
+        "gov"
+      ],
+      "baseDomains": [
+        "gov.tw"
+      ],
+      "senderDomains": [
+        "gov.tw"
+      ]
     },
     {
       "id": "yuanta",
       "name": "元大金融",
-      "keywords": ["yuanta", "元大"],
-      "baseDomains": ["yuanta.com.tw", "yuanta.com"],
-      "senderDomains": ["yuanta.com.tw", "yuanta.com"],
-      "serviceDomains": ["yuanta.com.tw", "yuanta.com"]
+      "keywords": [
+        "yuanta",
+        "元大"
+      ],
+      "baseDomains": [
+        "yuanta.com.tw",
+        "yuanta.com"
+      ],
+      "senderDomains": [
+        "yuanta.com.tw",
+        "yuanta.com"
+      ]
     },
     {
       "id": "bot_tw",
       "name": "台灣銀行",
-      "keywords": ["台灣銀行", "bank of taiwan", "bot"],
-      "baseDomains": ["bot.com.tw"],
-      "senderDomains": ["bot.com.tw"],
-      "serviceDomains": ["bot.com.tw"]
+      "keywords": [
+        "台灣銀行",
+        "bank of taiwan",
+        "bot"
+      ],
+      "baseDomains": [
+        "bot.com.tw"
+      ],
+      "senderDomains": [
+        "bot.com.tw"
+      ]
     },
     {
       "id": "cht",
       "name": "中華電信",
-      "keywords": ["中華電信", "chunghwa", "cht", "emome", "hicloud"],
-      "baseDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"],
-      "senderDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"],
-      "serviceDomains": ["cht.com.tw", "emome.net", "hicloud.com.tw"]
+      "keywords": [
+        "中華電信",
+        "chunghwa",
+        "cht",
+        "emome",
+        "hicloud"
+      ],
+      "baseDomains": [
+        "cht.com.tw",
+        "emome.net",
+        "hicloud.com.tw"
+      ],
+      "senderDomains": [
+        "cht.com.tw",
+        "emome.net",
+        "hicloud.com.tw"
+      ]
     },
     {
       "id": "cathaybk",
       "name": "國泰世華",
-      "keywords": ["國泰", "cathay"],
-      "baseDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"],
-      "senderDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"],
-      "serviceDomains": ["cathaybk.com.tw", "cathaymail.com.tw", "cathaycorp.com.tw"]
+      "keywords": [
+        "國泰",
+        "cathay"
+      ],
+      "baseDomains": [
+        "cathaybk.com.tw",
+        "cathaymail.com.tw",
+        "cathaycorp.com.tw"
+      ],
+      "senderDomains": [
+        "cathaybk.com.tw",
+        "cathaymail.com.tw",
+        "cathaycorp.com.tw"
+      ]
     },
     {
       "id": "esunbank",
       "name": "玉山銀行",
-      "keywords": ["玉山", "esun"],
-      "baseDomains": ["esunbank.com.tw"],
-      "senderDomains": ["esunbank.com.tw"],
-      "serviceDomains": ["esunbank.com.tw"]
+      "keywords": [
+        "玉山",
+        "esun"
+      ],
+      "baseDomains": [
+        "esunbank.com.tw"
+      ],
+      "senderDomains": [
+        "esunbank.com.tw"
+      ]
     },
     {
       "id": "fubon",
       "name": "富邦金融",
-      "keywords": ["富邦", "fubon", "myfone"],
-      "baseDomains": ["fubon.com", "myfone.com.tw"],
-      "senderDomains": ["fubon.com", "myfone.com.tw"],
-      "serviceDomains": ["fubon.com", "myfone.com.tw"]
+      "keywords": [
+        "富邦",
+        "fubon",
+        "myfone"
+      ],
+      "baseDomains": [
+        "fubon.com",
+        "myfone.com.tw"
+      ],
+      "senderDomains": [
+        "fubon.com",
+        "myfone.com.tw"
+      ]
     },
     {
       "id": "sinopac",
       "name": "永豐銀行",
-      "keywords": ["永豐", "sinopac"],
-      "baseDomains": ["sinopac.com"],
-      "senderDomains": ["sinopac.com"],
-      "serviceDomains": ["sinopac.com"]
+      "keywords": [
+        "永豐",
+        "sinopac"
+      ],
+      "baseDomains": [
+        "sinopac.com"
+      ],
+      "senderDomains": [
+        "sinopac.com"
+      ]
     },
     {
       "id": "ctbcbank",
       "name": "中信銀行",
-      "keywords": ["中信", "ctbc"],
-      "baseDomains": ["ctbcbank.com", "ctbcholding.com"],
-      "senderDomains": ["ctbcbank.com", "ctbcholding.com"],
-      "serviceDomains": ["ctbcbank.com", "ctbcholding.com"]
+      "keywords": [
+        "中信",
+        "ctbc"
+      ],
+      "baseDomains": [
+        "ctbcbank.com",
+        "ctbcholding.com"
+      ],
+      "senderDomains": [
+        "ctbcbank.com",
+        "ctbcholding.com"
+      ]
     },
     {
       "id": "firstbank",
       "name": "第一銀行",
-      "keywords": ["第一銀行", "first bank"],
-      "baseDomains": ["firstbank.com.tw"],
-      "senderDomains": ["firstbank.com.tw"],
-      "serviceDomains": ["firstbank.com.tw"]
+      "keywords": [
+        "第一銀行",
+        "first bank"
+      ],
+      "baseDomains": [
+        "firstbank.com.tw"
+      ],
+      "senderDomains": [
+        "firstbank.com.tw"
+      ]
     },
     {
       "id": "linkedin",
       "name": "LinkedIn",
-      "keywords": ["linkedin"],
-      "baseDomains": ["linkedin.com", "lnkd.in"],
-      "senderDomains": ["linkedin.com", "lnkd.in"],
-      "serviceDomains": ["linkedin.com", "lnkd.in"]
+      "keywords": [
+        "linkedin"
+      ],
+      "baseDomains": [
+        "linkedin.com",
+        "lnkd.in"
+      ],
+      "senderDomains": [
+        "linkedin.com",
+        "lnkd.in"
+      ]
     },
     {
       "id": "workday",
       "name": "Workday",
-      "keywords": ["workday"],
-      "baseDomains": ["workday.com", "myworkday.com"],
-      "senderDomains": ["workday.com", "myworkday.com"],
-      "serviceDomains": ["workday.com", "myworkday.com"]
+      "keywords": [
+        "workday"
+      ],
+      "baseDomains": [
+        "workday.com",
+        "myworkday.com"
+      ],
+      "senderDomains": [
+        "workday.com",
+        "myworkday.com"
+      ]
     },
     {
       "id": "google",
       "name": "Google",
-      "keywords": ["google", "gmail", "workspace", "gstatic", "谷歌"],
-      "baseDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"],
-      "senderDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"],
-      "serviceDomains": ["google.com", "gmail.com", "gstatic.com", "goo.gl"]
+      "keywords": [
+        "google",
+        "gmail",
+        "workspace",
+        "gstatic",
+        "谷歌"
+      ],
+      "baseDomains": [
+        "google.com",
+        "gmail.com",
+        "gstatic.com",
+        "goo.gl"
+      ],
+      "senderDomains": [
+        "google.com",
+        "gmail.com",
+        "gstatic.com",
+        "goo.gl"
+      ]
     },
     {
       "id": "microsoft",
       "name": "Microsoft",
-      "keywords": ["microsoft", "outlook", "office", "微軟"],
-      "baseDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"],
-      "senderDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"],
-      "serviceDomains": ["microsoft.com", "outlook.com", "office.com", "office365.com", "live.com", "microsoftonline.com"]
+      "keywords": [
+        "microsoft",
+        "outlook",
+        "office",
+        "微軟"
+      ],
+      "baseDomains": [
+        "microsoft.com",
+        "outlook.com",
+        "office.com",
+        "office365.com",
+        "live.com",
+        "microsoftonline.com"
+      ],
+      "senderDomains": [
+        "microsoft.com",
+        "outlook.com",
+        "office.com",
+        "office365.com",
+        "live.com",
+        "microsoftonline.com"
+      ]
     },
     {
       "id": "apple",
       "name": "Apple",
-      "keywords": ["apple", "icloud", "蘋果"],
-      "baseDomains": ["apple.com", "icloud.com"],
-      "senderDomains": ["apple.com", "icloud.com"],
-      "serviceDomains": ["apple.com", "icloud.com"]
+      "keywords": [
+        "apple",
+        "icloud",
+        "蘋果"
+      ],
+      "baseDomains": [
+        "apple.com",
+        "icloud.com"
+      ],
+      "senderDomains": [
+        "apple.com",
+        "icloud.com"
+      ]
     },
     {
       "id": "amazon",
       "name": "Amazon",
-      "keywords": ["amazon", "aws", "亞馬遜"],
-      "baseDomains": ["amazon.com", "amazon.co.jp", "amzn.to"],
-      "senderDomains": ["amazon.com", "amazon.co.jp", "amzn.to"],
-      "serviceDomains": ["amazon.com", "amazon.co.jp", "amzn.to"]
+      "keywords": [
+        "amazon",
+        "aws",
+        "亞馬遜"
+      ],
+      "baseDomains": [
+        "amazon.com",
+        "amazon.co.jp",
+        "amzn.to"
+      ],
+      "senderDomains": [
+        "amazon.com",
+        "amazon.co.jp",
+        "amzn.to"
+      ]
     },
     {
       "id": "paypal",
       "name": "PayPal",
-      "keywords": ["paypal"],
-      "baseDomains": ["paypal.com"],
-      "senderDomains": ["paypal.com"],
-      "serviceDomains": ["paypal.com"]
+      "keywords": [
+        "paypal"
+      ],
+      "baseDomains": [
+        "paypal.com"
+      ],
+      "senderDomains": [
+        "paypal.com"
+      ]
     },
     {
       "id": "stripe",
       "name": "Stripe",
-      "keywords": ["stripe"],
-      "baseDomains": ["stripe.com"],
-      "senderDomains": ["stripe.com"],
-      "serviceDomains": ["stripe.com"]
+      "keywords": [
+        "stripe"
+      ],
+      "baseDomains": [
+        "stripe.com"
+      ],
+      "senderDomains": [
+        "stripe.com"
+      ]
     },
     {
       "id": "github",
       "name": "GitHub",
-      "keywords": ["github"],
-      "baseDomains": ["github.com"],
-      "senderDomains": ["github.com"],
-      "serviceDomains": ["github.com"]
+      "keywords": [
+        "github"
+      ],
+      "baseDomains": [
+        "github.com"
+      ],
+      "senderDomains": [
+        "github.com"
+      ]
     },
     {
       "id": "slack",
       "name": "Slack",
-      "keywords": ["slack"],
-      "baseDomains": ["slack.com"],
-      "senderDomains": ["slack.com"],
-      "serviceDomains": ["slack.com"]
+      "keywords": [
+        "slack"
+      ],
+      "baseDomains": [
+        "slack.com"
+      ],
+      "senderDomains": [
+        "slack.com"
+      ]
     },
     {
       "id": "zoom",
       "name": "Zoom",
-      "keywords": ["zoom"],
-      "baseDomains": ["zoom.us"],
-      "senderDomains": ["zoom.us"],
-      "serviceDomains": ["zoom.us"]
+      "keywords": [
+        "zoom"
+      ],
+      "baseDomains": [
+        "zoom.us"
+      ],
+      "senderDomains": [
+        "zoom.us"
+      ]
     },
     {
       "id": "facebook",
       "name": "Facebook",
-      "keywords": ["facebook", "fb", "meta"],
-      "baseDomains": ["facebook.com", "fb.com", "fb.me"],
-      "senderDomains": ["facebook.com", "fb.com", "fb.me"],
-      "serviceDomains": ["facebook.com", "fb.com", "fb.me"]
+      "keywords": [
+        "facebook",
+        "fb",
+        "meta"
+      ],
+      "baseDomains": [
+        "facebook.com",
+        "fb.com",
+        "fb.me"
+      ],
+      "senderDomains": [
+        "facebook.com",
+        "fb.com",
+        "fb.me"
+      ]
     },
     {
       "id": "instagram",
       "name": "Instagram",
-      "keywords": ["instagram", "ig"],
-      "baseDomains": ["instagram.com"],
-      "senderDomains": ["instagram.com"],
-      "serviceDomains": ["instagram.com"]
+      "keywords": [
+        "instagram",
+        "ig"
+      ],
+      "baseDomains": [
+        "instagram.com"
+      ],
+      "senderDomains": [
+        "instagram.com"
+      ]
     },
     {
       "id": "twitter",
       "name": "Twitter / X",
-      "keywords": ["twitter", "x.com"],
-      "baseDomains": ["twitter.com", "x.com", "t.co"],
-      "senderDomains": ["twitter.com", "x.com"],
-      "serviceDomains": ["twitter.com", "x.com", "t.co"]
+      "keywords": [
+        "twitter",
+        "x.com"
+      ],
+      "baseDomains": [
+        "twitter.com",
+        "x.com",
+        "t.co"
+      ],
+      "senderDomains": [
+        "twitter.com",
+        "x.com"
+      ]
     },
     {
       "id": "youtube",
       "name": "YouTube",
-      "keywords": ["youtube", "youtu.be"],
-      "baseDomains": ["youtube.com", "youtu.be"],
-      "senderDomains": ["youtube.com"],
-      "serviceDomains": ["youtube.com", "youtu.be"]
+      "keywords": [
+        "youtube",
+        "youtu.be"
+      ],
+      "baseDomains": [
+        "youtube.com",
+        "youtu.be"
+      ],
+      "senderDomains": [
+        "youtube.com"
+      ]
     },
     {
       "id": "whatsapp",
       "name": "WhatsApp",
-      "keywords": ["whatsapp"],
-      "baseDomains": ["whatsapp.com"],
-      "senderDomains": ["whatsapp.com"],
-      "serviceDomains": ["whatsapp.com"]
+      "keywords": [
+        "whatsapp"
+      ],
+      "baseDomains": [
+        "whatsapp.com"
+      ],
+      "senderDomains": [
+        "whatsapp.com"
+      ]
     },
     {
       "id": "telegram",
       "name": "Telegram",
-      "keywords": ["telegram"],
-      "baseDomains": ["telegram.org", "t.me"],
-      "senderDomains": ["telegram.org"],
-      "serviceDomains": ["telegram.org", "t.me"]
+      "keywords": [
+        "telegram"
+      ],
+      "baseDomains": [
+        "telegram.org",
+        "t.me"
+      ],
+      "senderDomains": [
+        "telegram.org"
+      ]
     },
     {
       "id": "discord",
       "name": "Discord",
-      "keywords": ["discord"],
-      "baseDomains": ["discord.com", "discordapp.com"],
-      "senderDomains": ["discord.com", "discordapp.com"],
-      "serviceDomains": ["discord.com", "discordapp.com"]
+      "keywords": [
+        "discord"
+      ],
+      "baseDomains": [
+        "discord.com",
+        "discordapp.com"
+      ],
+      "senderDomains": [
+        "discord.com",
+        "discordapp.com"
+      ]
     },
     {
       "id": "aws",
       "name": "Amazon Web Services",
-      "keywords": ["aws", "amazon web services"],
-      "baseDomains": ["amazonaws.com", "aws.amazon.com"],
-      "senderDomains": ["amazonaws.com", "aws.amazon.com"],
-      "serviceDomains": ["amazonaws.com", "aws.amazon.com"]
+      "keywords": [
+        "aws",
+        "amazon web services"
+      ],
+      "baseDomains": [
+        "amazonaws.com",
+        "aws.amazon.com"
+      ],
+      "senderDomains": [
+        "amazonaws.com",
+        "aws.amazon.com"
+      ]
     },
     {
       "id": "azure",
       "name": "Microsoft Azure",
-      "keywords": ["azure"],
-      "baseDomains": ["azure.com", "azurewebsites.net", "windows.net"],
-      "senderDomains": ["azure.com", "microsoft.com"],
-      "serviceDomains": ["azure.com", "azurewebsites.net", "windows.net"]
+      "keywords": [
+        "azure"
+      ],
+      "baseDomains": [
+        "azure.com",
+        "azurewebsites.net",
+        "windows.net"
+      ],
+      "senderDomains": [
+        "azure.com",
+        "microsoft.com"
+      ]
     },
     {
       "id": "gcp",
       "name": "Google Cloud Platform",
-      "keywords": ["google cloud", "gcp"],
-      "baseDomains": ["cloud.google.com", "googleapis.com"],
-      "senderDomains": ["google.com", "cloud.google.com"],
-      "serviceDomains": ["cloud.google.com", "googleapis.com"]
+      "keywords": [
+        "google cloud",
+        "gcp"
+      ],
+      "baseDomains": [
+        "cloud.google.com",
+        "googleapis.com"
+      ],
+      "senderDomains": [
+        "google.com",
+        "cloud.google.com"
+      ]
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare",
-      "keywords": ["cloudflare"],
-      "baseDomains": ["cloudflare.com", "cloudflarestream.com"],
-      "senderDomains": ["cloudflare.com"],
-      "serviceDomains": ["cloudflare.com", "cloudflarestream.com"]
+      "keywords": [
+        "cloudflare"
+      ],
+      "baseDomains": [
+        "cloudflare.com",
+        "cloudflarestream.com"
+      ],
+      "senderDomains": [
+        "cloudflare.com"
+      ]
     },
     {
       "id": "docker",
       "name": "Docker",
-      "keywords": ["docker", "docker hub"],
-      "baseDomains": ["docker.com", "docker.io"],
-      "senderDomains": ["docker.com"],
-      "serviceDomains": ["docker.com", "docker.io"]
+      "keywords": [
+        "docker",
+        "docker hub"
+      ],
+      "baseDomains": [
+        "docker.com",
+        "docker.io"
+      ],
+      "senderDomains": [
+        "docker.com"
+      ]
     },
     {
       "id": "digitalocean",
       "name": "DigitalOcean",
-      "keywords": ["digitalocean"],
-      "baseDomains": ["digitalocean.com"],
-      "senderDomains": ["digitalocean.com"],
-      "serviceDomains": ["digitalocean.com"]
+      "keywords": [
+        "digitalocean"
+      ],
+      "baseDomains": [
+        "digitalocean.com"
+      ],
+      "senderDomains": [
+        "digitalocean.com"
+      ]
     },
     {
       "id": "heroku",
       "name": "Heroku",
-      "keywords": ["heroku"],
-      "baseDomains": ["heroku.com", "herokuapp.com"],
-      "senderDomains": ["heroku.com"],
-      "serviceDomains": ["heroku.com", "herokuapp.com"]
+      "keywords": [
+        "heroku"
+      ],
+      "baseDomains": [
+        "heroku.com",
+        "herokuapp.com"
+      ],
+      "senderDomains": [
+        "heroku.com"
+      ]
     },
     {
       "id": "vercel",
       "name": "Vercel",
-      "keywords": ["vercel"],
-      "baseDomains": ["vercel.com", "vercel.app"],
-      "senderDomains": ["vercel.com"],
-      "serviceDomains": ["vercel.com", "vercel.app"]
+      "keywords": [
+        "vercel"
+      ],
+      "baseDomains": [
+        "vercel.com",
+        "vercel.app"
+      ],
+      "senderDomains": [
+        "vercel.com"
+      ]
     },
     {
       "id": "netlify",
       "name": "Netlify",
-      "keywords": ["netlify"],
-      "baseDomains": ["netlify.com", "netlify.app"],
-      "senderDomains": ["netlify.com"],
-      "serviceDomains": ["netlify.com", "netlify.app"]
+      "keywords": [
+        "netlify"
+      ],
+      "baseDomains": [
+        "netlify.com",
+        "netlify.app"
+      ],
+      "senderDomains": [
+        "netlify.com"
+      ]
     },
     {
       "id": "gitlab",
       "name": "GitLab",
-      "keywords": ["gitlab"],
-      "baseDomains": ["gitlab.com"],
-      "senderDomains": ["gitlab.com"],
-      "serviceDomains": ["gitlab.com"]
+      "keywords": [
+        "gitlab"
+      ],
+      "baseDomains": [
+        "gitlab.com"
+      ],
+      "senderDomains": [
+        "gitlab.com"
+      ]
     },
     {
       "id": "bitbucket",
       "name": "Bitbucket",
-      "keywords": ["bitbucket"],
-      "baseDomains": ["bitbucket.org"],
-      "senderDomains": ["bitbucket.org"],
-      "serviceDomains": ["bitbucket.org"]
+      "keywords": [
+        "bitbucket"
+      ],
+      "baseDomains": [
+        "bitbucket.org"
+      ],
+      "senderDomains": [
+        "bitbucket.org"
+      ]
     },
     {
       "id": "atlassian",
       "name": "Atlassian",
-      "keywords": ["atlassian", "jira", "confluence", "trello"],
-      "baseDomains": ["atlassian.com", "atlassian.net"],
-      "senderDomains": ["atlassian.com", "atlassian.net"],
-      "serviceDomains": ["atlassian.com", "atlassian.net"]
+      "keywords": [
+        "atlassian",
+        "jira",
+        "confluence",
+        "trello"
+      ],
+      "baseDomains": [
+        "atlassian.com",
+        "atlassian.net"
+      ],
+      "senderDomains": [
+        "atlassian.com",
+        "atlassian.net"
+      ]
     },
     {
       "id": "notion",
       "name": "Notion",
-      "keywords": ["notion"],
-      "baseDomains": ["notion.so", "notion.site"],
-      "senderDomains": ["notion.so"],
-      "serviceDomains": ["notion.so", "notion.site"]
+      "keywords": [
+        "notion"
+      ],
+      "baseDomains": [
+        "notion.so",
+        "notion.site"
+      ],
+      "senderDomains": [
+        "notion.so"
+      ]
     },
     {
       "id": "dropbox",
       "name": "Dropbox",
-      "keywords": ["dropbox"],
-      "baseDomains": ["dropbox.com"],
-      "senderDomains": ["dropbox.com"],
-      "serviceDomains": ["dropbox.com"]
+      "keywords": [
+        "dropbox"
+      ],
+      "baseDomains": [
+        "dropbox.com"
+      ],
+      "senderDomains": [
+        "dropbox.com"
+      ]
     },
     {
       "id": "box",
       "name": "Box",
-      "keywords": ["box"],
-      "baseDomains": ["box.com"],
-      "senderDomains": ["box.com"],
-      "serviceDomains": ["box.com"]
+      "keywords": [
+        "box"
+      ],
+      "baseDomains": [
+        "box.com"
+      ],
+      "senderDomains": [
+        "box.com"
+      ]
     },
     {
       "id": "onedrive",
       "name": "OneDrive",
-      "keywords": ["onedrive"],
-      "baseDomains": ["onedrive.com", "1drv.ms"],
-      "senderDomains": ["microsoft.com"],
-      "serviceDomains": ["onedrive.com", "1drv.ms"]
+      "keywords": [
+        "onedrive"
+      ],
+      "baseDomains": [
+        "onedrive.com",
+        "1drv.ms"
+      ],
+      "senderDomains": [
+        "microsoft.com"
+      ]
     },
     {
       "id": "gdrive",
       "name": "Google Drive",
-      "keywords": ["google drive", "drive"],
-      "baseDomains": ["drive.google.com"],
-      "senderDomains": ["google.com"],
-      "serviceDomains": ["drive.google.com"]
+      "keywords": [
+        "google drive",
+        "drive"
+      ],
+      "baseDomains": [
+        "drive.google.com"
+      ],
+      "senderDomains": [
+        "google.com"
+      ]
     },
     {
       "id": "salesforce",
       "name": "Salesforce",
-      "keywords": ["salesforce"],
-      "baseDomains": ["salesforce.com", "force.com"],
-      "senderDomains": ["salesforce.com"],
-      "serviceDomains": ["salesforce.com", "force.com"]
+      "keywords": [
+        "salesforce"
+      ],
+      "baseDomains": [
+        "salesforce.com",
+        "force.com"
+      ],
+      "senderDomains": [
+        "salesforce.com"
+      ]
     },
     {
       "id": "hubspot",
       "name": "HubSpot",
-      "keywords": ["hubspot"],
-      "baseDomains": ["hubspot.com"],
-      "senderDomains": ["hubspot.com"],
-      "serviceDomains": ["hubspot.com"]
+      "keywords": [
+        "hubspot"
+      ],
+      "baseDomains": [
+        "hubspot.com"
+      ],
+      "senderDomains": [
+        "hubspot.com"
+      ]
     },
     {
       "id": "mailchimp",
       "name": "Mailchimp",
-      "keywords": ["mailchimp"],
-      "baseDomains": ["mailchimp.com"],
-      "senderDomains": ["mailchimp.com"],
-      "serviceDomains": ["mailchimp.com"]
+      "keywords": [
+        "mailchimp"
+      ],
+      "baseDomains": [
+        "mailchimp.com"
+      ],
+      "senderDomains": [
+        "mailchimp.com"
+      ]
     },
     {
       "id": "sendgrid",
       "name": "SendGrid",
-      "keywords": ["sendgrid"],
-      "baseDomains": ["sendgrid.com", "sendgrid.net"],
-      "senderDomains": ["sendgrid.com", "sendgrid.net"],
-      "serviceDomains": ["sendgrid.com", "sendgrid.net"]
+      "keywords": [
+        "sendgrid"
+      ],
+      "baseDomains": [
+        "sendgrid.com",
+        "sendgrid.net"
+      ],
+      "senderDomains": [
+        "sendgrid.com",
+        "sendgrid.net"
+      ]
     },
     {
       "id": "twilio",
       "name": "Twilio",
-      "keywords": ["twilio"],
-      "baseDomains": ["twilio.com"],
-      "senderDomains": ["twilio.com"],
-      "serviceDomains": ["twilio.com"]
+      "keywords": [
+        "twilio"
+      ],
+      "baseDomains": [
+        "twilio.com"
+      ],
+      "senderDomains": [
+        "twilio.com"
+      ]
     },
     {
       "id": "shopify",
       "name": "Shopify",
-      "keywords": ["shopify"],
-      "baseDomains": ["shopify.com", "myshopify.com"],
-      "senderDomains": ["shopify.com"],
-      "serviceDomains": ["shopify.com", "myshopify.com"]
+      "keywords": [
+        "shopify"
+      ],
+      "baseDomains": [
+        "shopify.com",
+        "myshopify.com"
+      ],
+      "senderDomains": [
+        "shopify.com"
+      ]
     },
     {
       "id": "wordpress",
       "name": "WordPress",
-      "keywords": ["wordpress"],
-      "baseDomains": ["wordpress.com", "wordpress.org"],
-      "senderDomains": ["wordpress.com"],
-      "serviceDomains": ["wordpress.com", "wordpress.org"]
+      "keywords": [
+        "wordpress"
+      ],
+      "baseDomains": [
+        "wordpress.com",
+        "wordpress.org"
+      ],
+      "senderDomains": [
+        "wordpress.com"
+      ]
     },
     {
       "id": "medium",
       "name": "Medium",
-      "keywords": ["medium"],
-      "baseDomains": ["medium.com"],
-      "senderDomains": ["medium.com"],
-      "serviceDomains": ["medium.com"]
+      "keywords": [
+        "medium"
+      ],
+      "baseDomains": [
+        "medium.com"
+      ],
+      "senderDomains": [
+        "medium.com"
+      ]
     },
     {
       "id": "reddit",
       "name": "Reddit",
-      "keywords": ["reddit"],
-      "baseDomains": ["reddit.com", "redd.it"],
-      "senderDomains": ["reddit.com"],
-      "serviceDomains": ["reddit.com", "redd.it"]
+      "keywords": [
+        "reddit"
+      ],
+      "baseDomains": [
+        "reddit.com",
+        "redd.it"
+      ],
+      "senderDomains": [
+        "reddit.com"
+      ]
     },
     {
       "id": "stackoverflow",
       "name": "Stack Overflow",
-      "keywords": ["stack overflow", "stackoverflow"],
-      "baseDomains": ["stackoverflow.com", "stackexchange.com"],
-      "senderDomains": ["stackoverflow.com", "stackexchange.com"],
-      "serviceDomains": ["stackoverflow.com", "stackexchange.com"]
+      "keywords": [
+        "stack overflow",
+        "stackoverflow"
+      ],
+      "baseDomains": [
+        "stackoverflow.com",
+        "stackexchange.com"
+      ],
+      "senderDomains": [
+        "stackoverflow.com",
+        "stackexchange.com"
+      ]
     },
     {
       "id": "npm",
       "name": "npm",
-      "keywords": ["npm", "npmjs"],
-      "baseDomains": ["npmjs.com", "npmjs.org"],
-      "senderDomains": ["npmjs.com"],
-      "serviceDomains": ["npmjs.com", "npmjs.org"]
+      "keywords": [
+        "npm",
+        "npmjs"
+      ],
+      "baseDomains": [
+        "npmjs.com",
+        "npmjs.org"
+      ],
+      "senderDomains": [
+        "npmjs.com"
+      ]
     },
     {
       "id": "pypi",
       "name": "PyPI",
-      "keywords": ["pypi", "python package"],
-      "baseDomains": ["pypi.org"],
-      "senderDomains": ["pypi.org"],
-      "serviceDomains": ["pypi.org"]
+      "keywords": [
+        "pypi",
+        "python package"
+      ],
+      "baseDomains": [
+        "pypi.org"
+      ],
+      "senderDomains": [
+        "pypi.org"
+      ]
     },
     {
       "id": "mongodb",
       "name": "MongoDB",
-      "keywords": ["mongodb", "mongo"],
-      "baseDomains": ["mongodb.com", "mongodb.net"],
-      "senderDomains": ["mongodb.com"],
-      "serviceDomains": ["mongodb.com", "mongodb.net"]
+      "keywords": [
+        "mongodb",
+        "mongo"
+      ],
+      "baseDomains": [
+        "mongodb.com",
+        "mongodb.net"
+      ],
+      "senderDomains": [
+        "mongodb.com"
+      ]
     },
     {
       "id": "redis",
       "name": "Redis",
-      "keywords": ["redis"],
-      "baseDomains": ["redis.io", "redis.com"],
-      "senderDomains": ["redis.io", "redis.com"],
-      "serviceDomains": ["redis.io", "redis.com"]
+      "keywords": [
+        "redis"
+      ],
+      "baseDomains": [
+        "redis.io",
+        "redis.com"
+      ],
+      "senderDomains": [
+        "redis.io",
+        "redis.com"
+      ]
     },
     {
       "id": "elastic",
       "name": "Elastic",
-      "keywords": ["elastic", "elasticsearch"],
-      "baseDomains": ["elastic.co"],
-      "senderDomains": ["elastic.co"],
-      "serviceDomains": ["elastic.co"]
+      "keywords": [
+        "elastic",
+        "elasticsearch"
+      ],
+      "baseDomains": [
+        "elastic.co"
+      ],
+      "senderDomains": [
+        "elastic.co"
+      ]
     },
     {
       "id": "datadog",
       "name": "Datadog",
-      "keywords": ["datadog"],
-      "baseDomains": ["datadoghq.com"],
-      "senderDomains": ["datadoghq.com"],
-      "serviceDomains": ["datadoghq.com"]
+      "keywords": [
+        "datadog"
+      ],
+      "baseDomains": [
+        "datadoghq.com"
+      ],
+      "senderDomains": [
+        "datadoghq.com"
+      ]
     },
     {
       "id": "newrelic",
       "name": "New Relic",
-      "keywords": ["new relic", "newrelic"],
-      "baseDomains": ["newrelic.com"],
-      "senderDomains": ["newrelic.com"],
-      "serviceDomains": ["newrelic.com"]
+      "keywords": [
+        "new relic",
+        "newrelic"
+      ],
+      "baseDomains": [
+        "newrelic.com"
+      ],
+      "senderDomains": [
+        "newrelic.com"
+      ]
     },
     {
       "id": "sentry",
       "name": "Sentry",
-      "keywords": ["sentry"],
-      "baseDomains": ["sentry.io"],
-      "senderDomains": ["sentry.io"],
-      "serviceDomains": ["sentry.io"]
+      "keywords": [
+        "sentry"
+      ],
+      "baseDomains": [
+        "sentry.io"
+      ],
+      "senderDomains": [
+        "sentry.io"
+      ]
     },
     {
       "id": "figma",
       "name": "Figma",
-      "keywords": ["figma"],
-      "baseDomains": ["figma.com"],
-      "senderDomains": ["figma.com"],
-      "serviceDomains": ["figma.com"]
+      "keywords": [
+        "figma"
+      ],
+      "baseDomains": [
+        "figma.com"
+      ],
+      "senderDomains": [
+        "figma.com"
+      ]
     },
     {
       "id": "canva",
       "name": "Canva",
-      "keywords": ["canva"],
-      "baseDomains": ["canva.com"],
-      "senderDomains": ["canva.com"],
-      "serviceDomains": ["canva.com"]
+      "keywords": [
+        "canva"
+      ],
+      "baseDomains": [
+        "canva.com"
+      ],
+      "senderDomains": [
+        "canva.com"
+      ]
     },
     {
       "id": "adobe",
       "name": "Adobe",
-      "keywords": ["adobe"],
-      "baseDomains": ["adobe.com"],
-      "senderDomains": ["adobe.com"],
-      "serviceDomains": ["adobe.com"]
+      "keywords": [
+        "adobe"
+      ],
+      "baseDomains": [
+        "adobe.com"
+      ],
+      "senderDomains": [
+        "adobe.com"
+      ]
     },
     {
       "id": "spotify",
       "name": "Spotify",
-      "keywords": ["spotify"],
-      "baseDomains": ["spotify.com"],
-      "senderDomains": ["spotify.com"],
-      "serviceDomains": ["spotify.com"]
+      "keywords": [
+        "spotify"
+      ],
+      "baseDomains": [
+        "spotify.com"
+      ],
+      "senderDomains": [
+        "spotify.com"
+      ]
     },
     {
       "id": "netflix",
       "name": "Netflix",
-      "keywords": ["netflix"],
-      "baseDomains": ["netflix.com"],
-      "senderDomains": ["netflix.com"],
-      "serviceDomains": ["netflix.com"]
+      "keywords": [
+        "netflix"
+      ],
+      "baseDomains": [
+        "netflix.com"
+      ],
+      "senderDomains": [
+        "netflix.com"
+      ]
     },
     {
       "id": "twitch",
       "name": "Twitch",
-      "keywords": ["twitch"],
-      "baseDomains": ["twitch.tv"],
-      "senderDomains": ["twitch.tv"],
-      "serviceDomains": ["twitch.tv"]
+      "keywords": [
+        "twitch"
+      ],
+      "baseDomains": [
+        "twitch.tv"
+      ],
+      "senderDomains": [
+        "twitch.tv"
+      ]
     },
     {
       "id": "steam",
       "name": "Steam",
-      "keywords": ["steam"],
-      "baseDomains": ["steampowered.com", "steamcommunity.com"],
-      "senderDomains": ["steampowered.com"],
-      "serviceDomains": ["steampowered.com", "steamcommunity.com"]
+      "keywords": [
+        "steam"
+      ],
+      "baseDomains": [
+        "steampowered.com",
+        "steamcommunity.com"
+      ],
+      "senderDomains": [
+        "steampowered.com"
+      ]
     },
     {
       "id": "ebay",
       "name": "eBay",
-      "keywords": ["ebay"],
-      "baseDomains": ["ebay.com"],
-      "senderDomains": ["ebay.com"],
-      "serviceDomains": ["ebay.com"]
+      "keywords": [
+        "ebay"
+      ],
+      "baseDomains": [
+        "ebay.com"
+      ],
+      "senderDomains": [
+        "ebay.com"
+      ]
     },
     {
       "id": "etsy",
       "name": "Etsy",
-      "keywords": ["etsy"],
-      "baseDomains": ["etsy.com"],
-      "senderDomains": ["etsy.com"],
-      "serviceDomains": ["etsy.com"]
+      "keywords": [
+        "etsy"
+      ],
+      "baseDomains": [
+        "etsy.com"
+      ],
+      "senderDomains": [
+        "etsy.com"
+      ]
     },
     {
       "id": "uber",
       "name": "Uber",
-      "keywords": ["uber"],
-      "baseDomains": ["uber.com"],
-      "senderDomains": ["uber.com"],
-      "serviceDomains": ["uber.com"]
+      "keywords": [
+        "uber"
+      ],
+      "baseDomains": [
+        "uber.com"
+      ],
+      "senderDomains": [
+        "uber.com"
+      ]
     },
     {
       "id": "airbnb",
       "name": "Airbnb",
-      "keywords": ["airbnb"],
-      "baseDomains": ["airbnb.com"],
-      "senderDomains": ["airbnb.com"],
-      "serviceDomains": ["airbnb.com"]
+      "keywords": [
+        "airbnb"
+      ],
+      "baseDomains": [
+        "airbnb.com"
+      ],
+      "senderDomains": [
+        "airbnb.com"
+      ]
     },
     {
       "id": "booking",
       "name": "Booking.com",
-      "keywords": ["booking"],
-      "baseDomains": ["booking.com"],
-      "senderDomains": ["booking.com"],
-      "serviceDomains": ["booking.com"]
+      "keywords": [
+        "booking"
+      ],
+      "baseDomains": [
+        "booking.com"
+      ],
+      "senderDomains": [
+        "booking.com"
+      ]
     }
   ],
   "publicEmailDomains": [
