@@ -92,76 +92,76 @@
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         console.log('[Aegis] AI mode active, processing', emails.length, 'emails');
 
-        // Process in chunks (batches of 10) to reduce API requests
+        // Fallback initial categorization for all emails
+        emails.forEach(email => {
+          const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
+          email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+        });
+
+        // Split into chunks (batches of 10) and process all in parallel
         const chunkSize = 10;
+        const chunks = [];
         for (let i = 0; i < emails.length; i += chunkSize) {
-          const chunk = emails.slice(i, i + chunkSize);
+          chunks.push(emails.slice(i, i + chunkSize));
+        }
 
-          // Fallback initial categorization
-          chunk.forEach(email => {
-            const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
-            email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
-          });
+        console.log('[Aegis] Processing', chunks.length, 'batches in parallel');
 
-          // Build batch payload
+        // Process all batches in parallel
+        const batchPromises = chunks.map((chunk, chunkIndex) => {
           const batchData = chunk.map((email, index) => ({
-            id: index,
+            id: chunkIndex * chunkSize + index, // Global index across all emails
             subject: email.subject,
             sender: email.sender,
             senderEmail: email.senderEmail
           }));
 
-          // Try AI Batch
-          try {
-            const aiResult = await new Promise((resolve) => {
-              chrome.runtime.sendMessage({
-                type: 'AI_BATCH_ANALYZE',
-                batchData,
-                availableCategories: labels.map(l => l.name)
+          return new Promise((resolve) => {
+            chrome.runtime.sendMessage({
+              type: 'AI_BATCH_ANALYZE',
+              batchData,
+              availableCategories: categories.map(c => c.name)
               }, (response) => {
                 if (chrome.runtime.lastError) {
                   console.error('[Aegis] sendMessage error:', chrome.runtime.lastError);
-                  resolve({});
+                  resolve({ error: true, chunkIndex });
                 } else {
-                  resolve(response || {});
+                  resolve({ ...response, chunkIndex });
                 }
               });
+          });
+        });
+
+        // Wait for all batches to complete
+        const results = await Promise.all(batchPromises);
+        console.log('[Aegis] All AI batches completed:', results.length);
+
+        // Apply results from all batches
+        results.forEach((aiResult) => {
+          if (aiResult && !aiResult.error && Array.isArray(aiResult.results)) {
+            aiResult.results.forEach(res => {
+              const email = emails[res.id]; // Use global index
+              if (email) {
+                // Try to match with user's configured settings categories first for custom colors/emojis
+                const matchedCategory = categories.find(c => c.name === res.category);
+                if (matchedCategory) {
+                  email.category = Object.assign({}, matchedCategory);
+                } else {
+                  // Create a dynamic category from the Gmail label name
+                  email.category = {
+                    name: res.category,
+                    emoji: '🏷️',
+                    color: '#4285f4',
+                    bgColor: '#e8f0fe',
+                    id: 'ai-label-' + res.category
+                  };
+                }
+              }
             });
-            console.log('[Aegis] AI Array result:', aiResult);
-
-            if (aiResult && !aiResult.error && Array.isArray(aiResult.results)) {
-              aiResult.results.forEach(res => {
-                const email = chunk[res.id];
-                if (email) {
-                  // Try to match with user's configured settings categories first for custom colors/emojis
-                  const matchedCategory = categories.find(c => c.name === res.category);
-                  if (matchedCategory) {
-                    email.category = Object.assign({}, matchedCategory);
-                  } else {
-                    // Create a dynamic category from the Gmail label name
-                    email.category = {
-                      name: res.category,
-                      emoji: '🏷️',
-                      color: '#4285f4',
-                      bgColor: '#e8f0fe',
-                      id: 'ai-label-' + res.category
-                    };
-                  }
-                }
-              });
-            }
-          } catch (e) {
-            console.error('[Aegis] AI Batch Error:', e);
+          } else if (aiResult && aiResult.error) {
+            console.error('[Aegis] AI Batch Error for chunk', aiResult.chunkIndex);
           }
-
-          // Render progressive updates
-          renderCurrentState(true);
-
-          // Small delay between chunks
-          if (i + chunkSize < emails.length) {
-            await new Promise(r => setTimeout(r, 500));
-          }
-        }
+        });
 
         // Final render after all chunks
         renderCurrentState(false);
@@ -195,8 +195,13 @@
 
       if (settings.analysisMode === 'ai' && settings.aiSettings && settings.aiSettings.apiKey) {
         try {
+          const categories = settings.categories || [];
           const aiResult = await new Promise((resolve) => {
-            chrome.runtime.sendMessage({ type: 'AI_ANALYZE', emailData }, (response) => {
+            chrome.runtime.sendMessage({ 
+              type: 'AI_ANALYZE', 
+              emailData,
+              availableCategories: categories.map(c => c.name)
+            }, (response) => {
               resolve(response || {});
             });
           });
@@ -272,6 +277,20 @@
       sendResponse({ status: 'ok' });
     }
     return true;
+  });
+
+  // Listen for storage changes (category updates from options page)
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync' && changes.categories) {
+      console.log('[Aegis] Categories updated, reloading settings');
+      settings = null; // Clear cached settings
+      
+      // If analysis panel is visible, refresh it
+      if (analysisPanel && analysisPanel.isVisible && analysisPanel.isVisible()) {
+        const currentFilter = analysisPanel.getCurrentFilter ? analysisPanel.getCurrentFilter() : 'unread';
+        runAnalysis(currentFilter === 'unread');
+      }
+    }
   });
 
   // Check initial state on load

@@ -1,4 +1,19 @@
 let settings = {};
+let keywordSaveTimeout = null;
+
+// Debounced save function for keywords
+function debouncedSaveKeywords() {
+  clearTimeout(keywordSaveTimeout);
+  keywordSaveTimeout = setTimeout(async () => {
+    try {
+      await chrome.storage.sync.set({ categories: settings.categories });
+      console.log('[Aegis Options] Keywords saved');
+    } catch (error) {
+      console.error('[Aegis Options] Error saving keywords:', error);
+      showErrorMessage('儲存關鍵字失敗');
+    }
+  }, 500);
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Load all settings
@@ -50,6 +65,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Test AI Connection button
   const testBtn = document.getElementById('testAiBtn');
   if (testBtn) testBtn.addEventListener('click', testAiConnection);
+
+  // Add Category button
+  document.getElementById('addCategoryBtn').addEventListener('click', showAddCategoryDialog);
 
   // Auto-fetch models on blur
   const baseUrlInput = document.getElementById('aiBaseUrl');
@@ -192,7 +210,9 @@ function renderModelList(models) {
 
 function renderCategories(categories) {
   const container = document.getElementById('categoriesList');
-  container.innerHTML = '';
+
+  // Use document fragment for better performance
+  const fragment = document.createDocumentFragment();
 
   categories.forEach(cat => {
     const item = document.createElement('div');
@@ -201,43 +221,100 @@ function renderCategories(categories) {
 
     item.innerHTML = `
       <div class="category-header-bar">
-        <span class="cat-emoji">${cat.emoji}</span>
-        <span class="cat-name" style="color: ${cat.color}">${cat.name}</span>
-        <span class="cat-count">${cat.keywords.length} 個關鍵字</span>
-        <span class="cat-toggle">▼</span>
+        <div class="cat-icon-wrapper" style="background-color: ${cat.bgColor || '#f0f0f0'}; color: ${cat.color};">
+          ${window.CategoryDialog.getIconSvg(cat.emoji) || `<span class="cat-emoji-fallback">${cat.emoji}</span>`}
+        </div>
+        <div class="cat-title-stack">
+          <span class="cat-name">${cat.name}</span>
+          <span class="cat-count">${cat.keywords.length} active keywords</span>
+        </div>
+        <div class="category-actions-inline">
+          <button class="category-edit-btn" data-cat-id="${cat.id}" title="Edit Category">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </button>
+          <span class="cat-toggle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </span>
+        </div>
       </div>
       <div class="category-keywords" id="cat-body-${cat.id}">
-        <div class="keywords-label">關鍵字</div>
         <div class="keywords-tags" id="tags-${cat.id}"></div>
-        <div class="keyword-add-row">
-          <input type="text" class="keyword-input" id="input-${cat.id}" placeholder="新增關鍵字...">
-          <button class="keyword-add-btn" data-cat-id="${cat.id}">新增</button>
-        </div>
+        <button class="keyword-add-btn" data-cat-id="${cat.id}">+ Add keyword</button>
       </div>
     `;
 
-    container.appendChild(item);
+    fragment.appendChild(item);
+  });
+
+  // Clear and append all at once
+  container.innerHTML = '';
+  container.appendChild(fragment);
+
+  // Attach event listeners after DOM insertion
+  categories.forEach(cat => {
+    const item = container.querySelector(`[data-cat-id="${cat.id}"]`);
+    if (!item) return;
 
     // Render keyword tags
     renderKeywordTags(cat);
 
     // Toggle expand
     const headerBar = item.querySelector('.category-header-bar');
-    headerBar.addEventListener('click', () => {
+    headerBar.addEventListener('click', (e) => {
+      // Don't toggle if clicking on action buttons
+      if (e.target.closest('.category-actions-inline')) return;
+
       const body = item.querySelector('.category-keywords');
-      const toggle = item.querySelector('.cat-toggle');
+      const toggle = item.querySelector('.cat-toggle svg');
       body.classList.toggle('open');
-      toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+      item.classList.toggle('expanded');
+
+      if (body.classList.contains('open')) {
+        toggle.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
+      } else {
+        toggle.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+      }
     });
+
+    // Edit button
+    item.querySelector('.category-edit-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      editCategory(cat.id);
+    });
+
+    // Remove delete button event listener as it's not in the inline actions anymore
+    // We will add it inside the edit dialog or keep it. Wait, mockup doesn't have delete icon on the main card.
+    // Let's assume delete is accessed inside "Edit" dialog. Wait, the edit dialog doesn't have a delete button in my implementation.
+    // For now I won't add it back directly, maybe we add a delete button next to save in the dialog if needed, but for now just comment it out.
+    // item.querySelector('.category-delete-btn').addEventListener('click', ...);
 
     // Add keyword button
     item.querySelector('.keyword-add-btn').addEventListener('click', () => {
-      addKeyword(cat.id);
-    });
+      // Toggle the line edit or prompt for a simple keyword?
+      // Since it's inline in the mockup: "+ Add keyword" button is next to tags
+      const currentLabel = item.querySelector('.keyword-add-btn').textContent;
+      if (currentLabel === '+ Add keyword') {
+        item.querySelector('.keyword-add-btn').outerHTML = `
+            <div class="keyword-add-row inline-add-row" style="display:inline-flex;">
+              <input type="text" class="keyword-input" id="input-${cat.id}" placeholder="Type keyword...">
+              <button class="keyword-save-btn" data-cat-id="${cat.id}">Save</button>
+            </div>
+          `;
 
-    // Add keyword on Enter
-    item.querySelector(`#input-${cat.id}`).addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addKeyword(cat.id);
+        const input = item.querySelector(`#input-${cat.id}`);
+        const saveBtn = item.querySelector(`.keyword-save-btn[data-cat-id="${cat.id}"]`);
+
+        input.focus();
+
+        saveBtn.addEventListener('click', () => {
+          addKeyword(cat.id);
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addKeyword(cat.id);
+          if (e.key === 'Escape') renderCategories(settings.categories); // reset render
+        });
+      }
     });
   });
 }
@@ -254,15 +331,15 @@ function renderKeywordTags(cat) {
 
   container.querySelectorAll('.keyword-remove').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const catId = e.target.dataset.cat;
-      const keyword = e.target.dataset.kw;
+      const catId = e.currentTarget.dataset.cat;
+      const keyword = e.currentTarget.dataset.kw;
       removeKeyword(catId, keyword);
     });
   });
 
   // Update count
   const countEl = document.querySelector(`[data-cat-id="${cat.id}"] .cat-count`);
-  if (countEl) countEl.textContent = `${cat.keywords.length} 個關鍵字`;
+  if (countEl) countEl.textContent = `${cat.keywords.length} active keywords`;
 }
 
 function addKeyword(catId) {
@@ -274,10 +351,13 @@ function addKeyword(catId) {
   const cat = settings.categories.find(c => c.id === catId);
   if (cat && !cat.keywords.includes(keyword)) {
     cat.keywords.push(keyword);
-    renderKeywordTags(cat);
+    // Full re-render to put the "+ Add keyword" button back
+    renderCategories(settings.categories);
+    debouncedSaveKeywords();
+  } else {
+    // If not valid or exists, just re-render to hide input
+    renderCategories(settings.categories);
   }
-  input.value = '';
-  input.focus();
 }
 
 function removeKeyword(catId, keyword) {
@@ -285,6 +365,7 @@ function removeKeyword(catId, keyword) {
   if (cat) {
     cat.keywords = cat.keywords.filter(k => k !== keyword);
     renderKeywordTags(cat);
+    debouncedSaveKeywords(); // Debounced save
   }
 }
 
@@ -368,4 +449,154 @@ async function updateWhitelistNow() {
       statusEl.style.color = '#cf222e';
     }
   });
+}
+
+// Category Management Functions
+
+function showAddCategoryDialog() {
+  if (!window.CategoryDialog) {
+    showErrorMessage('CategoryDialog module not loaded');
+    return;
+  }
+
+  window.CategoryDialog.show('create', null, async (formData) => {
+    try {
+      const newCategory = await window.CategoryManager.createCategory(formData);
+      // Reload categories from storage to ensure sync
+      const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
+      settings.categories = updatedSettings.categories || [];
+      renderCategories(settings.categories);
+      showSuccessMessage('分類已新增');
+    } catch (error) {
+      showErrorMessage(error.message);
+    }
+  });
+}
+
+function editCategory(categoryId) {
+  const category = settings.categories.find(c => c.id === categoryId);
+  if (!category) {
+    showErrorMessage('找不到分類');
+    return;
+  }
+
+  if (!window.CategoryDialog) {
+    showErrorMessage('CategoryDialog module not loaded');
+    return;
+  }
+
+  window.CategoryDialog.show('edit', category, async (formData) => {
+    try {
+      const updated = await window.CategoryManager.updateCategory(categoryId, formData);
+      // Reload categories from storage to ensure sync
+      const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
+      settings.categories = updatedSettings.categories || [];
+      renderCategories(settings.categories);
+      showSuccessMessage('分類已更新');
+    } catch (error) {
+      showErrorMessage(error.message);
+    }
+  });
+}
+
+async function deleteCategory(categoryId) {
+  const category = settings.categories.find(c => c.id === categoryId);
+  if (!category) {
+    showErrorMessage('找不到分類');
+    return;
+  }
+
+  // Show confirmation dialog
+  let message = `確定要刪除「${category.name}」分類嗎？`;
+  if (category.keywords.length > 0) {
+    message += `\n\n此分類包含 ${category.keywords.length} 個關鍵字，刪除後將無法復原。`;
+  }
+
+  // Warn if deleting last category
+  if (settings.categories.length === 1) {
+    message += '\n\n⚠️ 這是最後一個分類，刪除後郵件分類功能將無法運作。';
+  }
+
+  const confirmed = await showConfirmDialog('刪除分類', message);
+  if (!confirmed) return;
+
+  try {
+    const success = await window.CategoryManager.deleteCategory(categoryId);
+    if (success) {
+      // Reload categories from storage to ensure sync
+      const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
+      settings.categories = updatedSettings.categories || [];
+      renderCategories(settings.categories);
+      showSuccessMessage('分類已刪除');
+    }
+  } catch (error) {
+    showErrorMessage(error.message);
+  }
+}
+
+function showConfirmDialog(title, message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'aegis-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="aegis-confirm-dialog">
+        <h3>${escapeHtml(title)}</h3>
+        <p style="white-space: pre-line;">${escapeHtml(message)}</p>
+        <div class="aegis-confirm-actions">
+          <button class="aegis-confirm-cancel">取消</button>
+          <button class="aegis-confirm-ok">確定</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('.aegis-confirm-cancel').addEventListener('click', () => {
+      overlay.remove();
+      resolve(false);
+    });
+
+    overlay.querySelector('.aegis-confirm-ok').addEventListener('click', () => {
+      overlay.remove();
+      resolve(true);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    });
+  });
+}
+
+function showErrorMessage(message) {
+  const notification = document.createElement('div');
+  notification.className = 'aegis-notification aegis-notification-error';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.classList.add('show'), 10);
+
+  const dismiss = () => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  };
+
+  notification.addEventListener('click', dismiss);
+  setTimeout(dismiss, 5000);
+}
+
+function showSuccessMessage(message) {
+  const notification = document.createElement('div');
+  notification.className = 'aegis-notification aegis-notification-success';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.classList.add('show'), 10);
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
 }

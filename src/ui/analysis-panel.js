@@ -124,7 +124,7 @@ class AnalysisPanel {
     header.style.borderLeft = `3px solid ${category.color}`;
     header.innerHTML = `
       <input type="checkbox" class="aegis-select-all" title="全選">
-      <span class="aegis-category-emoji">${category.emoji}</span>
+      <span class="aegis-category-emoji" style="display:inline-flex;align-items:center;">${window.getPopupIconSvg ? window.getPopupIconSvg(category.emoji) : category.emoji}</span>
       <span class="aegis-category-name">${category.name}</span>
       <span class="aegis-category-count">${emails.length}</span>
     `;

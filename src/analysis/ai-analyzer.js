@@ -2,11 +2,17 @@
 
 const AIAnalyzer = (() => {
 
-  async function analyzeWithAI(emailData, aiSettings, whitelist) {
+  async function analyzeWithAI(emailData, aiSettings, whitelist, categories = []) {
     const { baseUrl, apiKey, model } = aiSettings;
 
+    // Build category list for AI prompt
+    const categoryNames = categories.map(c => c.name).join(', ');
+    const categoryPrompt = categoryNames 
+      ? `\n\nAvailable categories: ${categoryNames}. Choose the most appropriate category from this list.`
+      : '';
+
     const systemPrompt = `You are an email security and categorization assistant. Analyze the email for:
-1. Category classification
+1. Category classification${categoryPrompt}
 2. Security issues (phishing, spoofing, suspicious links)
 3. Service identification - detect if the email mentions well-known services (banks, tech companies, etc.)
 4. Domain validation - check if sender domain and link domains match the claimed service

@@ -1,100 +1,225 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aegis Mail 設定</title>
+  <title>Aegis Mail Settings</title>
   <link rel="stylesheet" href="options.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+  <!-- MOCK CHROME API FOR TESTING ONLY -->
+  <script>
+    if (!window.chrome || !window.chrome.storage) {
+      window.chrome = {
+        runtime: {
+          lastError: null,
+          sendMessage: (msg, cb) => {
+            if (cb) {
+              if (msg.type === 'GET_SETTINGS') {
+                cb({
+                  categories: [
+                    { id: 'work', name: '工作', emoji: 'briefcase', color: '#4285f4', bgColor: '#e8f0fe', keywords: [] }
+                  ]
+                });
+              } else {
+                cb({});
+              }
+            }
+          }
+        },
+        storage: {
+          sync: {
+            _data: { categories: [{ id: 'work', name: '工作', emoji: 'briefcase', color: '#4285f4', bgColor: '#e8f0fe', keywords: [] }] },
+            get: function (keys, cb) {
+              let res = {};
+              if (!keys) res = this._data;
+              else if (Array.isArray(keys)) keys.forEach(k => res[k] = this._data[k]);
+              else res[keys] = this._data[keys];
+              if (cb) cb(res);
+            },
+            set: function (items, cb) {
+              Object.assign(this._data, items);
+              if (cb) cb();
+            }
+          },
+          local: {
+            get: (k, cb) => { if (cb) cb({}); },
+            set: (v, cb) => { if (cb) cb(); }
+          }
+        }
+      };
+    }
+  </script>
   <div class="options-container">
     <header class="options-header">
       <img src="public/icons/icon32.png" alt="Aegis" width="28" height="28">
-      <h1>Aegis Mail 設定</h1>
+      <h1>Aegis Mail</h1>
     </header>
 
     <section class="options-section">
-      <h2>分析模式</h2>
-      <div class="mode-toggle">
-        <label class="toggle-option">
+      <div class="section-title-with-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
+          <path d="M8.5 8.5v.01"></path>
+          <path d="M16 15.5v.01"></path>
+          <path d="M12 12v.01"></path>
+          <path d="M11 17v.01"></path>
+          <path d="M7 14v.01"></path>
+        </svg>
+        <h2>Analysis Engine</h2>
+      </div>
+
+      <div class="analysis-engine-cards">
+        <label class="ae-card" id="ae-card-local">
           <input type="radio" name="analysisMode" value="local" checked>
-          <span class="toggle-label">
-            <strong>本地規則</strong>
-            <small>使用關鍵字規則分析，無需網路連線</small>
-          </span>
+          <div class="ae-card-content">
+            <div class="ae-radio-circle"></div>
+            <div class="ae-text">
+              <strong>Local Rules</strong>
+              <p>Processing happens entirely on your device. Fast, private, and works without an internet connection.
+              </p>
+            </div>
+          </div>
         </label>
-        <label class="toggle-option">
+
+        <label class="ae-card" id="ae-card-ai">
           <input type="radio" name="analysisMode" value="ai">
-          <span class="toggle-label">
-            <strong>AI 模式</strong>
-            <small>使用 OpenAI 相容 API 進行智慧分析</small>
-          </span>
+          <div class="ae-card-content">
+            <div class="ae-radio-circle"></div>
+            <div class="ae-text">
+              <div class="ae-header">
+                <strong>AI Mode</strong>
+                <span class="badge-recommended">RECOMMENDED</span>
+              </div>
+              <p>Advanced neural analysis using large language models for superior classification accuracy and threat
+                detection.</p>
+            </div>
+          </div>
         </label>
       </div>
     </section>
 
-    <section class="options-section" id="aiSettingsSection" style="display:none">
-      <h2>AI 設定</h2>
-      <div class="form-group">
-        <label for="aiBaseUrl">API Base URL</label>
-        <input type="url" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
+    <section class="options-section" id="aiSettingsSection">
+      <div class="section-title-with-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+        <h2>Model Configuration</h2>
       </div>
-      <div class="form-group">
-        <label for="aiApiKey">API Key</label>
-        <input type="password" id="aiApiKey" placeholder="sk-...">
+
+      <div class="form-group row-group">
+        <label for="aiBaseUrl">API BASE URL</label>
+        <div class="input-with-icon">
+          <input type="url" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg></span>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="aiModel" style="display:flex; justify-content:space-between; align-items:center;">
-          模型
-          <span id="fetchModelsStatus" style="font-size:12px; font-weight:normal;"></span>
-        </label>
-        <input type="text" id="aiModel" list="aiModelList" placeholder="gpt-5-nano-2025-08-07">
-        <datalist id="aiModelList"></datalist>
+
+      <div class="form-group row-group">
+        <label for="aiApiKey">API KEY</label>
+        <div class="input-with-icon">
+          <input type="password" id="aiApiKey" placeholder="sk-...">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+              </path>
+            </svg></span>
+        </div>
       </div>
-      <div class="form-group action-group">
-        <button type="button" class="test-btn" id="testAiBtn">🔌 測試連線</button>
-        <span class="test-status" id="testAiStatus" style="margin-left: 10px; font-weight: bold;"></span>
+
+      <div class="form-group row-group split-group">
+        <div class="split-left">
+          <label for="aiModel">SELECTED MODEL <span id="fetchModelsStatus"
+              style="font-weight:normal; text-transform:none;"></span></label>
+          <div class="input-with-icon">
+            <input type="text" id="aiModel" list="aiModelList" placeholder="gpt-4o-latest">
+            <datalist id="aiModelList"></datalist>
+            <span class="input-icon chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg></span>
+          </div>
+        </div>
+        <div class="split-right">
+          <label>&nbsp;</label>
+          <button type="button" class="test-connection-btn" id="testAiBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            TEST CONNECTION
+          </button>
+        </div>
       </div>
+      <div id="testAiStatus" style="font-size: 13px; font-weight: 500; margin-top: 8px;"></div>
     </section>
 
-    <section class="options-section">
+    <section class="options-section smart-categories-section">
+      <div class="smart-categories-header">
+        <div class="sc-title-area">
+          <div class="section-title-with-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <h2>Smart Categories</h2>
+          </div>
+          <p class="sc-desc">Define classification rules and keywords for your inbox</p>
+        </div>
+        <button type="button" class="add-category-btn-new" id="addCategoryBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Category
+        </button>
+      </div>
+
+      <div id="categoriesList" class="categories-list"></div>
+    </section>
+
+    <!-- Hidden older sections, kept for JS backwards compatibility but hidden from UI as per mock -->
+    <section class="options-section" style="display:none;">
       <h2>白名單設定</h2>
-      <p class="section-desc">設定可信服務白名單的下載來源，每週自動更新並快取於本機</p>
-      <div class="form-group">
-        <label for="whitelistUrl">白名單 URL <small style="font-weight:normal;color:#666">（留空使用內建白名單）</small></label>
-        <input type="url" id="whitelistUrl" placeholder="https://example.com/service-whitelist.json">
-      </div>
-      <div class="form-group action-group">
-        <button type="button" class="test-btn" id="updateWhitelistBtn">🔄 立即更新</button>
-        <span class="test-status" id="whitelistStatus" style="margin-left:10px;font-weight:bold;"></span>
-      </div>
-      <div id="whitelistInfo" style="font-size:12px;color:#666;margin-top:4px;"></div>
+      <input type="url" id="whitelistUrl">
+      <button id="updateWhitelistBtn">更新</button>
+      <span id="whitelistStatus"></span>
+      <div id="whitelistInfo"></div>
     </section>
 
-    <section class="options-section">
-      <h2>分類規則</h2>
-      <p class="section-desc">展開各分類以新增或移除關鍵字</p>
-      <div id="categoriesList"></div>
-    </section>
-
-    <section class="options-section">
-      <h2>開發者工具</h2>
+    <section class="options-section" style="display:none;">
       <label class="toggle-option">
         <input type="checkbox" id="analysisDebug">
-        <span class="toggle-label">
-          <strong>Debug 模式</strong>
-          <small>將每封郵件的判斷邏輯與分析結果輸出至瀏覽器 Console（F12）</small>
-        </span>
+        <span>Debug 模式</span>
       </label>
     </section>
 
-    <div class="options-actions">
-      <button class="save-btn" id="saveBtn">💾 儲存設定</button>
+    <div class="options-actions" style="margin-top: 20px;">
+      <button class="save-btn" id="saveBtn">Save Settings</button>
       <span class="save-status" id="saveStatus"></span>
     </div>
   </div>
+
+  <div id="categoryDialogContainer"></div>
+
+  <script src="src/utils/validation-helpers.js"></script>
+  <script src="src/managers/category-manager.js"></script>
+  <script src="src/ui/category-dialog.js"></script>
   <script src="options.js"></script>
 </body>
 

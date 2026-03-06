@@ -11,17 +11,25 @@
     "test:whitelist": "jest whitelist-manager",
     "test:ai": "jest ai-analyzer"
   },
-  "keywords": ["chrome-extension", "email", "security", "gmail"],
+  "keywords": [
+    "chrome-extension",
+    "email",
+    "security",
+    "gmail"
+  ],
   "author": "Aegis Mail Team",
   "license": "MIT",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "fast-check": "^4.5.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "testMatch": ["**/__tests__/**/*.test.js"],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
     "collectCoverageFrom": [
       "src/analysis/*.js",
       "!src/package*.json"
@@ -33,7 +41,12 @@
       "/src/ui/",
       "/src/analytics/"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/__tests__/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/__tests__/setup.js"
+    ],
     "verbose": false
+  },
+  "dependencies": {
+    "puppeteer": "^24.38.0"
   }
 }
