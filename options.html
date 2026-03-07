@@ -11,48 +11,7 @@
 
 <body>
   <!-- MOCK CHROME API FOR TESTING ONLY -->
-  <script>
-    if (!window.chrome || !window.chrome.storage) {
-      window.chrome = {
-        runtime: {
-          lastError: null,
-          sendMessage: (msg, cb) => {
-            if (cb) {
-              if (msg.type === 'GET_SETTINGS') {
-                cb({
-                  categories: [
-                    { id: 'work', name: '工作', emoji: 'briefcase', color: '#4285f4', bgColor: '#e8f0fe', keywords: [] }
-                  ]
-                });
-              } else {
-                cb({});
-              }
-            }
-          }
-        },
-        storage: {
-          sync: {
-            _data: { categories: [{ id: 'work', name: '工作', emoji: 'briefcase', color: '#4285f4', bgColor: '#e8f0fe', keywords: [] }] },
-            get: function (keys, cb) {
-              let res = {};
-              if (!keys) res = this._data;
-              else if (Array.isArray(keys)) keys.forEach(k => res[k] = this._data[k]);
-              else res[keys] = this._data[keys];
-              if (cb) cb(res);
-            },
-            set: function (items, cb) {
-              Object.assign(this._data, items);
-              if (cb) cb();
-            }
-          },
-          local: {
-            get: (k, cb) => { if (cb) cb({}); },
-            set: (v, cb) => { if (cb) cb(); }
-          }
-        }
-      };
-    }
-  </script>
+  <script src="mock-chrome.js"></script>
   <div class="options-container">
     <header class="options-header">
       <img src="public/icons/icon32.png" alt="Aegis" width="28" height="28">
@@ -114,6 +73,9 @@
         </svg>
         <h2>Model Configuration</h2>
       </div>
+      <p style="font-size: 13px; color: #5f6368; margin-top: 0; margin-bottom: 20px;">
+        AI Mode will smartly categorize your emails using your existing custom Gmail labels automatically.
+      </p>
 
       <div class="form-group row-group">
         <label for="aiBaseUrl">API BASE URL</label>
@@ -167,7 +129,7 @@
       <div id="testAiStatus" style="font-size: 13px; font-weight: 500; margin-top: 8px;"></div>
     </section>
 
-    <section class="options-section smart-categories-section">
+    <section class="options-section smart-categories-section" id="categoriesSection">
       <div class="smart-categories-header">
         <div class="sc-title-area">
           <div class="section-title-with-icon">

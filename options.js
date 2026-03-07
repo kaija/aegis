@@ -38,13 +38,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.checked = true;
     }
     input.addEventListener('change', () => {
-      document.getElementById('aiSettingsSection').style.display =
-        input.value === 'ai' ? 'block' : 'none';
+      const isAi = input.value === 'ai';
+      document.getElementById('aiSettingsSection').style.display = isAi ? 'block' : 'none';
+      document.getElementById('categoriesSection').style.display = isAi ? 'none' : 'block';
     });
   });
 
   if (settings.analysisMode === 'ai') {
     document.getElementById('aiSettingsSection').style.display = 'block';
+    document.getElementById('categoriesSection').style.display = 'none';
   }
 
   // Set AI settings values
@@ -126,8 +128,8 @@ async function testAiConnection() {
       dumpArea.readOnly = true;
       dumpArea.value = response.message;
 
-      // Append below the action group
-      btn.parentElement.after(dumpArea);
+      // Append below the test status so it doesn't break the flex row layout.
+      document.getElementById('testAiStatus').after(dumpArea);
     } else {
       statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
       statusEl.style.color = '#cf222e';
