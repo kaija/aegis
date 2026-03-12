@@ -349,7 +349,8 @@
   function isEmailDetailView() {
     const hash = window.location.hash;
     // Gmail email detail: #inbox/FMfcgz..., #sent/FMfcgz..., #search/query/FMfcgz...
-    return /^#[^/]+\/[A-Za-z0-9]{10,}/.test(hash);
+    // Allows nested paths like #label/Phishing/FMfcgz...
+    return /^#.*\/[A-Za-z0-9]{10,}/.test(hash);
   }
 
   // Handle navigation changes
