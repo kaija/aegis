@@ -118,4 +118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.runtime.openOptionsPage();
     window.close();
   });
+
+  const analyticsBtn = document.getElementById('analyticsBtn');
+  if (analyticsBtn) {
+    analyticsBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('url-analytics.html') });
+      window.close();
+    });
+  }
 });

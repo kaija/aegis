@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis - URL Analytics</title>
+  <link rel="stylesheet" href="url-analytics.css">
+</head>
+
+<body>
+  <div class="analytics-container">
+    <header class="analytics-header">
+      <div class="header-left">
+        <img src="public/icons/icon32.png" alt="Aegis" width="24" height="24">
+        <h1>Browsing Analytics</h1>
+      </div>
+      <div class="header-actions">
+        <label class="toggle-feedback" title="Enable category feedback for uncategorized URLs">
+          <input type="checkbox" id="feedbackToggle">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Feedback Mode</span>
+        </label>
+        <button class="btn-icon" id="exportBtn" title="Export Data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Prediction Card -->
+    <div class="prediction-card">
+      <div class="prediction-main">
+        <div class="prediction-current">
+          <span class="prediction-number" id="currentViews">0</span>
+          <span class="prediction-label">Views Today</span>
+        </div>
+        <div class="prediction-divider"></div>
+        <div class="prediction-estimate">
+          <span class="prediction-number predicted" id="predictedViews">--</span>
+          <span class="prediction-label">Predicted EOD</span>
+        </div>
+      </div>
+      <div class="prediction-meta" id="predictionMeta"></div>
+    </div>
+
+    <!-- Trend Chart -->
+    <section class="chart-section">
+      <div class="section-header">
+        <h2>Daily Page Views</h2>
+        <span class="section-badge">Past 7 days + today</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="trendChart" width="600" height="220"></canvas>
+      </div>
+    </section>
+
+    <!-- Category Pie Charts -->
+    <div class="pie-charts-row">
+      <section class="chart-section pie-section">
+        <div class="section-header">
+          <h2>By Page Views</h2>
+        </div>
+        <div class="pie-wrapper">
+          <canvas id="categoryPieChart" width="240" height="240"></canvas>
+        </div>
+        <div class="legend-list" id="categoryLegend"></div>
+      </section>
+
+      <section class="chart-section pie-section">
+        <div class="section-header">
+          <h2>By Visit Time</h2>
+          <span class="section-badge reserved">Coming Soon</span>
+        </div>
+        <div class="pie-wrapper reserved-chart">
+          <canvas id="timePieChart" width="240" height="240"></canvas>
+          <div class="reserved-overlay">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Reserved for visit time tracking</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Category Feedback Dialog (hidden by default) -->
+    <div class="feedback-dialog" id="feedbackDialog" style="display:none;">
+      <div class="feedback-content">
+        <h3>Categorize URL</h3>
+        <p class="feedback-url" id="feedbackUrl"></p>
+        <p class="feedback-domain" id="feedbackDomain"></p>
+        <select id="feedbackCategory" class="feedback-select">
+          <option value="">-- Select Category --</option>
+        </select>
+        <div class="feedback-actions">
+          <button class="btn-secondary" id="feedbackCancel">Skip</button>
+          <button class="btn-primary" id="feedbackSave">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Dialog -->
+    <div class="export-dialog" id="exportDialog" style="display:none;">
+      <div class="export-content">
+        <h3>Export Browsing Data</h3>
+        <div class="export-options">
+          <button class="export-option-btn" id="exportLabels">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            <span>User Labels (JSON)</span>
+            <small>Domain-to-category mappings you've set</small>
+          </button>
+          <button class="export-option-btn" id="exportHistory">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span>Full History (CSV)</span>
+            <small>All page views from the past 30 days</small>
+          </button>
+        </div>
+        <button class="btn-secondary export-close" id="exportClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="url-analytics.js"></script>
+</body>
+
+</html>

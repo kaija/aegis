@@ -68,6 +68,12 @@ body {
   letter-spacing: 0.3px;
 }
 
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .settings-btn {
   background: none;
   border: none;

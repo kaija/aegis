@@ -3,7 +3,7 @@
   "name": "Aegis Mail",
   "version": "1.0.0",
   "description": "Organize your Gmail with smart email categorization",
-  "permissions": ["storage", "activeTab", "scripting", "alarms"],
+  "permissions": ["storage", "activeTab", "scripting", "alarms", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {

@@ -1,3 +1,119 @@
+// ---- URL Categories helpers ----
+
+let _urlCategoriesCache = null;
+
+async function loadUrlCategories() {
+  if (_urlCategoriesCache) return _urlCategoriesCache;
+  try {
+    const url = chrome.runtime.getURL('src/data/url-categories.json');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    _urlCategoriesCache = await res.json();
+    return _urlCategoriesCache;
+  } catch (e) {
+    console.error('[Aegis] Failed to load URL categories:', e);
+    return null;
+  }
+}
+
+function categorizeUrlByDomain(url, categoriesData) {
+  if (!categoriesData || !url) return null;
+  try {
+    const u = new URL(url);
+    const hostname = u.hostname.replace(/^www\./, '');
+
+    // Check excluded domains first
+    for (const excl of (categoriesData.excludedDomains || [])) {
+      if (excl.includes('://') && url.startsWith(excl)) return null;
+      if (!excl.includes('://') && (hostname === excl || hostname.endsWith('.' + excl))) return null;
+    }
+
+    // Try exact hostname match, then parent domains
+    for (const cat of categoriesData.categories) {
+      for (const domain of cat.domains) {
+        if (domain.includes('/')) {
+          // Path-based match
+          const pathDomain = hostname + u.pathname;
+          if (pathDomain.startsWith(domain)) return cat.id;
+        } else if (hostname === domain || hostname.endsWith('.' + domain)) {
+          return cat.id;
+        }
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// ---- URL Tracking via webNavigation ----
+
+const URL_HISTORY_KEY = 'aegis_url_history';
+const URL_TRACKER_SETTINGS_KEY = 'aegis_url_tracker_settings';
+
+function getDateKeyBg(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+async function trackUrlView(url, title) {
+  if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:') || url.startsWith('data:')) {
+    return;
+  }
+
+  const categoriesData = await loadUrlCategories();
+  if (!categoriesData) return;
+
+  let hostname;
+  try {
+    hostname = new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return;
+  }
+
+  // Skip excluded
+  for (const excl of (categoriesData.excludedDomains || [])) {
+    if (excl.includes('://') && url.startsWith(excl)) return;
+    if (!excl.includes('://') && (hostname === excl || hostname.endsWith('.' + excl))) return;
+  }
+
+  const categoryId = categorizeUrlByDomain(url, categoriesData) || 'uncategorized';
+  const dateKey = getDateKeyBg(new Date());
+  const storageKey = `${URL_HISTORY_KEY}_${dateKey}`;
+
+  return new Promise((resolve) => {
+    chrome.storage.local.get([storageKey], (result) => {
+      const dayData = result[storageKey] || { views: [], totalCount: 0 };
+      dayData.views.push({
+        url,
+        domain: hostname,
+        title: (title || '').slice(0, 100),
+        category: categoryId,
+        timestamp: Date.now()
+      });
+      dayData.totalCount = dayData.views.length;
+      chrome.storage.local.set({ [storageKey]: dayData }, () => resolve(categoryId));
+    });
+  });
+}
+
+// Track completed navigations (top-level frames only)
+if (chrome.webNavigation) {
+  chrome.webNavigation.onCompleted.addListener(async (details) => {
+    if (details.frameId !== 0) return; // top-level only
+    try {
+      const tab = await chrome.tabs.get(details.tabId);
+      if (tab && tab.url) {
+        await trackUrlView(tab.url, tab.title || '');
+      }
+    } catch {
+      // tab may have closed
+    }
+  });
+}
+
 // ---- Whitelist helpers ----
 
 async function loadBundledWhitelist() {
@@ -44,12 +160,40 @@ async function autoRefreshWhitelist() {
   }
 }
 
-// Weekly refresh alarm
+// Alarm handlers
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'aegis-whitelist-update') {
     autoRefreshWhitelist();
   }
+  if (alarm.name === 'aegis-url-history-cleanup') {
+    cleanupOldUrlHistory();
+  }
 });
+
+async function cleanupOldUrlHistory() {
+  const MAX_DAYS = 30;
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - MAX_DAYS);
+  const cutoffKey = getDateKeyBg(cutoff);
+
+  chrome.storage.local.get(null, (all) => {
+    const keysToRemove = [];
+    for (const key of Object.keys(all)) {
+      if (key.startsWith(URL_HISTORY_KEY + '_')) {
+        const dateStr = key.replace(URL_HISTORY_KEY + '_', '');
+        if (dateStr < cutoffKey) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+    if (keysToRemove.length > 0) {
+      chrome.storage.local.remove(keysToRemove, () => {
+        console.log('[Aegis] Cleaned up', keysToRemove.length, 'old URL history entries');
+      });
+    }
+  });
+}
 
 // ---- Default settings ----
 
@@ -95,6 +239,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Schedule weekly whitelist refresh
   chrome.alarms.create('aegis-whitelist-update', { periodInMinutes: 10080 });
+
+  // Schedule daily URL history cleanup (every 24h)
+  chrome.alarms.create('aegis-url-history-cleanup', { periodInMinutes: 1440 });
 });
 
 function buildUserMessage(emailData) {
@@ -398,6 +545,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SAVE_SETTINGS') {
     chrome.storage.sync.set(message.settings, () => {
       sendResponse({ ok: true });
+    });
+    return true;
+  }
+
+  if (message.type === 'GET_URL_CATEGORIES') {
+    loadUrlCategories().then((data) => {
+      sendResponse({ data });
+    });
+    return true;
+  }
+
+  if (message.type === 'TRACK_URL') {
+    trackUrlView(message.url, message.title || '').then((categoryId) => {
+      sendResponse({ categoryId: categoryId || 'uncategorized' });
+    });
+    return true;
+  }
+
+  if (message.type === 'CATEGORIZE_URL') {
+    loadUrlCategories().then((data) => {
+      const catId = categorizeUrlByDomain(message.url, data);
+      sendResponse({ categoryId: catId });
     });
     return true;
   }
