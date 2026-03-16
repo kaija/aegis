@@ -105,13 +105,67 @@ if (chrome.webNavigation) {
     if (details.frameId !== 0) return; // top-level only
     try {
       const tab = await chrome.tabs.get(details.tabId);
-      if (tab && tab.url) {
-        await trackUrlView(tab.url, tab.title || '');
+      if (!tab || !tab.url) return;
+
+      const categoryId = await trackUrlView(tab.url, tab.title || '');
+
+      // If uncategorized and feedback mode is ON, inject the feedback widget
+      if (categoryId === 'uncategorized') {
+        const settings = await new Promise(r =>
+          chrome.storage.local.get([URL_TRACKER_SETTINGS_KEY], r)
+        );
+        const trackerSettings = settings[URL_TRACKER_SETTINGS_KEY] || {};
+
+        if (trackerSettings.feedbackEnabled) {
+          await injectFeedbackWidget(tab);
+        }
       }
     } catch {
       // tab may have closed
     }
   });
+}
+
+async function injectFeedbackWidget(tab) {
+  try {
+    // Skip chrome:// and extension pages
+    if (!tab.url || tab.url.startsWith('chrome') || tab.url.startsWith('about:')) return;
+
+    const categoriesData = await loadUrlCategories();
+    if (!categoriesData) return;
+
+    let hostname;
+    try {
+      hostname = new URL(tab.url).hostname.replace(/^www\./, '');
+    } catch {
+      return;
+    }
+
+    const categoryList = categoriesData.categories.map(c => ({
+      id: c.id,
+      name: c.name,
+      emoji: c.emoji
+    }));
+
+    // Inject data globals then the widget script
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (cats, domain, url) => {
+        window.__aegisFeedbackCategories = cats;
+        window.__aegisFeedbackDomain = domain;
+        window.__aegisFeedbackUrl = url;
+      },
+      args: [categoryList, hostname, tab.url]
+    });
+
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['src/ui/url-feedback.js']
+    });
+  } catch (e) {
+    // Injection may fail on restricted pages — that's OK
+    console.warn('[Aegis] Could not inject feedback widget:', e.message);
+  }
 }
 
 // ---- Whitelist helpers ----
@@ -567,6 +621,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     loadUrlCategories().then((data) => {
       const catId = categorizeUrlByDomain(message.url, data);
       sendResponse({ categoryId: catId });
+    });
+    return true;
+  }
+
+  if (message.type === 'SAVE_URL_LABEL') {
+    const { domain, categoryId, url } = message;
+    const USER_LABELS_KEY = 'aegis_url_user_labels';
+    chrome.storage.local.get([USER_LABELS_KEY], (result) => {
+      const labels = result[USER_LABELS_KEY] || {};
+      labels[domain] = categoryId;
+      chrome.storage.local.set({ [USER_LABELS_KEY]: labels }, () => {
+        // Also re-categorize today's uncategorized entries for this domain
+        const dateKey = getDateKeyBg(new Date());
+        const storageKey = `${URL_HISTORY_KEY}_${dateKey}`;
+        chrome.storage.local.get([storageKey], (res) => {
+          const dayData = res[storageKey];
+          if (dayData && dayData.views) {
+            let changed = false;
+            for (const view of dayData.views) {
+              if (view.domain === domain && view.category === 'uncategorized') {
+                view.category = categoryId;
+                changed = true;
+              }
+            }
+            if (changed) {
+              chrome.storage.local.set({ [storageKey]: dayData }, () => {
+                sendResponse({ ok: true });
+              });
+            } else {
+              sendResponse({ ok: true });
+            }
+          } else {
+            sendResponse({ ok: true });
+          }
+        });
+      });
     });
     return true;
   }
