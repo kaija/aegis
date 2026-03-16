@@ -109,7 +109,8 @@ class GmailPlatform extends BasePlatform {
     const links = [];
     linkEls.forEach(a => {
       const href = a.getAttribute('href');
-      if (href && !href.startsWith('mailto:') && links.length < 20) {
+      const isImageLink = /\.(?:png|jpe?g|gif|webp|svg|bmp|ico|tiff?)(?:[\?#].*)?$/i.test(href);
+      if (href && !href.startsWith('mailto:') && !isImageLink && links.length < 20) {
         links.push(href);
       }
     });

@@ -380,14 +380,15 @@ const EmailAnalyzer = (() => {
         row.結構 = '✗ 無效URL';
       }
 
-      if (isSuspicious || isOffWhitelist || isPotentialSpoof || reasons.length > 0) suspiciousCount++;
+      const isActuallySuspicious = (isSuspicious || isOffWhitelist || isPotentialSpoof) && !isWhitelisted;
+      if (isActuallySuspicious) suspiciousCount++;
 
       row.結果 = isWhitelisted ? '✓ 白名單' : isPotentialSpoof ? '✗ 疑似偽冒' : (isSuspicious || isOffWhitelist) ? '✗ 可疑' : '✓ 正常';
       linkDebugRows.push(row);
 
       linkResults.push({
         url: link,
-        isSuspicious: (isSuspicious || isOffWhitelist || isPotentialSpoof) && !isWhitelisted,
+        isSuspicious: isActuallySuspicious,
         isWhitelisted,
         isOffWhitelist,
         isPotentialSpoof,
