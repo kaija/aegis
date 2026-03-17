@@ -88,6 +88,22 @@
       </section>
     </div>
 
+    <!-- Uncategorized URLs Section (visible when feedback mode ON) -->
+    <section class="chart-section uncategorized-section" id="uncategorizedSection" style="display:none;">
+      <div class="section-header">
+        <h2>Uncategorized URLs</h2>
+        <span class="section-badge" id="uncategorizedCount">0</span>
+      </div>
+      <div class="uncategorized-list" id="uncategorizedList">
+        <div class="empty-state" id="uncategorizedEmpty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <p>All URLs are categorized</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Category Feedback Dialog (hidden by default) -->
     <div class="feedback-dialog" id="feedbackDialog" style="display:none;">
       <div class="feedback-content">

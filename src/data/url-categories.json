@@ -1,5 +1,5 @@
 {
-  "version": "1",
+  "version": "2",
   "updatedAt": "2026-03-16",
   "categories": [
     {
@@ -10,9 +10,13 @@
       "bgColor": "#e8f0fe",
       "domains": [
         "google.com", "google.co.jp", "google.co.uk", "google.com.tw",
+        "google.de", "google.fr", "google.com.au", "google.ca",
+        "google.co.in", "google.com.br", "google.co.kr",
         "bing.com", "duckduckgo.com", "yahoo.com", "baidu.com",
-        "yandex.com", "ecosia.org", "startpage.com", "brave.com",
-        "search.yahoo.com", "perplexity.ai"
+        "yandex.com", "yandex.ru", "ecosia.org", "startpage.com",
+        "brave.com", "search.yahoo.com",
+        "search.brave.com", "sogou.com", "naver.com",
+        "search.naver.com"
       ]
     },
     {
@@ -22,10 +26,24 @@
       "color": "#1da1f2",
       "bgColor": "#e8f5fd",
       "domains": [
-        "facebook.com", "instagram.com", "twitter.com", "x.com",
-        "linkedin.com", "reddit.com", "threads.net", "mastodon.social",
-        "tiktok.com", "snapchat.com", "pinterest.com", "tumblr.com",
-        "weibo.com", "plurk.com", "bsky.app", "discord.com"
+        "facebook.com", "m.facebook.com", "web.facebook.com",
+        "instagram.com",
+        "twitter.com", "x.com", "mobile.twitter.com",
+        "linkedin.com",
+        "reddit.com", "old.reddit.com",
+        "threads.net", "mastodon.social",
+        "tiktok.com",
+        "snapchat.com", "web.snapchat.com",
+        "pinterest.com",
+        "tumblr.com",
+        "weibo.com", "plurk.com", "bsky.app",
+        "discord.com", "discord.gg",
+        "messenger.com",
+        "whatsapp.com", "web.whatsapp.com",
+        "telegram.org", "web.telegram.org",
+        "signal.org",
+        "line.me",
+        "wechat.com"
       ]
     },
     {
@@ -35,11 +53,23 @@
       "color": "#ff0000",
       "bgColor": "#ffe0e0",
       "domains": [
-        "youtube.com", "youtu.be", "netflix.com", "twitch.tv",
-        "vimeo.com", "dailymotion.com", "disneyplus.com", "hulu.com",
-        "hbomax.com", "max.com", "primevideo.com", "crunchyroll.com",
-        "bilibili.com", "nicovideo.jp", "iqiyi.com", "spotify.com",
-        "music.apple.com", "soundcloud.com", "podcasts.apple.com"
+        "youtube.com", "m.youtube.com", "studio.youtube.com",
+        "music.youtube.com", "tv.youtube.com",
+        "netflix.com",
+        "twitch.tv",
+        "vimeo.com", "dailymotion.com",
+        "disneyplus.com", "hulu.com",
+        "hbomax.com", "max.com",
+        "primevideo.com", "video.amazon.com",
+        "tv.apple.com",
+        "crunchyroll.com",
+        "bilibili.com", "nicovideo.jp", "iqiyi.com",
+        "spotify.com", "open.spotify.com",
+        "music.apple.com", "soundcloud.com",
+        "podcasts.apple.com", "podcasts.google.com",
+        "deezer.com", "tidal.com",
+        "peacocktv.com", "paramountplus.com",
+        "plex.tv", "app.plex.tv"
       ]
     },
     {
@@ -49,13 +79,29 @@
       "color": "#ff6d00",
       "bgColor": "#fff3e0",
       "domains": [
-        "amazon.com", "amazon.co.jp", "amazon.co.uk", "amazon.com.tw",
-        "ebay.com", "etsy.com", "walmart.com", "target.com",
-        "shopee.tw", "shopee.com", "momo.com.tw", "pcone.com.tw",
+        "amazon.com", "amazon.co.jp", "amazon.co.uk", "amazon.de",
+        "amazon.fr", "amazon.ca", "amazon.com.au", "amazon.in",
+        "amazon.com.tw", "amazon.com.br",
+        "smile.amazon.com",
+        "ebay.com", "ebay.co.uk", "ebay.de",
+        "etsy.com",
+        "walmart.com", "target.com",
+        "shopee.tw", "shopee.com", "shopee.sg",
+        "momo.com.tw", "pcone.com.tw",
         "pchome.com.tw", "ruten.com.tw", "books.com.tw",
-        "rakuten.com.tw", "aliexpress.com", "taobao.com", "jd.com",
-        "bestbuy.com", "costco.com", "ikea.com", "uniqlo.com",
-        "zalando.com", "asos.com"
+        "rakuten.com.tw", "rakuten.co.jp",
+        "aliexpress.com", "taobao.com", "tmall.com", "jd.com",
+        "bestbuy.com", "costco.com",
+        "ikea.com", "uniqlo.com",
+        "zalando.com", "asos.com",
+        "store.google.com",
+        "store.apple.com", "apple.com/shop",
+        "store.nike.com", "nike.com",
+        "adidas.com",
+        "newegg.com",
+        "wayfair.com", "homedepot.com", "lowes.com",
+        "shopify.com",
+        "wish.com", "temu.com", "shein.com"
       ]
     },
     {
@@ -65,14 +111,25 @@
       "color": "#212121",
       "bgColor": "#f5f5f5",
       "domains": [
-        "cnn.com", "bbc.com", "bbc.co.uk", "nytimes.com",
-        "washingtonpost.com", "reuters.com", "apnews.com",
+        "cnn.com", "bbc.com", "bbc.co.uk",
+        "nytimes.com", "washingtonpost.com",
+        "reuters.com", "apnews.com",
         "theguardian.com", "bloomberg.com", "wsj.com",
+        "forbes.com", "fortune.com", "businessinsider.com",
+        "cnbc.com", "foxnews.com", "nbcnews.com", "abcnews.go.com",
         "techcrunch.com", "theverge.com", "wired.com",
         "arstechnica.com", "engadget.com",
+        "mashable.com", "gizmodo.com", "zdnet.com",
+        "cnet.com", "tomshardware.com",
+        "news.google.com", "news.yahoo.com",
+        "news.microsoft.com", "about.fb.com",
+        "blog.google",
         "udn.com", "ltn.com.tw", "ettoday.net", "setn.com",
-        "storm.mg", "bnext.com.tw", "cw.com.tw",
-        "nhk.or.jp", "asahi.com", "nikkei.com"
+        "storm.mg", "bnext.com.tw", "cw.com.tw", "tvbs.com.tw",
+        "nhk.or.jp", "asahi.com", "nikkei.com",
+        "scmp.com", "straitstimes.com",
+        "aljazeera.com", "dw.com",
+        "news.ycombinator.com"
       ]
     },
     {
@@ -82,11 +139,28 @@
       "color": "#0d47a1",
       "bgColor": "#e3f2fd",
       "domains": [
-        "apple.com", "microsoft.com", "samsung.com", "intel.com",
-        "nvidia.com", "amd.com", "lenovo.com", "dell.com", "hp.com",
-        "asus.com", "msi.com", "acer.com", "sony.com", "lg.com",
-        "oneplus.com", "xiaomi.com", "huawei.com", "oppo.com",
-        "support.apple.com", "support.microsoft.com"
+        "apple.com",
+        "microsoft.com",
+        "samsung.com",
+        "intel.com", "nvidia.com", "amd.com", "qualcomm.com", "arm.com",
+        "lenovo.com", "dell.com", "hp.com",
+        "asus.com", "msi.com", "acer.com",
+        "sony.com", "lg.com", "panasonic.com",
+        "oneplus.com", "xiaomi.com", "huawei.com", "oppo.com", "vivo.com",
+        "support.apple.com", "support.microsoft.com",
+        "support.google.com",
+        "developer.apple.com",
+        "learn.microsoft.com", "devblogs.microsoft.com",
+        "developers.google.com",
+        "developer.amazon.com",
+        "engineering.fb.com",
+        "meta.com",
+        "oracle.com", "ibm.com", "cisco.com",
+        "vmware.com", "broadcom.com", "hpe.com",
+        "motorola.com", "nokia.com",
+        "logitech.com", "razer.com", "corsair.com",
+        "dyson.com", "bose.com",
+        "store.steampowered.com/hardware"
       ]
     },
     {
@@ -96,16 +170,37 @@
       "color": "#24292e",
       "bgColor": "#f0f0f0",
       "domains": [
-        "github.com", "gitlab.com", "bitbucket.org",
-        "stackoverflow.com", "stackexchange.com",
+        "github.com", "gist.github.com",
+        "gitlab.com", "bitbucket.org",
+        "stackoverflow.com", "stackexchange.com", "askubuntu.com",
         "npmjs.com", "pypi.org", "crates.io", "pkg.go.dev",
-        "developer.mozilla.org", "mdn.io", "w3schools.com",
-        "codepen.io", "jsfiddle.net", "replit.com",
+        "rubygems.org", "packagist.org", "nuget.org",
+        "mvnrepository.com", "pub.dev",
+        "developer.mozilla.org", "mdn.io",
+        "w3schools.com", "w3.org",
+        "codepen.io", "jsfiddle.net", "codesandbox.io",
+        "replit.com", "glitch.com",
         "vercel.com", "netlify.com", "heroku.com",
         "docker.com", "hub.docker.com",
+        "kubernetes.io",
         "dev.to", "medium.com", "hashnode.dev",
         "leetcode.com", "hackerrank.com", "codeforces.com",
-        "figma.com", "dribbble.com"
+        "codewars.com",
+        "figma.com", "dribbble.com", "behance.net",
+        "postman.com",
+        "grafana.com", "prometheus.io",
+        "terraform.io", "ansible.com",
+        "jetbrains.com",
+        "visualstudio.com", "marketplace.visualstudio.com",
+        "code.visualstudio.com",
+        "plugins.jetbrains.com",
+        "circleci.com", "travis-ci.com",
+        "sentry.io", "datadoghq.com", "newrelic.com",
+        "elastic.co", "splunk.com",
+        "confluent.io",
+        "redis.io", "mongodb.com", "postgresql.org",
+        "mysql.com", "mariadb.org",
+        "sqlite.org"
       ]
     },
     {
@@ -116,11 +211,19 @@
       "bgColor": "#fff8e1",
       "domains": [
         "aws.amazon.com", "console.aws.amazon.com",
+        "docs.aws.amazon.com", "s3.amazonaws.com",
         "cloud.google.com", "console.cloud.google.com",
         "azure.microsoft.com", "portal.azure.com",
-        "digitalocean.com", "cloudflare.com",
+        "azure.com", "devops.azure.com",
+        "digitalocean.com", "cloudflare.com", "dash.cloudflare.com",
         "firebase.google.com", "supabase.com",
-        "railway.app", "fly.io", "render.com"
+        "railway.app", "fly.io", "render.com",
+        "linode.com", "akamai.com",
+        "vultr.com", "ovhcloud.com",
+        "oracle.cloud.com",
+        "cloud.ibm.com",
+        "alibabacloud.com", "cloud.tencent.com",
+        "workers.cloudflare.com", "pages.cloudflare.com"
       ]
     },
     {
@@ -130,13 +233,35 @@
       "color": "#7c4dff",
       "bgColor": "#ede7f6",
       "domains": [
-        "chat.openai.com", "openai.com", "claude.ai", "anthropic.com",
-        "gemini.google.com", "bard.google.com",
-        "huggingface.co", "kaggle.com",
-        "midjourney.com", "stability.ai",
-        "copilot.microsoft.com", "poe.com",
-        "character.ai", "replicate.com", "together.ai",
-        "groq.com", "mistral.ai", "cohere.com"
+        "chat.openai.com", "platform.openai.com", "openai.com",
+        "claude.ai", "console.anthropic.com", "anthropic.com",
+        "gemini.google.com", "aistudio.google.com",
+        "ai.google.dev",
+        "copilot.microsoft.com", "copilot.github.com",
+        "huggingface.co",
+        "kaggle.com",
+        "midjourney.com",
+        "stability.ai",
+        "poe.com", "character.ai",
+        "replicate.com", "together.ai",
+        "groq.com", "mistral.ai", "cohere.com",
+        "deepmind.google", "deepmind.com",
+        "ai.meta.com", "llama.meta.com",
+        "labs.google.com",
+        "research.google.com",
+        "research.facebook.com", "research.fb.com",
+        "ai.amazon.com", "bedrock.aws.amazon.com",
+        "sagemaker.aws.amazon.com",
+        "azure.microsoft.com/ai",
+        "runwayml.com",
+        "elevenlabs.io", "play.ht",
+        "civitai.com",
+        "perplexity.ai",
+        "cursor.com", "cursor.sh",
+        "v0.dev",
+        "phind.com", "you.com",
+        "deepseek.com", "chat.deepseek.com",
+        "qwen.ai"
       ]
     },
     {
@@ -147,14 +272,27 @@
       "bgColor": "#e0f2f1",
       "domains": [
         "chase.com", "bankofamerica.com", "wellsfargo.com",
-        "paypal.com", "stripe.com", "wise.com",
+        "citibank.com", "capitalone.com", "usbank.com",
+        "paypal.com", "stripe.com", "wise.com", "revolut.com",
+        "venmo.com", "cash.app", "zelle.com",
         "robinhood.com", "etrade.com", "fidelity.com",
+        "schwab.com", "vanguard.com", "ameritrade.com",
+        "interactive brokers.com",
         "coinbase.com", "binance.com", "kraken.com",
+        "crypto.com", "gemini.com",
+        "pay.google.com", "pay.apple.com", "wallet.google.com",
+        "card.apple.com",
+        "pay.amazon.com",
         "esun.com.tw", "cathaybk.com.tw", "ctbcbank.com",
         "megabank.com.tw", "bot.com.tw",
         "hsbc.com", "hsbc.com.tw",
-        "yahoo.com/finance", "finance.yahoo.com",
-        "tradingview.com", "investing.com"
+        "barclays.co.uk", "natwest.com",
+        "finance.yahoo.com",
+        "tradingview.com", "investing.com",
+        "morningstar.com", "seekingalpha.com",
+        "mint.intuit.com", "quickbooks.intuit.com",
+        "tax.google.com",
+        "turbotax.intuit.com"
       ]
     },
     {
@@ -169,11 +307,26 @@
         "evernote.com", "obsidian.md",
         "airtable.com", "miro.com", "canva.com",
         "docs.google.com", "sheets.google.com", "slides.google.com",
-        "drive.google.com", "dropbox.com", "box.com",
+        "forms.google.com", "sites.google.com",
+        "drive.google.com",
+        "photos.google.com",
+        "keep.google.com",
+        "dropbox.com", "box.com",
         "onedrive.live.com", "office.com", "outlook.com",
-        "zoom.us", "teams.microsoft.com", "slack.com",
+        "outlook.office.com", "outlook.office365.com",
+        "word.office.com", "excel.office.com", "powerpoint.office.com",
+        "onenote.com",
+        "zoom.us", "app.zoom.us",
+        "teams.microsoft.com", "teams.live.com",
+        "slack.com", "app.slack.com",
         "meet.google.com", "calendar.google.com",
-        "grammarly.com", "1password.com", "bitwarden.com"
+        "contacts.google.com",
+        "workplace.com",
+        "grammarly.com", "1password.com", "bitwarden.com",
+        "lastpass.com", "dashlane.com",
+        "linear.app", "height.app",
+        "basecamp.com", "wrike.com",
+        "coda.io"
       ]
     },
     {
@@ -187,10 +340,16 @@
         "khanacademy.org", "duolingo.com",
         "pluralsight.com", "skillshare.com", "codecademy.com",
         "freecodecamp.org", "udacity.com",
+        "lynda.com", "linkedin.com/learning",
+        "masterclass.com",
         "wikipedia.org", "wikimedia.org",
         "scholar.google.com", "arxiv.org", "researchgate.net",
         "academia.edu", "jstor.org",
-        "hahow.in", "pressplay.cc"
+        "classroom.google.com",
+        "edu.google.com",
+        "hahow.in", "pressplay.cc",
+        "brilliant.org", "mit.edu", "stanford.edu",
+        "ocw.mit.edu"
       ]
     },
     {
@@ -202,8 +361,10 @@
       "domains": [
         "mail.google.com", "gmail.com",
         "outlook.live.com", "mail.yahoo.com",
-        "protonmail.com", "proton.me",
-        "fastmail.com", "tutanota.com", "hey.com"
+        "protonmail.com", "proton.me", "mail.proton.me",
+        "fastmail.com", "tutanota.com", "hey.com",
+        "mail.zoho.com", "zoho.com/mail",
+        "icloud.com/mail", "mail.aol.com"
       ]
     },
     {
@@ -218,8 +379,14 @@
         "skyscanner.com", "kayak.com",
         "google.com/travel", "google.com/flights",
         "maps.google.com", "google.com/maps",
+        "maps.apple.com",
         "klook.com", "kkday.com",
-        "uber.com", "lyft.com", "grab.com"
+        "uber.com", "lyft.com", "grab.com",
+        "flightradar24.com",
+        "rome2rio.com", "omio.com",
+        "vrbo.com", "hostelworld.com",
+        "trip.com", "ctrip.com",
+        "flightaware.com"
       ]
     },
     {
@@ -232,7 +399,11 @@
         "ubereats.com", "doordash.com", "grubhub.com",
         "foodpanda.com", "deliveroo.com",
         "yelp.com", "opentable.com",
-        "foodpanda.com.tw", "ubereats.com.tw"
+        "foodpanda.com.tw", "ubereats.com.tw",
+        "instacart.com", "postmates.com",
+        "seamless.com",
+        "allrecipes.com", "epicurious.com",
+        "food.google.com"
       ]
     },
     {
@@ -243,9 +414,13 @@
       "bgColor": "#ffebee",
       "domains": [
         "webmd.com", "mayoclinic.org", "healthline.com",
-        "nih.gov", "who.int",
+        "nih.gov", "who.int", "cdc.gov",
         "strava.com", "fitbit.com", "myfitnesspal.com",
-        "nhi.gov.tw", "cdc.gov.tw"
+        "nhi.gov.tw", "cdc.gov.tw",
+        "health.apple.com", "fitness.google.com",
+        "peloton.com", "garmin.com/fitness",
+        "headspace.com", "calm.com",
+        "zocdoc.com", "teladoc.com"
       ]
     },
     {
@@ -258,9 +433,17 @@
         "store.steampowered.com", "steampowered.com", "steamcommunity.com",
         "epicgames.com", "gog.com",
         "playstation.com", "xbox.com", "nintendo.com",
-        "ign.com", "gamespot.com", "kotaku.com",
-        "twitch.tv", "riotgames.com", "blizzard.com",
-        "ea.com", "ubisoft.com"
+        "ign.com", "gamespot.com", "kotaku.com", "polygon.com",
+        "riotgames.com", "blizzard.com", "battle.net",
+        "ea.com", "ubisoft.com",
+        "play.google.com",
+        "apps.apple.com",
+        "unity.com", "unrealengine.com",
+        "roblox.com", "minecraft.net",
+        "curseforge.com", "nexusmods.com",
+        "gamesradar.com", "pcgamer.com",
+        "stadia.google.com",
+        "gaming.amazon.com", "luna.amazon.com"
       ]
     },
     {
@@ -270,11 +453,15 @@
       "color": "#37474f",
       "bgColor": "#eceff1",
       "domains": [
-        "gov.tw", "gov.uk", "gov.au",
+        "gov.tw", "gov.uk", "gov.au", "gc.ca",
         "usa.gov", "whitehouse.gov",
         "irs.gov", "ssa.gov",
         "europa.eu", "un.org",
-        "nhi.gov.tw", "etax.nat.gov.tw", "moea.gov.tw"
+        "etax.nat.gov.tw", "moea.gov.tw",
+        "state.gov", "justice.gov",
+        "congress.gov", "senate.gov",
+        "fda.gov", "epa.gov", "nasa.gov",
+        "data.gov", "data.gov.tw"
       ]
     },
     {
@@ -286,10 +473,13 @@
       "domains": [
         "imdb.com", "rottentomatoes.com",
         "goodreads.com", "letterboxd.com",
-        "spotify.com", "apple.com/music",
         "bandcamp.com", "last.fm",
         "ticketmaster.com", "eventbrite.com",
-        "tixcraft.com", "kktix.com"
+        "tixcraft.com", "kktix.com",
+        "fandango.com",
+        "stubhub.com", "seatgeek.com",
+        "genius.com",
+        "tv.apple.com/channel"
       ]
     },
     {
@@ -304,7 +494,44 @@
         "speedtest.net", "fast.com",
         "archive.org", "web.archive.org",
         "jsonformatter.org", "regex101.com",
-        "excalidraw.com", "draw.io", "diagrams.net"
+        "excalidraw.com", "draw.io", "diagrams.net",
+        "whois.com", "who.is",
+        "downdetector.com",
+        "worldtimebuddy.com", "timeanddate.com",
+        "convertunits.com",
+        "weather.com", "weather.google.com",
+        "myaccount.google.com",
+        "account.microsoft.com",
+        "account.apple.com", "appleid.apple.com",
+        "myaccount.amazon.com"
+      ]
+    },
+    {
+      "id": "advertising",
+      "name": "Advertising & Marketing",
+      "emoji": "📢",
+      "color": "#f57c00",
+      "bgColor": "#fff3e0",
+      "domains": [
+        "ads.google.com", "adwords.google.com",
+        "analytics.google.com", "tagmanager.google.com",
+        "searchconsole.google.com",
+        "business.facebook.com", "adsmanager.facebook.com",
+        "business.instagram.com",
+        "ads.twitter.com", "ads.x.com",
+        "ads.linkedin.com",
+        "ads.tiktok.com",
+        "advertising.amazon.com",
+        "ads.microsoft.com",
+        "ads.pinterest.com",
+        "ads.snapchat.com",
+        "mailchimp.com", "hubspot.com",
+        "marketo.com", "salesforce.com",
+        "semrush.com", "ahrefs.com", "moz.com",
+        "hootsuite.com", "buffer.com",
+        "amplitude.com", "mixpanel.com",
+        "segment.com", "hotjar.com",
+        "optimizely.com"
       ]
     }
   ],
@@ -313,6 +540,7 @@
     "buff.ly", "is.gd", "v.gd", "rb.gy", "cutt.ly",
     "shorturl.at", "tiny.cc", "lnkd.in", "fb.me",
     "youtu.be", "amzn.to", "a.co",
+    "aka.ms", "msft.it", "apple.co",
     "chrome://", "chrome-extension://", "about:", "data:",
     "localhost", "127.0.0.1", "0.0.0.0"
   ]

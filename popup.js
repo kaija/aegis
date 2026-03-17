@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Set version
   const manifest = chrome.runtime.getManifest();
   if (versionText) {
-    versionText.textContent = `v${manifest.version} • Enterprise Ready`;
+    versionText.textContent = `v${manifest.version}`;
   }
 
   // Load stats from local storage (if any)

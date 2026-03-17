@@ -10,8 +10,8 @@ const UrlTracker = (() => {
   const USER_LABELS_KEY = 'aegis_url_user_labels';
   const MAX_HISTORY_DAYS = 30;
 
-  let _categoryMap = null; // domain -> category
-  let _categories = null;  // full category list
+  let _sortedLookup = null; // sorted by domain length desc for longest-match-first
+  let _categories = null;   // full category list
   let _excludedDomains = null;
   let _settings = null;
 
@@ -24,27 +24,35 @@ const UrlTracker = (() => {
       if (data) {
         _categories = data.categories || [];
         _excludedDomains = new Set(data.excludedDomains || []);
-        _buildCategoryMap();
+        _buildSortedLookup();
       }
       _settings = await _loadSettings();
 
-      // Merge user labels into category map
+      // Merge user labels into lookup (user labels are highest priority, added at front)
       const userLabels = await _loadUserLabels();
-      for (const [domain, categoryId] of Object.entries(userLabels)) {
-        _categoryMap.set(domain, categoryId);
+      if (_sortedLookup) {
+        const userEntries = Object.entries(userLabels).map(([domain, categoryId]) => ({
+          domain, categoryId, hasPath: domain.includes('/')
+        }));
+        // User labels go first (highest priority), sorted longest first among themselves
+        userEntries.sort((a, b) => b.domain.length - a.domain.length);
+        _sortedLookup = [...userEntries, ..._sortedLookup];
       }
     } catch (e) {
       console.warn('[Aegis URL Tracker] Init failed:', e);
     }
   }
 
-  function _buildCategoryMap() {
-    _categoryMap = new Map();
+  function _buildSortedLookup() {
+    const entries = [];
     for (const cat of _categories) {
       for (const domain of cat.domains) {
-        _categoryMap.set(domain, cat.id);
+        entries.push({ domain, categoryId: cat.id, hasPath: domain.includes('/') });
       }
     }
+    // Sort by domain length descending — longer (more specific) matches win
+    entries.sort((a, b) => b.domain.length - a.domain.length);
+    _sortedLookup = entries;
   }
 
   async function _loadCategories() {
@@ -107,42 +115,30 @@ const UrlTracker = (() => {
   }
 
   /**
-   * Categorize a URL by matching its domain against the category map
-   * Tries exact domain, then parent domains
+   * Categorize a URL by matching against sorted lookup (longest match first).
+   * e.g. gemini.google.com → "ai" (not "search" from google.com)
    */
   function categorizeUrl(url) {
     if (_isExcluded(url)) return null;
+    if (!_sortedLookup) return null;
 
     const domain = _extractDomain(url);
     if (!domain) return null;
 
-    // Try full hostname match first (e.g. "mail.google.com")
-    if (_categoryMap.has(domain)) {
-      return _categoryMap.get(domain);
-    }
-
-    // Try parent domains (e.g. "sub.example.com" -> "example.com")
-    const parts = domain.split('.');
-    for (let i = 1; i < parts.length - 1; i++) {
-      const parent = parts.slice(i).join('.');
-      if (_categoryMap.has(parent)) {
-        return _categoryMap.get(parent);
-      }
-    }
-
-    // Try URL path match (e.g. "google.com/maps")
+    let pathname = '';
     try {
-      const u = new URL(url);
-      const pathDomain = domain + u.pathname;
-      for (const cat of _categories) {
-        for (const d of cat.domains) {
-          if (d.includes('/') && pathDomain.startsWith(d)) {
-            return cat.id;
-          }
-        }
-      }
+      pathname = new URL(url).pathname;
     } catch {
       // ignore
+    }
+
+    for (const entry of _sortedLookup) {
+      if (entry.hasPath) {
+        const pathDomain = domain + pathname;
+        if (pathDomain.startsWith(entry.domain)) return entry.categoryId;
+      } else if (domain === entry.domain || domain.endsWith('.' + entry.domain)) {
+        return entry.categoryId;
+      }
     }
 
     return null;
@@ -333,7 +329,18 @@ const UrlTracker = (() => {
   async function saveUserLabel(domain, categoryId) {
     const labels = await _loadUserLabels();
     labels[domain] = categoryId;
-    if (_categoryMap) _categoryMap.set(domain, categoryId);
+    // Update in-memory lookup: remove old entry for this domain, insert new one
+    if (_sortedLookup) {
+      _sortedLookup = _sortedLookup.filter(e => e.domain !== domain);
+      // Insert at correct position (sorted by length desc)
+      const entry = { domain, categoryId, hasPath: domain.includes('/') };
+      const idx = _sortedLookup.findIndex(e => e.domain.length <= domain.length);
+      if (idx === -1) {
+        _sortedLookup.push(entry);
+      } else {
+        _sortedLookup.splice(idx, 0, entry);
+      }
+    }
     return new Promise((resolve) => {
       chrome.storage.local.set({ [USER_LABELS_KEY]: labels }, resolve);
     });

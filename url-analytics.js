@@ -413,6 +413,122 @@ function renderLegend(container, breakdown) {
   }
 }
 
+// ---- Uncategorized URLs ----
+
+async function getUncategorizedDomains(days) {
+  const now = new Date();
+  const keys = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    keys.push(`${STORAGE_KEY}_${getDateKey(d)}`);
+  }
+
+  const data = await new Promise((resolve) => {
+    chrome.storage.local.get(keys, resolve);
+  });
+
+  // Aggregate by domain: { domain -> { count, lastUrl, lastTitle } }
+  const domainMap = {};
+  for (const key of keys) {
+    const dayData = data[key];
+    if (!dayData || !dayData.views) continue;
+    for (const v of dayData.views) {
+      if (v.category !== 'uncategorized') continue;
+      if (!domainMap[v.domain]) {
+        domainMap[v.domain] = { count: 0, lastUrl: v.url, lastTitle: v.title };
+      }
+      domainMap[v.domain].count++;
+      domainMap[v.domain].lastUrl = v.url;
+      domainMap[v.domain].lastTitle = v.title;
+    }
+  }
+
+  // Sort by count descending
+  return Object.entries(domainMap)
+    .map(([domain, info]) => ({ domain, ...info }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function renderUncategorizedList(container, domains, categories, onSave) {
+  const emptyEl = document.getElementById('uncategorizedEmpty');
+  const countBadge = document.getElementById('uncategorizedCount');
+
+  if (domains.length === 0) {
+    emptyEl.style.display = '';
+    countBadge.textContent = '0';
+    // Remove all rows but keep empty state
+    container.querySelectorAll('.uncat-row').forEach(el => el.remove());
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  countBadge.textContent = domains.length;
+
+  // Clear existing rows
+  container.querySelectorAll('.uncat-row').forEach(el => el.remove());
+
+  const optionsHtml = categories.map(c =>
+    `<option value="${escapeHtml(c.id)}">${c.emoji} ${escapeHtml(c.name)}</option>`
+  ).join('');
+
+  for (const item of domains) {
+    const row = document.createElement('div');
+    row.className = 'uncat-row';
+    row.dataset.domain = item.domain;
+    row.innerHTML = `
+      <div class="uncat-domain">
+        <span class="uncat-domain-name" title="${escapeHtml(item.lastUrl)}">${escapeHtml(item.domain)}</span>
+        <span class="uncat-domain-meta">${item.count} view${item.count > 1 ? 's' : ''}</span>
+      </div>
+      <select class="uncat-select">
+        <option value="">-- Select --</option>
+        ${optionsHtml}
+      </select>
+      <button class="uncat-save" disabled>Save</button>
+    `;
+
+    const select = row.querySelector('.uncat-select');
+    const saveBtn = row.querySelector('.uncat-save');
+
+    select.addEventListener('change', () => {
+      saveBtn.disabled = !select.value;
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      if (!select.value) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = '...';
+
+      await onSave(item.domain, select.value);
+
+      // Replace select+button with saved indicator
+      const selectedText = select.options[select.selectedIndex].text;
+      select.remove();
+      saveBtn.remove();
+      const saved = document.createElement('span');
+      saved.className = 'uncat-saved';
+      saved.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${escapeHtml(selectedText)}`;
+      row.appendChild(saved);
+
+      // Update count badge
+      const remaining = container.querySelectorAll('.uncat-select').length;
+      countBadge.textContent = remaining;
+      if (remaining === 0) {
+        emptyEl.style.display = '';
+      }
+    });
+
+    container.appendChild(row);
+  }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
 // ---- Export Functions ----
 
 function downloadFile(content, filename, mimeType) {
@@ -460,6 +576,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const exportHistoryBtn = document.getElementById('exportHistory');
   const exportCloseBtn = document.getElementById('exportClose');
 
+  const uncategorizedSection = document.getElementById('uncategorizedSection');
+  const uncategorizedList = document.getElementById('uncategorizedList');
+
   // Load categories
   await loadCategoriesData();
 
@@ -467,10 +586,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   const settings = await getSettings();
   feedbackToggle.checked = settings.feedbackEnabled || false;
 
+  // Category list for dropdowns
+  const categoryOptions = _categoriesData
+    ? _categoriesData.categories.map(c => ({ id: c.id, name: c.name, emoji: c.emoji }))
+    : [];
+
+  // Refresh helper: re-renders pie chart, legend, and uncategorized list
+  async function refreshAfterSave() {
+    const newBreakdown = await getCategoryBreakdown(8);
+    drawPieChart(pieCanvas, newBreakdown);
+    renderLegend(legendContainer, newBreakdown);
+  }
+
+  // Show/hide uncategorized section based on feedback toggle
+  async function updateUncategorizedSection() {
+    if (feedbackToggle.checked) {
+      uncategorizedSection.style.display = '';
+      const domains = await getUncategorizedDomains(8);
+      renderUncategorizedList(uncategorizedList, domains, categoryOptions, async (domain, categoryId) => {
+        // Save label via background
+        await new Promise((resolve) => {
+          chrome.runtime.sendMessage({
+            type: 'SAVE_URL_LABEL',
+            domain,
+            categoryId,
+            url: ''
+          }, resolve);
+        });
+        await refreshAfterSave();
+      });
+    } else {
+      uncategorizedSection.style.display = 'none';
+    }
+  }
+
+  await updateUncategorizedSection();
+
   feedbackToggle.addEventListener('change', async () => {
     const s = await getSettings();
     s.feedbackEnabled = feedbackToggle.checked;
     await saveSettings(s);
+    await updateUncategorizedSection();
   });
 
   // Prediction

@@ -9,6 +9,7 @@ async function loadUrlCategories() {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     _urlCategoriesCache = await res.json();
+    _sortedDomainLookup = null; // invalidate lookup on reload
     return _urlCategoriesCache;
   } catch (e) {
     console.error('[Aegis] Failed to load URL categories:', e);
@@ -16,7 +17,45 @@ async function loadUrlCategories() {
   }
 }
 
-function categorizeUrlByDomain(url, categoriesData) {
+// Pre-built sorted lookup: built once per categories load, longest domain first
+let _sortedDomainLookup = null;
+
+async function _buildSortedLookup(categoriesData) {
+  if (_sortedDomainLookup) return _sortedDomainLookup;
+  const entries = [];
+  for (const cat of categoriesData.categories) {
+    for (const domain of cat.domains) {
+      entries.push({ domain, categoryId: cat.id, hasPath: domain.includes('/') });
+    }
+  }
+
+  // Add user labels (override built-in mappings for same domain)
+  try {
+    const result = await new Promise(r =>
+      chrome.storage.local.get(['aegis_url_user_labels'], r)
+    );
+    const userLabels = result.aegis_url_user_labels || {};
+    const userDomains = new Set(Object.keys(userLabels));
+
+    // Remove built-in entries for domains that have user overrides
+    const filtered = entries.filter(e => !userDomains.has(e.domain));
+
+    // Add user label entries
+    for (const [domain, categoryId] of Object.entries(userLabels)) {
+      filtered.push({ domain, categoryId, hasPath: domain.includes('/') });
+    }
+
+    // Sort by domain length descending — longer (more specific) matches first
+    filtered.sort((a, b) => b.domain.length - a.domain.length);
+    _sortedDomainLookup = filtered;
+  } catch {
+    entries.sort((a, b) => b.domain.length - a.domain.length);
+    _sortedDomainLookup = entries;
+  }
+  return _sortedDomainLookup;
+}
+
+async function categorizeUrlByDomain(url, categoriesData) {
   if (!categoriesData || !url) return null;
   try {
     const u = new URL(url);
@@ -28,16 +67,15 @@ function categorizeUrlByDomain(url, categoriesData) {
       if (!excl.includes('://') && (hostname === excl || hostname.endsWith('.' + excl))) return null;
     }
 
-    // Try exact hostname match, then parent domains
-    for (const cat of categoriesData.categories) {
-      for (const domain of cat.domains) {
-        if (domain.includes('/')) {
-          // Path-based match
-          const pathDomain = hostname + u.pathname;
-          if (pathDomain.startsWith(domain)) return cat.id;
-        } else if (hostname === domain || hostname.endsWith('.' + domain)) {
-          return cat.id;
-        }
+    const lookup = await _buildSortedLookup(categoriesData);
+
+    // Longest match first: gemini.google.com matches "ai" before google.com matches "search"
+    for (const entry of lookup) {
+      if (entry.hasPath) {
+        const pathDomain = hostname + u.pathname;
+        if (pathDomain.startsWith(entry.domain)) return entry.categoryId;
+      } else if (hostname === entry.domain || hostname.endsWith('.' + entry.domain)) {
+        return entry.categoryId;
       }
     }
     return null;
@@ -79,7 +117,7 @@ async function trackUrlView(url, title) {
     if (!excl.includes('://') && (hostname === excl || hostname.endsWith('.' + excl))) return;
   }
 
-  const categoryId = categorizeUrlByDomain(url, categoriesData) || 'uncategorized';
+  const categoryId = (await categorizeUrlByDomain(url, categoriesData)) || 'uncategorized';
   const dateKey = getDateKeyBg(new Date());
   const storageKey = `${URL_HISTORY_KEY}_${dateKey}`;
 
@@ -618,8 +656,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'CATEGORIZE_URL') {
-    loadUrlCategories().then((data) => {
-      const catId = categorizeUrlByDomain(message.url, data);
+    loadUrlCategories().then(async (data) => {
+      const catId = await categorizeUrlByDomain(message.url, data);
       sendResponse({ categoryId: catId });
     });
     return true;
@@ -628,6 +666,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SAVE_URL_LABEL') {
     const { domain, categoryId, url } = message;
     const USER_LABELS_KEY = 'aegis_url_user_labels';
+    // Invalidate sorted lookup so future navigations use the new label
+    _sortedDomainLookup = null;
     chrome.storage.local.get([USER_LABELS_KEY], (result) => {
       const labels = result[USER_LABELS_KEY] || {};
       labels[domain] = categoryId;
