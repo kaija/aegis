@@ -206,6 +206,161 @@ async function injectFeedbackWidget(tab) {
   }
 }
 
+// ---- Active Time Tracking ----
+// Tracks how long the user actively views each page (tab focused + user active).
+// Stores per-day time data in aegis_url_time_{date} keyed by domain+category.
+
+const URL_TIME_KEY = 'aegis_url_time';
+const TIME_FLUSH_INTERVAL = 15000; // flush accumulated time every 15s
+
+let _activeSession = null;  // { tabId, url, domain, category, startTime }
+let _isUserActive = true;   // idle API state
+let _isWindowFocused = true;
+
+function _startSession(tabId, url) {
+  if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:') || url.startsWith('data:')) {
+    _activeSession = null;
+    return;
+  }
+
+  let hostname;
+  try {
+    hostname = new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    _activeSession = null;
+    return;
+  }
+
+  _activeSession = {
+    tabId,
+    url,
+    domain: hostname,
+    category: null, // resolved lazily on flush
+    startTime: Date.now()
+  };
+}
+
+async function _flushSession() {
+  if (!_activeSession) return;
+  if (!_isUserActive || !_isWindowFocused) return;
+
+  const now = Date.now();
+  const elapsed = now - _activeSession.startTime;
+  if (elapsed < 1000) return; // ignore sub-second
+
+  // Resolve category if not yet done
+  if (!_activeSession.category || _activeSession.category === 'null') {
+    const categoriesData = await loadUrlCategories();
+    if (categoriesData) {
+      _activeSession.category = (await categorizeUrlByDomain(_activeSession.url, categoriesData)) || 'uncategorized';
+    } else {
+      _activeSession.category = 'uncategorized';
+    }
+  }
+
+  const dateKey = getDateKeyBg(new Date());
+  const storageKey = `${URL_TIME_KEY}_${dateKey}`;
+
+  await new Promise((resolve) => {
+    chrome.storage.local.get([storageKey], (result) => {
+      const dayTime = result[storageKey] || { domains: {}, categories: {}, totalMs: 0 };
+
+      // Accumulate by domain
+      if (!dayTime.domains[_activeSession.domain]) {
+        dayTime.domains[_activeSession.domain] = { ms: 0, category: _activeSession.category };
+      }
+      dayTime.domains[_activeSession.domain].ms += elapsed;
+      dayTime.domains[_activeSession.domain].category = _activeSession.category;
+
+      // Accumulate by category
+      if (!dayTime.categories[_activeSession.category]) {
+        dayTime.categories[_activeSession.category] = 0;
+      }
+      dayTime.categories[_activeSession.category] += elapsed;
+
+      dayTime.totalMs += elapsed;
+
+      chrome.storage.local.set({ [storageKey]: dayTime }, resolve);
+    });
+  });
+
+  // Reset start time for next interval
+  _activeSession.startTime = now;
+}
+
+async function _endSession() {
+  await _flushSession();
+  _activeSession = null;
+}
+
+// When active tab changes
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  await _flushSession();
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+    if (tab && tab.url) {
+      _startSession(activeInfo.tabId, tab.url);
+    } else {
+      _activeSession = null;
+    }
+  } catch {
+    _activeSession = null;
+  }
+});
+
+// When tab URL changes (SPA navigations, user navigates within tab)
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.url && _activeSession && _activeSession.tabId === tabId) {
+    await _flushSession();
+    _startSession(tabId, changeInfo.url);
+  }
+});
+
+// When window focus changes
+chrome.windows.onFocusChanged.addListener(async (windowId) => {
+  if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    // All windows lost focus
+    await _flushSession();
+    _isWindowFocused = false;
+  } else {
+    _isWindowFocused = true;
+    // Re-start session for current active tab in this window
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, windowId });
+      if (tab && tab.url) {
+        _startSession(tab.id, tab.url);
+      }
+    } catch {
+      // ignore
+    }
+  }
+});
+
+// Idle detection: user idle (screen off, locked, AFK)
+chrome.idle.setDetectionInterval(60); // 60 seconds
+chrome.idle.onStateChanged.addListener(async (newState) => {
+  if (newState === 'active') {
+    _isUserActive = true;
+    // Resume tracking current tab
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      if (tab && tab.url) {
+        _startSession(tab.id, tab.url);
+      }
+    } catch {
+      // ignore
+    }
+  } else {
+    // 'idle' or 'locked'
+    await _flushSession();
+    _isUserActive = false;
+    _activeSession = null;
+  }
+});
+
+// Periodic flush using alarm (service worker may suspend, so use alarm)
+chrome.alarms.create('aegis-time-flush', { periodInMinutes: 0.25 }); // every 15s
+
 // ---- Whitelist helpers ----
 
 async function loadBundledWhitelist() {
@@ -260,6 +415,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'aegis-url-history-cleanup') {
     cleanupOldUrlHistory();
   }
+  if (alarm.name === 'aegis-time-flush') {
+    _flushSession();
+  }
 });
 
 async function cleanupOldUrlHistory() {
@@ -272,8 +430,9 @@ async function cleanupOldUrlHistory() {
   chrome.storage.local.get(null, (all) => {
     const keysToRemove = [];
     for (const key of Object.keys(all)) {
-      if (key.startsWith(URL_HISTORY_KEY + '_')) {
-        const dateStr = key.replace(URL_HISTORY_KEY + '_', '');
+      if (key.startsWith(URL_HISTORY_KEY + '_') || key.startsWith(URL_TIME_KEY + '_')) {
+        const prefix = key.startsWith(URL_HISTORY_KEY) ? URL_HISTORY_KEY + '_' : URL_TIME_KEY + '_';
+        const dateStr = key.replace(prefix, '');
         if (dateStr < cutoffKey) {
           keysToRemove.push(key);
         }
@@ -663,6 +822,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'GET_TIME_DATA') {
+    // Flush current session first to get latest data
+    _flushSession().then(() => {
+      const days = message.days || 8;
+      const now = new Date();
+      const keys = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        keys.push(`${URL_TIME_KEY}_${getDateKeyBg(d)}`);
+      }
+      chrome.storage.local.get(keys, (data) => {
+        const result = {};
+        for (const key of keys) {
+          const dateStr = key.replace(URL_TIME_KEY + '_', '');
+          result[dateStr] = data[key] || { domains: {}, categories: {}, totalMs: 0 };
+        }
+        sendResponse({ timeData: result });
+      });
+    });
+    return true;
+  }
+
   if (message.type === 'SAVE_URL_LABEL') {
     const { domain, categoryId, url } = message;
     const USER_LABELS_KEY = 'aegis_url_user_labels';
@@ -672,26 +854,68 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const labels = result[USER_LABELS_KEY] || {};
       labels[domain] = categoryId;
       chrome.storage.local.set({ [USER_LABELS_KEY]: labels }, () => {
-        // Also re-categorize today's uncategorized entries for this domain
-        const dateKey = getDateKeyBg(new Date());
-        const storageKey = `${URL_HISTORY_KEY}_${dateKey}`;
-        chrome.storage.local.get([storageKey], (res) => {
-          const dayData = res[storageKey];
-          if (dayData && dayData.views) {
-            let changed = false;
-            for (const view of dayData.views) {
-              if (view.domain === domain && view.category === 'uncategorized') {
-                view.category = categoryId;
-                changed = true;
+        // Re-categorize ALL days' history + time data for this domain (past 30 days)
+        const allKeys = [];
+        for (let i = 0; i < 30; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dk = getDateKeyBg(d);
+          allKeys.push(`${URL_HISTORY_KEY}_${dk}`);
+          allKeys.push(`${URL_TIME_KEY}_${dk}`);
+        }
+
+        chrome.storage.local.get(allKeys, (res) => {
+          const updates = {};
+
+          for (const key of allKeys) {
+            if (key.startsWith(URL_HISTORY_KEY + '_')) {
+              // Update history views
+              const dayData = res[key];
+              if (dayData && dayData.views) {
+                let changed = false;
+                for (const view of dayData.views) {
+                  if (view.domain === domain && (view.category === 'uncategorized' || !view.category || view.category === 'null')) {
+                    view.category = categoryId;
+                    changed = true;
+                  }
+                }
+                if (changed) updates[key] = dayData;
+              }
+            } else if (key.startsWith(URL_TIME_KEY + '_')) {
+              // Update time data: move ms from old category to new category
+              const timeData = res[key];
+              if (timeData && timeData.domains && timeData.domains[domain]) {
+                const domainEntry = timeData.domains[domain];
+                const oldCat = domainEntry.category || 'uncategorized';
+                if (oldCat !== categoryId) {
+                  const ms = domainEntry.ms || 0;
+                  // Remove from old category
+                  const oldKey = oldCat === 'null' ? 'null' : oldCat;
+                  if (timeData.categories[oldKey]) {
+                    timeData.categories[oldKey] -= ms;
+                    if (timeData.categories[oldKey] <= 0) {
+                      delete timeData.categories[oldKey];
+                    }
+                  }
+                  // Clean up 'null' key if present
+                  if (timeData.categories['null']) {
+                    const nullMs = timeData.categories['null'];
+                    delete timeData.categories['null'];
+                    timeData.categories['uncategorized'] = (timeData.categories['uncategorized'] || 0) + nullMs;
+                  }
+                  // Add to new category
+                  timeData.categories[categoryId] = (timeData.categories[categoryId] || 0) + ms;
+                  domainEntry.category = categoryId;
+                  updates[key] = timeData;
+                }
               }
             }
-            if (changed) {
-              chrome.storage.local.set({ [storageKey]: dayData }, () => {
-                sendResponse({ ok: true });
-              });
-            } else {
+          }
+
+          if (Object.keys(updates).length > 0) {
+            chrome.storage.local.set(updates, () => {
               sendResponse({ ok: true });
-            }
+            });
           } else {
             sendResponse({ ok: true });
           }

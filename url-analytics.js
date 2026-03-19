@@ -9,6 +9,7 @@ const STORAGE_KEY = 'aegis_url_history';
 const USER_LABELS_KEY = 'aegis_url_user_labels';
 const SETTINGS_KEY = 'aegis_url_tracker_settings';
 const CATEGORIES_DATA_KEY = 'aegis_url_categories_data';
+const TIME_KEY = 'aegis_url_time';
 
 let _categoriesData = null;
 
@@ -197,6 +198,76 @@ async function getFullHistory(days) {
   return allViews;
 }
 
+// ---- Time Data Helpers ----
+
+async function getTimeData(days) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ type: 'GET_TIME_DATA', days }, (response) => {
+      resolve(response && response.timeData ? response.timeData : {});
+    });
+  });
+}
+
+function formatDuration(ms) {
+  if (ms < 60000) return Math.round(ms / 1000) + 's';
+  const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 60) return totalMin + 'm';
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m > 0 ? h + 'h ' + m + 'm' : h + 'h';
+}
+
+function formatDurationShort(ms) {
+  if (ms < 60000) return Math.round(ms / 1000) + 's';
+  const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 60) return totalMin + 'm';
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m > 0 ? h + 'h' + m : h + 'h';
+}
+
+function getDailyTimeFromData(timeData) {
+  const result = [];
+  const sortedDates = Object.keys(timeData).sort();
+  for (const date of sortedDates) {
+    const d = new Date(date + 'T00:00:00');
+    result.push({
+      date,
+      totalMs: timeData[date].totalMs || 0,
+      dayOfWeek: d.getDay()
+    });
+  }
+  return result;
+}
+
+function getTimeCategoryBreakdown(timeData) {
+  const catTotals = {};
+  for (const dayData of Object.values(timeData)) {
+    if (!dayData.categories) continue;
+    for (const [rawCatId, ms] of Object.entries(dayData.categories)) {
+      // Treat null/undefined/empty keys as uncategorized
+      const catId = (!rawCatId || rawCatId === 'null' || rawCatId === 'undefined') ? 'uncategorized' : rawCatId;
+      catTotals[catId] = (catTotals[catId] || 0) + ms;
+    }
+  }
+
+  const categories = _categoriesData ? _categoriesData.categories : [];
+  const breakdown = [];
+  for (const [catId, ms] of Object.entries(catTotals)) {
+    const cat = categories.find(c => c.id === catId);
+    breakdown.push({
+      categoryId: catId,
+      name: cat ? cat.name : (catId === 'uncategorized' ? 'Uncategorized' : catId),
+      emoji: cat ? cat.emoji : '?',
+      color: cat ? cat.color : '#9e9e9e',
+      bgColor: cat ? cat.bgColor : '#f5f5f5',
+      ms
+    });
+  }
+  breakdown.sort((a, b) => b.ms - a.ms);
+  return breakdown;
+}
+
 // ---- Chart Drawing ----
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -364,7 +435,102 @@ function drawPieChart(canvas, breakdownData) {
   ctx.fillText('views', cx, cy + 18);
 }
 
-function drawReservedPie(canvas) {
+function drawTimeTrendChart(canvas, dailyTimeData) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = rect.width;
+  const h = 200;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+
+  const padding = { top: 20, right: 20, bottom: 36, left: 44 };
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+
+  const maxVal = Math.max(...dailyTimeData.map(d => d.totalMs), 60000); // min 1 minute
+  const gridLines = 4;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid lines + Y labels (time format)
+  ctx.strokeStyle = '#f1f3f4';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = padding.top + (chartH / gridLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(w - padding.right, y);
+    ctx.stroke();
+
+    const val = maxVal - (maxVal / gridLines) * i;
+    ctx.fillStyle = '#80868b';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatDurationShort(val), padding.left - 6, y + 4);
+  }
+
+  if (dailyTimeData.length === 0) return;
+
+  const barWidth = Math.min(32, (chartW / dailyTimeData.length) * 0.6);
+  const gap = chartW / dailyTimeData.length;
+
+  for (let i = 0; i < dailyTimeData.length; i++) {
+    const d = dailyTimeData[i];
+    const x = padding.left + gap * i + (gap - barWidth) / 2;
+    const barH = (d.totalMs / maxVal) * chartH;
+    const y = padding.top + chartH - barH;
+
+    const isToday = i === dailyTimeData.length - 1;
+    const gradient = ctx.createLinearGradient(x, y, x, padding.top + chartH);
+    if (isToday) {
+      gradient.addColorStop(0, '#34a853');
+      gradient.addColorStop(1, '#57bb6d');
+    } else {
+      gradient.addColorStop(0, '#a8dab5');
+      gradient.addColorStop(1, '#c5e8cf');
+    }
+    ctx.fillStyle = gradient;
+
+    const radius = Math.min(4, barWidth / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + barWidth - radius, y);
+    ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + radius);
+    ctx.lineTo(x + barWidth, padding.top + chartH);
+    ctx.lineTo(x, padding.top + chartH);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.fill();
+
+    // Value on top
+    if (d.totalMs >= 1000) {
+      ctx.fillStyle = isToday ? '#34a853' : '#80868b';
+      ctx.font = `${isToday ? 'bold' : 'normal'} 10px -apple-system, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(formatDurationShort(d.totalMs), x + barWidth / 2, y - 6);
+    }
+
+    // X-axis label
+    const label = isToday ? 'Today' : DAY_NAMES[d.dayOfWeek];
+    ctx.fillStyle = isToday ? '#34a853' : '#5f6368';
+    ctx.font = `${isToday ? '600' : '400'} 11px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x + barWidth / 2, h - padding.bottom + 16);
+
+    const dateLabel = d.date.slice(5);
+    ctx.fillStyle = '#80868b';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.fillText(dateLabel, x + barWidth / 2, h - padding.bottom + 28);
+  }
+}
+
+function drawTimePieChart(canvas, timeBreakdown) {
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const size = 180;
@@ -380,19 +546,61 @@ function drawReservedPie(canvas) {
   const outerR = size / 2 - 4;
   const innerR = outerR * 0.55;
 
-  // Dashed circle
-  ctx.beginPath();
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
-  ctx.fillStyle = '#f1f3f4';
-  ctx.fill();
+  const totalMs = timeBreakdown.reduce((sum, d) => sum + d.ms, 0);
+  if (totalMs === 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
+    ctx.fillStyle = '#f1f3f4';
+    ctx.fill();
+    ctx.fillStyle = '#80868b';
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data', cx, cy + 5);
+    return;
+  }
 
-  ctx.setLineDash([4, 4]);
-  ctx.strokeStyle = '#e0e0e0';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  ctx.stroke();
+  let startAngle = -Math.PI / 2;
+  for (const item of timeBreakdown) {
+    const sliceAngle = (item.ms / totalMs) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
+    ctx.arc(cx, cy, innerR, startAngle + sliceAngle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = item.color;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    startAngle += sliceAngle;
+  }
+
+  // Center text
+  ctx.fillStyle = '#202124';
+  ctx.font = 'bold 18px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(formatDuration(totalMs), cx, cy + 2);
+  ctx.fillStyle = '#80868b';
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.fillText('total', cx, cy + 18);
+}
+
+function renderTimeLegend(container, timeBreakdown) {
+  const totalMs = timeBreakdown.reduce((sum, d) => sum + d.ms, 0);
+  container.innerHTML = '';
+
+  for (const item of timeBreakdown) {
+    const pct = totalMs > 0 ? ((item.ms / totalMs) * 100).toFixed(1) : '0.0';
+    const div = document.createElement('div');
+    div.className = 'legend-item';
+    div.innerHTML = `
+      <span class="legend-dot" style="background:${item.color}"></span>
+      <span class="legend-name">${item.emoji} ${item.name}</span>
+      <span class="legend-count">${formatDuration(item.ms)}</span>
+      <span class="legend-pct">${pct}%</span>
+    `;
+    container.appendChild(div);
+  }
 }
 
 function renderLegend(container, breakdown) {
@@ -434,7 +642,7 @@ async function getUncategorizedDomains(days) {
     const dayData = data[key];
     if (!dayData || !dayData.views) continue;
     for (const v of dayData.views) {
-      if (v.category !== 'uncategorized') continue;
+      if (v.category && v.category !== 'uncategorized' && v.category !== 'null') continue;
       if (!domainMap[v.domain]) {
         domainMap[v.domain] = { count: 0, lastUrl: v.url, lastTitle: v.title };
       }
@@ -497,13 +705,18 @@ function renderUncategorizedList(container, domains, categories, onSave) {
 
     saveBtn.addEventListener('click', async () => {
       if (!select.value) return;
+      const selectedCatId = select.value;
+      const selectedText = select.options[select.selectedIndex].text;
       saveBtn.disabled = true;
       saveBtn.textContent = '...';
 
-      await onSave(item.domain, select.value);
+      try {
+        await onSave(item.domain, selectedCatId);
+      } catch (e) {
+        console.error('[Aegis] Save label failed:', e);
+      }
 
       // Replace select+button with saved indicator
-      const selectedText = select.options[select.selectedIndex].text;
       select.remove();
       saveBtn.remove();
       const saved = document.createElement('span');
@@ -563,9 +776,11 @@ async function exportHistoryAsCsv() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const trendCanvas = document.getElementById('trendChart');
+  const timeTrendCanvas = document.getElementById('timeTrendChart');
   const pieCanvas = document.getElementById('categoryPieChart');
   const timePieCanvas = document.getElementById('timePieChart');
   const legendContainer = document.getElementById('categoryLegend');
+  const timeLegendContainer = document.getElementById('timeLegend');
   const currentViewsEl = document.getElementById('currentViews');
   const predictedViewsEl = document.getElementById('predictedViews');
   const predictionMetaEl = document.getElementById('predictionMeta');
@@ -591,11 +806,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     ? _categoriesData.categories.map(c => ({ id: c.id, name: c.name, emoji: c.emoji }))
     : [];
 
-  // Refresh helper: re-renders pie chart, legend, and uncategorized list
+  // Refresh helper: re-renders pie charts and legends after label save
   async function refreshAfterSave() {
     const newBreakdown = await getCategoryBreakdown(8);
     drawPieChart(pieCanvas, newBreakdown);
     renderLegend(legendContainer, newBreakdown);
+
+    // Also refresh time pie chart
+    const newTimeData = await getTimeData(8);
+    const newTimeBreakdown = getTimeCategoryBreakdown(newTimeData);
+    drawTimePieChart(timePieCanvas, newTimeBreakdown);
+    renderTimeLegend(timeLegendContainer, newTimeBreakdown);
   }
 
   // Show/hide uncategorized section based on feedback toggle
@@ -604,15 +825,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       uncategorizedSection.style.display = '';
       const domains = await getUncategorizedDomains(8);
       renderUncategorizedList(uncategorizedList, domains, categoryOptions, async (domain, categoryId) => {
-        // Save label via background
-        await new Promise((resolve) => {
-          chrome.runtime.sendMessage({
-            type: 'SAVE_URL_LABEL',
-            domain,
-            categoryId,
-            url: ''
-          }, resolve);
-        });
+        // Save label via background (updates history + time data + invalidates lookup)
+        try {
+          await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+              type: 'SAVE_URL_LABEL',
+              domain,
+              categoryId,
+              url: ''
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve(response);
+              }
+            });
+          });
+        } catch (e) {
+          console.warn('[Aegis] Background save failed, saving locally:', e.message);
+          await saveUserLabel(domain, categoryId);
+        }
         await refreshAfterSave();
       });
     } else {
@@ -629,28 +861,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     await updateUncategorizedSection();
   });
 
-  // Prediction
+  // Fetch time data (triggers flush of current session)
+  const timeData = await getTimeData(8);
+  const dailyTime = getDailyTimeFromData(timeData);
+  const todayDateKey = getDateKey(new Date());
+  const todayTime = timeData[todayDateKey] || { totalMs: 0 };
+
+  // Prediction card — views + today's active time
   const prediction = await predictToday();
   currentViewsEl.textContent = prediction.current;
   if (prediction.sampleWeeks > 0) {
     predictedViewsEl.textContent = prediction.predicted;
-    predictionMetaEl.textContent = `Based on ${prediction.sampleWeeks} week(s) avg: ${prediction.historicalAvg} views on this weekday`;
+    predictionMetaEl.textContent = `${prediction.sampleWeeks}w avg: ${prediction.historicalAvg} views | Active today: ${formatDuration(todayTime.totalMs)}`;
   } else {
     predictedViewsEl.textContent = '--';
-    predictionMetaEl.textContent = 'Not enough historical data for prediction';
+    predictionMetaEl.textContent = `Active today: ${formatDuration(todayTime.totalMs)}`;
   }
 
-  // Trend chart (past 7 days + today = 8)
+  // Page views trend chart (past 7 days + today = 8)
   const dailyViews = await getDailyViews(8);
   drawTrendChart(trendCanvas, dailyViews);
 
-  // Category pie chart
+  // Browsing time trend chart
+  drawTimeTrendChart(timeTrendCanvas, dailyTime);
+
+  // Category pie chart (by views)
   const breakdown = await getCategoryBreakdown(8);
   drawPieChart(pieCanvas, breakdown);
   renderLegend(legendContainer, breakdown);
 
-  // Reserved pie chart
-  drawReservedPie(timePieCanvas);
+  // Time pie chart (by active time)
+  const timeBreakdown = getTimeCategoryBreakdown(timeData);
+  drawTimePieChart(timePieCanvas, timeBreakdown);
+  renderTimeLegend(timeLegendContainer, timeBreakdown);
 
   // Export dialog
   exportBtn.addEventListener('click', () => {
@@ -681,6 +924,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       drawTrendChart(trendCanvas, dailyViews);
+      drawTimeTrendChart(timeTrendCanvas, dailyTime);
     }, 100);
   });
 });

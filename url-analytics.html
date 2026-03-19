@@ -47,18 +47,30 @@
       <div class="prediction-meta" id="predictionMeta"></div>
     </div>
 
-    <!-- Trend Chart -->
-    <section class="chart-section">
-      <div class="section-header">
-        <h2>Daily Page Views</h2>
-        <span class="section-badge">Past 7 days + today</span>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="trendChart" width="600" height="220"></canvas>
-      </div>
-    </section>
+    <!-- Trend Charts (Views + Time side by side) -->
+    <div class="trend-charts-row">
+      <section class="chart-section trend-section">
+        <div class="section-header">
+          <h2>Daily Page Views</h2>
+          <span class="section-badge">Past 7 days + today</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="trendChart" width="600" height="220"></canvas>
+        </div>
+      </section>
 
-    <!-- Category Pie Charts -->
+      <section class="chart-section trend-section">
+        <div class="section-header">
+          <h2>Daily Browsing Time</h2>
+          <span class="section-badge time-badge">Active Time</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="timeTrendChart" width="600" height="220"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- Category Pie Charts (Views + Time) -->
     <div class="pie-charts-row">
       <section class="chart-section pie-section">
         <div class="section-header">
@@ -73,18 +85,11 @@
       <section class="chart-section pie-section">
         <div class="section-header">
           <h2>By Visit Time</h2>
-          <span class="section-badge reserved">Coming Soon</span>
         </div>
-        <div class="pie-wrapper reserved-chart">
+        <div class="pie-wrapper">
           <canvas id="timePieChart" width="240" height="240"></canvas>
-          <div class="reserved-overlay">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <span>Reserved for visit time tracking</span>
-          </div>
         </div>
+        <div class="legend-list" id="timeLegend"></div>
       </section>
     </div>
 

@@ -26,7 +26,9 @@ body {
   font-family: var(--font);
   color: var(--text-dark);
   min-width: 520px;
-  width: 600px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* Scrollbar */
@@ -229,6 +231,23 @@ body::-webkit-scrollbar-thumb {
   background: var(--border-light);
 }
 
+/* Trend Charts Row */
+.trend-charts-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.trend-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-badge.time-badge {
+  color: var(--green);
+  background: #e8f5e9;
+}
+
 .chart-wrapper {
   width: 100%;
   overflow: hidden;
@@ -261,28 +280,6 @@ body::-webkit-scrollbar-thumb {
   max-height: 180px;
 }
 
-.reserved-chart {
-  opacity: 0.4;
-}
-
-.reserved-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: var(--text-light);
-}
-
-.reserved-overlay svg {
-  margin-bottom: 6px;
-}
-
-.reserved-overlay span {
-  display: block;
-  font-size: 11px;
-  max-width: 120px;
-}
 
 /* Legend */
 .legend-list {
