@@ -1,0 +1,20 @@
+{
+  "name": "feedback-collection-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --run",
+    "test:integration:dev": "STAGE=dev NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.json --forceExit",
+    "test:integration:prod": "STAGE=prod NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.json --forceExit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "fast-check": "^3.0.0",
+    "aws-sdk-client-mock": "^3.0.0"
+  }
+}

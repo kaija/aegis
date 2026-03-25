@@ -1,0 +1,186 @@
+service: feedback-collection-api
+
+custom:
+  stage: ${sls:stage}
+  config:
+    dev:
+      domain: aegis.dev.penrose.services
+    prod:
+      domain: aegis.penrose.services
+  domain: ${self:custom.config.${self:custom.stage}.domain}
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-1
+  environment:
+    URL_FEEDBACK_TABLE: !Ref UrlFeedbackTable
+    WHITELIST_TABLE: !Ref WhitelistTable
+    SENDER_MAPPING_FEEDBACK_TABLE: !Ref SenderMappingFeedbackTable
+    SENDER_DOMAIN_MAPPING_TABLE: !Ref SenderDomainMappingTable
+    SENDER_MAPPING_URL_THRESHOLD: "3"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+          Resource:
+            - !GetAtt UrlFeedbackTable.Arn
+            - !GetAtt WhitelistTable.Arn
+            - !GetAtt SenderMappingFeedbackTable.Arn
+            - !GetAtt SenderDomainMappingTable.Arn
+
+functions:
+  feedbackUrlCategory:
+    handler: src/handlers/feedback/urlCategory.handler
+    events:
+      - httpApi:
+          path: /feedback/url-category
+          method: POST
+
+  feedbackSenderMapping:
+    handler: src/handlers/feedback/senderMapping.handler
+    events:
+      - httpApi:
+          path: /feedback/sender-mapping
+          method: POST
+
+  listsUrlCategories:
+    handler: src/handlers/lists/urlCategories.handler
+    events:
+      - httpApi:
+          path: /lists/url-categories
+          method: GET
+
+  listsWhitelist:
+    handler: src/handlers/lists/whitelist.handler
+    events:
+      - httpApi:
+          path: /lists/whitelist
+          method: GET
+
+  health:
+    handler: src/handlers/health.handler
+    events:
+      - httpApi:
+          path: /health
+          method: GET
+
+resources:
+  Resources:
+    # DynamoDB Tables
+    UrlFeedbackTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-url-feedback
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: createdAt
+            KeyType: RANGE
+
+    WhitelistTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-whitelist
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    SenderMappingFeedbackTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-sender-mapping-feedback
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: createdAt
+            KeyType: RANGE
+
+    SenderDomainMappingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-sender-domain-mapping
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: senderDomain
+            AttributeType: S
+        KeySchema:
+          - AttributeName: senderDomain
+            KeyType: HASH
+
+    # ACM Certificate for custom domain
+    AegisCertificate:
+      Type: AWS::CertificateManager::Certificate
+      Properties:
+        DomainName: ${self:custom.domain}
+        ValidationMethod: DNS
+        DomainValidationOptions:
+          - DomainName: ${self:custom.domain}
+            HostedZoneId: Z0806969350599HSOT293
+
+    # API Gateway custom domain
+    ApiGatewayCustomDomain:
+      Type: AWS::ApiGatewayV2::DomainName
+      Properties:
+        DomainName: ${self:custom.domain}
+        DomainNameConfigurations:
+          - CertificateArn: !Ref AegisCertificate
+            EndpointType: REGIONAL
+
+    # API mapping
+    ApiGatewayApiMapping:
+      Type: AWS::ApiGatewayV2::ApiMapping
+      Properties:
+        DomainName: !Ref ApiGatewayCustomDomain
+        ApiId: !Ref HttpApi
+        Stage: $default
+
+    # Route53 A record pointing to API Gateway custom domain
+    AegisRoute53Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: Z0806969350599HSOT293
+        Name: ${self:custom.domain}.
+        Type: A
+        AliasTarget:
+          DNSName: !GetAtt ApiGatewayCustomDomain.RegionalDomainName
+          HostedZoneId: !GetAtt ApiGatewayCustomDomain.RegionalHostedZoneId
+
+  # CORS configuration for HTTP API
+  # API Gateway V2 does not support scheme-specific wildcards (chrome-extension://*).
+  # Use "*" to allow all origins; restrict via Lambda handler if needed.
+  extensions:
+    HttpApi:
+      Properties:
+        CorsConfiguration:
+          AllowOrigins:
+            - "*"
+          AllowHeaders:
+            - Content-Type
+            - X-Extension-Version
+            - Authorization
+          AllowMethods:
+            - POST
+            - GET
+            - OPTIONS
