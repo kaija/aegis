@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Aegis Mail",
+  "name": "Aegis",
   "version": "1.0.0",
-  "description": "Organize your Gmail with smart email categorization",
+  "description": "Smart email categorization, security analysis, and browsing analytics",
   "permissions": ["storage", "activeTab", "scripting", "alarms", "webNavigation", "idle", "tabs"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [

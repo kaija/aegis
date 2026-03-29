@@ -1,7 +1,7 @@
 {
-  "name": "aegis-mail",
+  "name": "aegis",
   "version": "1.0.0",
-  "description": "Chrome Extension for intelligent email categorization and security analysis",
+  "description": "Chrome Extension for smart email categorization, security analysis, and browsing analytics",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
@@ -17,7 +17,7 @@
     "security",
     "gmail"
   ],
-  "author": "Aegis Mail Team",
+  "author": "Aegis Team",
   "license": "MIT",
   "devDependencies": {
     "@jest/globals": "^29.7.0",

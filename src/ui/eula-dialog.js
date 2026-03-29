@@ -75,9 +75,9 @@ class EulaDialog {
     dialog.innerHTML = `
       <h2 id="aegis-eula-title" class="aegis-eula-title">End User License Agreement</h2>
       <div class="aegis-eula-body">
-        <p>Please read the following End User License Agreement carefully before using the Aegis Mail extension.</p>
+        <p>Please read the following End User License Agreement carefully before using the Aegis extension.</p>
         <p>By using this extension, you agree to the following terms:</p>
-        <p>1. <strong>License Grant.</strong> You are granted a non-exclusive, non-transferable license to use the Aegis Mail Chrome Extension for personal, non-commercial purposes.</p>
+        <p>1. <strong>License Grant.</strong> You are granted a non-exclusive, non-transferable license to use the Aegis Chrome Extension for personal, non-commercial purposes.</p>
         <p>2. <strong>Data Collection.</strong> The extension may collect anonymous category-level data (such as email category labels and domain names) to improve classification accuracy. No personal email content, subject lines, full email addresses, or attachment data is ever collected.</p>
         <p>3. <strong>Privacy.</strong> Your privacy is important to us. All data processing occurs locally in your browser unless you have opted in to anonymous data feedback. You may disable data feedback at any time from the Settings page.</p>
         <p>4. <strong>No Warranty.</strong> This extension is provided "as is" without warranty of any kind, express or implied.</p>

@@ -1,4 +1,4 @@
-# Aegis Mail — Developer Guide
+# Aegis — Developer Guide
 
 > 本文件說明 extension 的完整運作流程、資料結構、擴充方式，供 AI coding 工具快速上手延續開發。
 
@@ -26,7 +26,7 @@
 
 ## 1. 專案概覽
 
-**Aegis Mail** 是 Chrome Extension（Manifest V3），注入 Gmail 頁面，提供：
+**Aegis** 是 Chrome Extension（Manifest V3），注入 Gmail 頁面，提供：
 
 - 右側滑入面板：將收件匣郵件依分類顯示，支援未讀/全部切換
 - 本地關鍵字規則分析（預設，不需 API）
@@ -436,8 +436,8 @@ const platform = window.location.href.includes('yahoo.com')
 
 ```bash
 make dev    # 將 source 複製到 dist/（排除 Makefile、CLAUDE.md、.git 等）
-make zip    # 打包 dist/aegis-mail-{version}.zip（上架 Chrome Web Store 用）
-make crx    # 打包 .crx（自行散佈用，首次執行會產生 aegis-mail.pem）
+make zip    # 打包 dist/aegis-{version}.zip（上架 Chrome Web Store 用）
+make crx    # 打包 .crx（自行散佈用，首次執行會產生 aegis.pem）
 make clean  # 刪除 dist/
 make info   # 顯示版本、Chrome 路徑等資訊
 ```

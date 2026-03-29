@@ -1,6 +1,6 @@
-# Aegis Mail
+# Aegis
 
-Chrome Extension for intelligent email categorization and security analysis.
+Chrome Extension for smart email categorization, security analysis, and browsing analytics.
 
 ## Features
 

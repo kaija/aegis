@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Aegis Mail 測試執行腳本
+# Aegis 測試執行腳本
 
 set -e
 
-echo "🧪 Aegis Mail Unit Tests"
+echo "🧪 Aegis Unit Tests"
 echo "========================"
 echo ""
 

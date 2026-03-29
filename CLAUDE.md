@@ -1,4 +1,4 @@
-# CLAUDE.md — Aegis Mail Developer Guide
+# CLAUDE.md — Aegis Developer Guide
 
 Complete reference for AI coding tools continuing development on this codebase.
 
@@ -6,7 +6,7 @@ Complete reference for AI coding tools continuing development on this codebase.
 
 ## Project Overview
 
-**Aegis Mail** is a Chrome Extension (Manifest V3) that injects into Gmail and provides:
+**Aegis** is a Chrome Extension (Manifest V3) that injects into Gmail and provides:
 
 - Right-side sliding panel: categorizes inbox emails with unread/all toggle
 - Security analysis popup: auto-triggers when opening an email (safety score + issues + link audit)
@@ -330,8 +330,8 @@ make dev             # copy source → dist/ (excludes .git, node_modules, __tes
 ### Build Commands
 ```bash
 make dev    # development build to dist/
-make zip    # dist/aegis-mail-{version}.zip for Chrome Web Store
-make crx    # dist/aegis-mail-{version}.crx for self-distribution
+make zip    # dist/aegis-{version}.zip for Chrome Web Store
+make crx    # dist/aegis-{version}.crx for self-distribution
 make clean  # remove dist/
 make info   # show version, Chrome path
 ```

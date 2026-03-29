@@ -1,4 +1,4 @@
-EXTENSION_NAME := aegis-mail
+EXTENSION_NAME := aegis
 VERSION        := $(shell node -p "require('./manifest.json').version" 2>/dev/null || echo "1.0.0")
 OUT_DIR        := dist
 ZIP_FILE       := $(OUT_DIR)/$(EXTENSION_NAME)-$(VERSION).zip
@@ -17,21 +17,27 @@ PACK_EXCLUDE := \
 	--exclude=".git/*" \
 	--exclude=".claude/*" \
 	--exclude=".kiro/*" \
+	--exclude=".vscode/*" \
 	--exclude="__tests__/*" \
 	--exclude="node_modules/*" \
 	--exclude="coverage/*" \
 	--exclude="scripts/*" \
 	--exclude="dist/*" \
+	--exclude="backend/*" \
 	--exclude="*.md" \
 	--exclude="TEST-*.txt" \
 	--exclude="TEST-*.md" \
 	--exclude="CLAUDE.md" \
 	--exclude="Makefile" \
 	--exclude="*.map" \
+	--exclude="*.csv" \
 	--exclude="package.json" \
 	--exclude="package-lock.json" \
 	--exclude="jest.config.js" \
-	--exclude=".gitignore"
+	--exclude=".gitignore" \
+	--exclude="mock-chrome.js" \
+	--exclude="aegis-*.json" \
+	--exclude="aegis-*.csv"
 
 .PHONY: all zip crx dev clean help
 
@@ -60,16 +66,22 @@ dev: ## Copy extension files to dist/ for local unpacked loading
 		--exclude="dist/" \
 		--exclude="scripts" \
 		--exclude="scripts/" \
+		--exclude="backend" \
+		--exclude="backend/" \
 		--exclude="*.md" \
 		--exclude="TEST-*.txt" \
 		--exclude="TEST-*.md" \
 		--exclude="CLAUDE.md" \
 		--exclude="Makefile" \
 		--exclude="*.map" \
+		--exclude="*.csv" \
 		--exclude="package.json" \
 		--exclude="package-lock.json" \
 		--exclude="jest.config.js" \
 		--exclude=".gitignore" \
+		--exclude="mock-chrome.js" \
+		--exclude="aegis-*.json" \
+		--exclude="aegis-*.csv" \
 		. $(OUT_DIR)/
 	@echo "Ready: load $(OUT_DIR)/ as unpacked extension in Chrome"
 
