@@ -793,6 +793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const uncategorizedSection = document.getElementById('uncategorizedSection');
   const uncategorizedList = document.getElementById('uncategorizedList');
+  const syncCategoriesBtn = document.getElementById('syncCategoriesBtn');
 
   // Load categories
   await loadCategoriesData();
@@ -916,6 +917,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   exportHistoryBtn.addEventListener('click', async () => {
     await exportHistoryAsCsv();
     exportDialog.style.display = 'none';
+  });
+
+  // Sync categories button
+  syncCategoriesBtn.addEventListener('click', async () => {
+    const svg = syncCategoriesBtn.querySelector('svg');
+    syncCategoriesBtn.disabled = true;
+    svg.style.animation = 'spin 0.8s linear infinite';
+
+    chrome.runtime.sendMessage({ type: 'SYNC_URL_CATEGORIES' }, async (response) => {
+      svg.style.animation = '';
+      syncCategoriesBtn.disabled = false;
+
+      if (chrome.runtime.lastError || !response) {
+        syncCategoriesBtn.title = 'Sync failed — try again';
+        return;
+      }
+
+      if (response.success) {
+        syncCategoriesBtn.title = `Synced ${response.categoryCount} categories (${response.updatedAt})`;
+        // Reload categories and refresh charts
+        await loadCategoriesData();
+        const newBreakdown = await getCategoryBreakdown(8);
+        drawPieChart(pieCanvas, newBreakdown);
+        renderLegend(legendContainer, newBreakdown);
+        const newTimeData = await getTimeData(8);
+        const newTimeBreakdown = getTimeCategoryBreakdown(newTimeData);
+        drawTimePieChart(timePieCanvas, newTimeBreakdown);
+        renderTimeLegend(timeLegendContainer, newTimeBreakdown);
+      } else {
+        syncCategoriesBtn.title = `Sync failed: ${response.error}`;
+      }
+    });
+  });
+
+  // Show last sync time on hover
+  chrome.runtime.sendMessage({ type: 'GET_URL_CATEGORIES_SYNC_STATUS' }, (response) => {
+    if (response && response.lastSync) {
+      const d = new Date(response.lastSync);
+      syncCategoriesBtn.title = `Last synced: ${d.toLocaleString()} — Click to sync now`;
+    }
   });
 
   // Handle window resize

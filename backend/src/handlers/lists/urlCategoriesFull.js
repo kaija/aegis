@@ -1,0 +1,123 @@
+import { createHash } from 'crypto';
+import { ok, internalError } from '../../lib/response.js';
+import { dynamo } from '../../lib/dynamo.js';
+import { config } from '../../config.js';
+import { ScanCommand } from '@aws-sdk/lib-dynamodb';
+
+/**
+ * GET /lists/url-categories/full
+ *
+ * Returns the complete url-categories.json in the extension's native format,
+ * with community-voted domains merged into the appropriate categories.
+ *
+ * The bundled category definitions (id, name, emoji, color, bgColor, domains)
+ * are the base. Feedback-voted domains are appended to matching categories
+ * (or grouped under a fallback "community" category if no match).
+ */
+
+// Bundled category definitions — the canonical source of truth for metadata.
+// Domains here are the baseline; feedback domains are additive.
+const BUNDLED_CATEGORIES = [
+  { id: 'search', name: 'Web Search', emoji: '🔍', color: '#4285f4', bgColor: '#e8f0fe', domains: ['google.com','google.co.jp','google.co.uk','google.com.tw','google.de','google.fr','google.com.au','google.ca','google.co.in','google.com.br','google.co.kr','bing.com','duckduckgo.com','yahoo.com','baidu.com','yandex.com','yandex.ru','ecosia.org','startpage.com','brave.com','search.yahoo.com','search.brave.com','sogou.com','naver.com','search.naver.com'] },
+  { id: 'social', name: 'Social Media', emoji: '💬', color: '#1da1f2', bgColor: '#e8f5fd', domains: ['facebook.com','m.facebook.com','web.facebook.com','instagram.com','twitter.com','x.com','mobile.twitter.com','linkedin.com','reddit.com','old.reddit.com','threads.net','mastodon.social','tiktok.com','snapchat.com','web.snapchat.com','pinterest.com','tumblr.com','weibo.com','plurk.com','bsky.app','discord.com','discord.gg','messenger.com','whatsapp.com','web.whatsapp.com','telegram.org','web.telegram.org','signal.org','line.me','wechat.com'] },
+  { id: 'video', name: 'Video & Streaming', emoji: '🎬', color: '#ff0000', bgColor: '#ffe0e0', domains: ['youtube.com','m.youtube.com','studio.youtube.com','music.youtube.com','tv.youtube.com','netflix.com','twitch.tv','vimeo.com','dailymotion.com','disneyplus.com','hulu.com','hbomax.com','max.com','primevideo.com','video.amazon.com','tv.apple.com','crunchyroll.com','bilibili.com','nicovideo.jp','iqiyi.com','spotify.com','open.spotify.com','music.apple.com','soundcloud.com','podcasts.apple.com','podcasts.google.com','deezer.com','tidal.com','peacocktv.com','paramountplus.com','plex.tv','app.plex.tv'] },
+  { id: 'shopping', name: 'Shopping', emoji: '🛒', color: '#ff6d00', bgColor: '#fff3e0', domains: ['amazon.com','amazon.co.jp','amazon.co.uk','amazon.de','amazon.fr','amazon.ca','amazon.com.au','amazon.in','amazon.com.tw','amazon.com.br','smile.amazon.com','ebay.com','ebay.co.uk','ebay.de','etsy.com','walmart.com','target.com','shopee.tw','shopee.com','shopee.sg','momo.com.tw','pcone.com.tw','pchome.com.tw','ruten.com.tw','books.com.tw','rakuten.com.tw','rakuten.co.jp','aliexpress.com','taobao.com','tmall.com','jd.com','bestbuy.com','costco.com','ikea.com','uniqlo.com','zalando.com','asos.com','store.google.com','store.apple.com','apple.com/shop','store.nike.com','nike.com','adidas.com','newegg.com','wayfair.com','homedepot.com','lowes.com','shopify.com','wish.com','temu.com','shein.com'] },
+  { id: 'news', name: 'News & Media', emoji: '📰', color: '#212121', bgColor: '#f5f5f5', domains: ['cnn.com','bbc.com','bbc.co.uk','nytimes.com','washingtonpost.com','reuters.com','apnews.com','theguardian.com','bloomberg.com','wsj.com','forbes.com','fortune.com','businessinsider.com','cnbc.com','foxnews.com','nbcnews.com','abcnews.go.com','techcrunch.com','theverge.com','wired.com','arstechnica.com','engadget.com','mashable.com','gizmodo.com','zdnet.com','cnet.com','tomshardware.com','news.google.com','news.yahoo.com','news.microsoft.com','about.fb.com','blog.google','udn.com','ltn.com.tw','ettoday.net','setn.com','storm.mg','bnext.com.tw','cw.com.tw','tvbs.com.tw','nhk.or.jp','asahi.com','nikkei.com','scmp.com','straitstimes.com','aljazeera.com','dw.com','news.ycombinator.com'] },
+  { id: 'tech', name: 'Technology', emoji: '💻', color: '#0d47a1', bgColor: '#e3f2fd', domains: ['apple.com','microsoft.com','samsung.com','intel.com','nvidia.com','amd.com','qualcomm.com','arm.com','lenovo.com','dell.com','hp.com','asus.com','msi.com','acer.com','sony.com','lg.com','panasonic.com','oneplus.com','xiaomi.com','huawei.com','oppo.com','vivo.com','support.apple.com','support.microsoft.com','support.google.com','developer.apple.com','learn.microsoft.com','devblogs.microsoft.com','developers.google.com','developer.amazon.com','engineering.fb.com','meta.com','oracle.com','ibm.com','cisco.com','vmware.com','broadcom.com','hpe.com','motorola.com','nokia.com','logitech.com','razer.com','corsair.com','dyson.com','bose.com','store.steampowered.com/hardware'] },
+  { id: 'dev', name: 'Development', emoji: '👨‍💻', color: '#24292e', bgColor: '#f0f0f0', domains: ['github.com','gist.github.com','gitlab.com','bitbucket.org','stackoverflow.com','stackexchange.com','askubuntu.com','npmjs.com','pypi.org','crates.io','pkg.go.dev','rubygems.org','packagist.org','nuget.org','mvnrepository.com','pub.dev','developer.mozilla.org','mdn.io','w3schools.com','w3.org','codepen.io','jsfiddle.net','codesandbox.io','replit.com','glitch.com','vercel.com','netlify.com','heroku.com','docker.com','hub.docker.com','kubernetes.io','dev.to','medium.com','hashnode.dev','leetcode.com','hackerrank.com','codeforces.com','codewars.com','figma.com','dribbble.com','behance.net','postman.com','grafana.com','prometheus.io','terraform.io','ansible.com','jetbrains.com','visualstudio.com','marketplace.visualstudio.com','code.visualstudio.com','plugins.jetbrains.com','circleci.com','travis-ci.com','sentry.io','datadoghq.com','newrelic.com','elastic.co','splunk.com','confluent.io','redis.io','mongodb.com','postgresql.org','mysql.com','mariadb.org','sqlite.org'] },
+  { id: 'cloud', name: 'Cloud Services', emoji: '☁️', color: '#ff9900', bgColor: '#fff8e1', domains: ['aws.amazon.com','console.aws.amazon.com','docs.aws.amazon.com','s3.amazonaws.com','cloud.google.com','console.cloud.google.com','azure.microsoft.com','portal.azure.com','azure.com','devops.azure.com','digitalocean.com','cloudflare.com','dash.cloudflare.com','firebase.google.com','supabase.com','railway.app','fly.io','render.com','linode.com','akamai.com','vultr.com','ovhcloud.com','oracle.cloud.com','cloud.ibm.com','alibabacloud.com','cloud.tencent.com','workers.cloudflare.com','pages.cloudflare.com'] },
+  { id: 'ai', name: 'AI & Machine Learning', emoji: '🤖', color: '#7c4dff', bgColor: '#ede7f6', domains: ['chat.openai.com','platform.openai.com','openai.com','claude.ai','console.anthropic.com','anthropic.com','gemini.google.com','aistudio.google.com','ai.google.dev','copilot.microsoft.com','copilot.github.com','huggingface.co','kaggle.com','midjourney.com','stability.ai','poe.com','character.ai','replicate.com','together.ai','groq.com','mistral.ai','cohere.com','deepmind.google','deepmind.com','ai.meta.com','llama.meta.com','labs.google.com','research.google.com','research.facebook.com','research.fb.com','ai.amazon.com','bedrock.aws.amazon.com','sagemaker.aws.amazon.com','azure.microsoft.com/ai','runwayml.com','elevenlabs.io','play.ht','civitai.com','perplexity.ai','cursor.com','cursor.sh','v0.dev','phind.com','you.com','deepseek.com','chat.deepseek.com','qwen.ai'] },
+  { id: 'finance', name: 'Finance & Banking', emoji: '💰', color: '#00897b', bgColor: '#e0f2f1', domains: ['chase.com','bankofamerica.com','wellsfargo.com','citibank.com','capitalone.com','usbank.com','paypal.com','stripe.com','wise.com','revolut.com','venmo.com','cash.app','zelle.com','robinhood.com','etrade.com','fidelity.com','schwab.com','vanguard.com','ameritrade.com','coinbase.com','binance.com','kraken.com','crypto.com','gemini.com','pay.google.com','pay.apple.com','wallet.google.com','card.apple.com','pay.amazon.com','esun.com.tw','cathaybk.com.tw','ctbcbank.com','megabank.com.tw','bot.com.tw','hsbc.com','hsbc.com.tw','barclays.co.uk','natwest.com','finance.yahoo.com','tradingview.com','investing.com','morningstar.com','seekingalpha.com','mint.intuit.com','quickbooks.intuit.com','tax.google.com','turbotax.intuit.com'] },
+  { id: 'productivity', name: 'Productivity', emoji: '📋', color: '#43a047', bgColor: '#e8f5e9', domains: ['notion.so','notion.com','trello.com','asana.com','monday.com','clickup.com','todoist.com','evernote.com','obsidian.md','airtable.com','miro.com','canva.com','docs.google.com','sheets.google.com','slides.google.com','forms.google.com','sites.google.com','drive.google.com','photos.google.com','keep.google.com','dropbox.com','box.com','onedrive.live.com','office.com','outlook.com','outlook.office.com','outlook.office365.com','word.office.com','excel.office.com','powerpoint.office.com','onenote.com','zoom.us','app.zoom.us','teams.microsoft.com','teams.live.com','slack.com','app.slack.com','meet.google.com','calendar.google.com','contacts.google.com','workplace.com','grammarly.com','1password.com','bitwarden.com','lastpass.com','dashlane.com','linear.app','height.app','basecamp.com','wrike.com','coda.io'] },
+  { id: 'education', name: 'Education', emoji: '🎓', color: '#6d4c41', bgColor: '#efebe9', domains: ['coursera.org','udemy.com','edx.org','khanacademy.org','duolingo.com','pluralsight.com','skillshare.com','codecademy.com','freecodecamp.org','udacity.com','lynda.com','linkedin.com/learning','masterclass.com','wikipedia.org','wikimedia.org','scholar.google.com','arxiv.org','researchgate.net','academia.edu','jstor.org','classroom.google.com','edu.google.com','hahow.in','pressplay.cc','brilliant.org','mit.edu','stanford.edu','ocw.mit.edu'] },
+  { id: 'email', name: 'Email', emoji: '📧', color: '#ea4335', bgColor: '#fce8e6', domains: ['mail.google.com','gmail.com','outlook.live.com','mail.yahoo.com','protonmail.com','proton.me','mail.proton.me','fastmail.com','tutanota.com','hey.com','mail.zoho.com','zoho.com/mail','icloud.com/mail','mail.aol.com'] },
+  { id: 'travel', name: 'Travel', emoji: '✈️', color: '#0288d1', bgColor: '#e1f5fe', domains: ['booking.com','airbnb.com','expedia.com','tripadvisor.com','hotels.com','agoda.com','skyscanner.com','kayak.com','google.com/travel','google.com/flights','maps.google.com','google.com/maps','maps.apple.com','klook.com','kkday.com','uber.com','lyft.com','grab.com','flightradar24.com','rome2rio.com','omio.com','vrbo.com','hostelworld.com','trip.com','ctrip.com','flightaware.com'] },
+  { id: 'food', name: 'Food & Delivery', emoji: '🍔', color: '#e65100', bgColor: '#fff3e0', domains: ['ubereats.com','doordash.com','grubhub.com','foodpanda.com','deliveroo.com','yelp.com','opentable.com','foodpanda.com.tw','ubereats.com.tw','instacart.com','postmates.com','seamless.com','allrecipes.com','epicurious.com','food.google.com'] },
+  { id: 'health', name: 'Health & Fitness', emoji: '🏥', color: '#c62828', bgColor: '#ffebee', domains: ['webmd.com','mayoclinic.org','healthline.com','nih.gov','who.int','cdc.gov','strava.com','fitbit.com','myfitnesspal.com','nhi.gov.tw','cdc.gov.tw','health.apple.com','fitness.google.com','peloton.com','garmin.com/fitness','headspace.com','calm.com','zocdoc.com','teladoc.com'] },
+  { id: 'gaming', name: 'Gaming', emoji: '🎮', color: '#7b1fa2', bgColor: '#f3e5f5', domains: ['store.steampowered.com','steampowered.com','steamcommunity.com','epicgames.com','gog.com','playstation.com','xbox.com','nintendo.com','ign.com','gamespot.com','kotaku.com','polygon.com','riotgames.com','blizzard.com','battle.net','ea.com','ubisoft.com','play.google.com','apps.apple.com','unity.com','unrealengine.com','roblox.com','minecraft.net','curseforge.com','nexusmods.com','gamesradar.com','pcgamer.com','stadia.google.com','gaming.amazon.com','luna.amazon.com'] },
+  { id: 'government', name: 'Government', emoji: '🏛️', color: '#37474f', bgColor: '#eceff1', domains: ['gov.tw','gov.uk','gov.au','gc.ca','usa.gov','whitehouse.gov','irs.gov','ssa.gov','europa.eu','un.org','etax.nat.gov.tw','moea.gov.tw','state.gov','justice.gov','congress.gov','senate.gov','fda.gov','epa.gov','nasa.gov','data.gov','data.gov.tw'] },
+  { id: 'entertainment', name: 'Entertainment', emoji: '🎭', color: '#ad1457', bgColor: '#fce4ec', domains: ['imdb.com','rottentomatoes.com','goodreads.com','letterboxd.com','bandcamp.com','last.fm','ticketmaster.com','eventbrite.com','tixcraft.com','kktix.com','fandango.com','stubhub.com','seatgeek.com','genius.com','tv.apple.com/channel'] },
+  { id: 'reference', name: 'Reference & Tools', emoji: '🔧', color: '#546e7a', bgColor: '#eceff1', domains: ['translate.google.com','deepl.com','wolframalpha.com','calculator.net','speedtest.net','fast.com','archive.org','web.archive.org','jsonformatter.org','regex101.com','excalidraw.com','draw.io','diagrams.net','whois.com','who.is','downdetector.com','worldtimebuddy.com','timeanddate.com','convertunits.com','weather.com','weather.google.com','myaccount.google.com','account.microsoft.com','account.apple.com','appleid.apple.com','myaccount.amazon.com'] },
+  { id: 'advertising', name: 'Advertising & Marketing', emoji: '📢', color: '#f57c00', bgColor: '#fff3e0', domains: ['ads.google.com','adwords.google.com','analytics.google.com','tagmanager.google.com','searchconsole.google.com','business.facebook.com','adsmanager.facebook.com','business.instagram.com','ads.twitter.com','ads.x.com','ads.linkedin.com','ads.tiktok.com','advertising.amazon.com','ads.microsoft.com','ads.pinterest.com','ads.snapchat.com','mailchimp.com','hubspot.com','marketo.com','salesforce.com','semrush.com','ahrefs.com','moz.com','hootsuite.com','buffer.com','amplitude.com','mixpanel.com','segment.com','hotjar.com','optimizely.com'] },
+];
+
+const EXCLUDED_DOMAINS = [
+  'bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','buff.ly','is.gd','v.gd','rb.gy','cutt.ly',
+  'shorturl.at','tiny.cc','lnkd.in','fb.me','youtu.be','amzn.to','a.co','aka.ms','msft.it','apple.co',
+  'chrome://','chrome-extension://','about:','data:','localhost','127.0.0.1','0.0.0.0',
+];
+
+export const handler = async (_event) => {
+  try {
+    // Scan all feedback votes
+    const result = await dynamo.send(
+      new ScanCommand({ TableName: config.URL_FEEDBACK_TABLE })
+    );
+    const items = result.Items ?? [];
+
+    // Build domain → winning category from votes
+    const domainCounts = {};
+    for (const item of items) {
+      const { domain, suggestedCategory } = item;
+      if (!domain || !suggestedCategory) continue;
+      if (!domainCounts[domain]) domainCounts[domain] = {};
+      domainCounts[domain][suggestedCategory] =
+        (domainCounts[domain][suggestedCategory] ?? 0) + 1;
+    }
+
+    const votedDomains = {}; // domain -> categoryId
+    for (const [domain, counts] of Object.entries(domainCounts)) {
+      let best = null, bestCount = -1;
+      for (const [cat, count] of Object.entries(counts)) {
+        if (count > bestCount || (count === bestCount && cat < best)) {
+          best = cat;
+          bestCount = count;
+        }
+      }
+      votedDomains[domain] = best;
+    }
+
+    // Build a set of all bundled domains for dedup
+    const bundledDomainSet = new Set();
+    for (const cat of BUNDLED_CATEGORIES) {
+      for (const d of cat.domains) bundledDomainSet.add(d);
+    }
+
+    // Merge voted domains into categories
+    const categoriesOut = BUNDLED_CATEGORIES.map(cat => ({
+      ...cat,
+      domains: [...cat.domains], // clone
+    }));
+
+    // Index by id for fast lookup
+    const catById = {};
+    for (const cat of categoriesOut) catById[cat.id] = cat;
+
+    for (const [domain, catId] of Object.entries(votedDomains)) {
+      if (bundledDomainSet.has(domain)) continue; // already in bundled
+      if (catById[catId]) {
+        catById[catId].domains.push(domain);
+      }
+      // If catId doesn't match any bundled category, skip (don't create new categories from votes)
+    }
+
+    const responseBody = {
+      version: '2',
+      updatedAt: new Date().toISOString().slice(0, 10),
+      categories: categoriesOut,
+      excludedDomains: EXCLUDED_DOMAINS,
+    };
+
+    const bodyStr = JSON.stringify(responseBody);
+    const etag = createHash('md5').update(bodyStr).digest('hex');
+
+    return ok(responseBody, {
+      'Cache-Control': 'public, max-age=86400',
+      'ETag': etag,
+      'Content-Type': 'application/json',
+    });
+  } catch (err) {
+    console.error(err);
+    return internalError();
+  }
+};

@@ -92,6 +92,16 @@ body::-webkit-scrollbar-thumb {
   border-color: var(--primary);
 }
 
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Toggle */
 .toggle-feedback {
   display: flex;

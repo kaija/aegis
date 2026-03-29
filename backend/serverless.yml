@@ -11,7 +11,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs24.x
   region: ap-northeast-1
   environment:
     URL_FEEDBACK_TABLE: !Ref UrlFeedbackTable
@@ -54,6 +54,13 @@ functions:
     events:
       - httpApi:
           path: /lists/url-categories
+          method: GET
+
+  listsUrlCategoriesFull:
+    handler: src/handlers/lists/urlCategoriesFull.handler
+    events:
+      - httpApi:
+          path: /lists/url-categories/full
           method: GET
 
   listsWhitelist:

@@ -48,11 +48,24 @@ let _urlCategoriesCache = null;
 async function loadUrlCategories() {
   if (_urlCategoriesCache) return _urlCategoriesCache;
   try {
+    // Prefer synced data from API over bundled file
+    const synced = await new Promise(resolve => {
+      chrome.storage.local.get(['aegis_url_categories_synced'], (result) => {
+        resolve(result.aegis_url_categories_synced || null);
+      });
+    });
+    if (synced && Array.isArray(synced.categories)) {
+      _urlCategoriesCache = synced;
+      _sortedDomainLookup = null;
+      return _urlCategoriesCache;
+    }
+
+    // Fallback to bundled file
     const url = chrome.runtime.getURL('src/data/url-categories.json');
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     _urlCategoriesCache = await res.json();
-    _sortedDomainLookup = null; // invalidate lookup on reload
+    _sortedDomainLookup = null;
     return _urlCategoriesCache;
   } catch (e) {
     console.error('[Aegis] Failed to load URL categories:', e);
@@ -450,6 +463,40 @@ async function autoRefreshWhitelist() {
   }
 }
 
+// ---- URL Categories Sync ----
+
+const URL_CATEGORIES_SYNC_KEY = 'aegis_url_categories_last_sync';
+
+async function syncUrlCategories() {
+  try {
+    const res = await fetch(`${AEGIS_API_BASE_URL}/lists/url-categories/full`, {
+      method: 'GET',
+      headers: { 'X-Extension-Version': _getExtensionVersion() },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.categories)) throw new Error('Invalid response format');
+
+    // Cache the synced data in local storage
+    await new Promise(resolve => {
+      chrome.storage.local.set({
+        aegis_url_categories_synced: data,
+        [URL_CATEGORIES_SYNC_KEY]: Date.now(),
+      }, resolve);
+    });
+
+    // Invalidate the in-memory URL categories cache so next navigation uses fresh data
+    _urlCategoriesCache = null;
+    _sortedDomainLookup = null;
+
+    console.log('[Aegis] URL categories synced:', data.categories.length, 'categories');
+    return { success: true, categoryCount: data.categories.length, updatedAt: data.updatedAt };
+  } catch (e) {
+    console.error('[Aegis] URL categories sync failed:', e);
+    return { success: false, error: e.message };
+  }
+}
+
 // Alarm handlers
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'aegis-whitelist-update') {
@@ -460,6 +507,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
   if (alarm.name === 'aegis-time-flush') {
     _flushSession();
+  }
+  if (alarm.name === 'aegis-url-categories-sync') {
+    syncUrlCategories();
   }
 });
 
@@ -538,6 +588,12 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Schedule daily URL history cleanup (every 24h)
   chrome.alarms.create('aegis-url-history-cleanup', { periodInMinutes: 1440 });
+
+  // Schedule weekly URL categories sync (every 7 days)
+  chrome.alarms.create('aegis-url-categories-sync', { periodInMinutes: 10080 });
+
+  // Initial URL categories sync on install/update
+  syncUrlCategories();
 });
 
 function buildUserMessage(emailData) {
@@ -855,6 +911,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_URL_CATEGORIES') {
     loadUrlCategories().then((data) => {
       sendResponse({ data });
+    });
+    return true;
+  }
+
+  if (message.type === 'SYNC_URL_CATEGORIES') {
+    syncUrlCategories().then((result) => {
+      sendResponse(result);
+    });
+    return true;
+  }
+
+  if (message.type === 'GET_URL_CATEGORIES_SYNC_STATUS') {
+    chrome.storage.local.get([URL_CATEGORIES_SYNC_KEY], (result) => {
+      sendResponse({ lastSync: result[URL_CATEGORIES_SYNC_KEY] || null });
     });
     return true;
   }
