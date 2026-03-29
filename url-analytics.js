@@ -794,6 +794,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   const uncategorizedSection = document.getElementById('uncategorizedSection');
   const uncategorizedList = document.getElementById('uncategorizedList');
   const syncCategoriesBtn = document.getElementById('syncCategoriesBtn');
+  const syncStatusBar = document.getElementById('syncStatusBar');
+  const syncStatusIcon = document.getElementById('syncStatusIcon');
+  const syncStatusText = document.getElementById('syncStatusText');
+
+  // Helper: update sync status bar display
+  function updateSyncStatusBar(lastSync, categoryCount, totalDomains) {
+    syncStatusBar.style.display = 'flex';
+    syncStatusBar.classList.remove('sync-ok', 'sync-stale', 'sync-none');
+
+    if (!lastSync) {
+      syncStatusBar.classList.add('sync-none');
+      syncStatusIcon.textContent = '○';
+      syncStatusText.textContent = 'URL categories not synced yet — click the sync button to update';
+      return;
+    }
+
+    const now = Date.now();
+    const daysSince = (now - lastSync) / (1000 * 60 * 60 * 24);
+    const d = new Date(lastSync);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const stats = totalDomains ? ` · ${categoryCount} categories · ${totalDomains} domains` : '';
+
+    if (daysSince <= 7) {
+      syncStatusBar.classList.add('sync-ok');
+      syncStatusIcon.textContent = '✓';
+      syncStatusText.textContent = `Categories synced ${dateStr}${stats}`;
+    } else {
+      syncStatusBar.classList.add('sync-stale');
+      syncStatusIcon.textContent = '⚠';
+      syncStatusText.textContent = `Last synced ${dateStr} (${Math.floor(daysSince)} days ago)${stats} — consider syncing`;
+    }
+  }
 
   // Load categories
   await loadCategoriesData();
@@ -936,6 +968,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (response.success) {
         syncCategoriesBtn.title = `Synced ${response.categoryCount} categories (${response.updatedAt})`;
+        updateSyncStatusBar(Date.now(), response.categoryCount, response.totalDomains);
         // Reload categories and refresh charts
         await loadCategoriesData();
         const newBreakdown = await getCategoryBreakdown(8);
@@ -951,11 +984,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Show last sync time on hover
+  // Show last sync time on hover and in status bar
   chrome.runtime.sendMessage({ type: 'GET_URL_CATEGORIES_SYNC_STATUS' }, (response) => {
-    if (response && response.lastSync) {
-      const d = new Date(response.lastSync);
-      syncCategoriesBtn.title = `Last synced: ${d.toLocaleString()} — Click to sync now`;
+    if (chrome.runtime.lastError) return;
+    if (response) {
+      updateSyncStatusBar(response.lastSync, response.categoryCount, response.totalDomains);
+      if (response.lastSync) {
+        const d = new Date(response.lastSync);
+        syncCategoriesBtn.title = `Last synced: ${d.toLocaleString()} — Click to sync now`;
+      }
     }
   });
 

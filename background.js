@@ -490,7 +490,8 @@ async function syncUrlCategories() {
     _sortedDomainLookup = null;
 
     console.log('[Aegis] URL categories synced:', data.categories.length, 'categories');
-    return { success: true, categoryCount: data.categories.length, updatedAt: data.updatedAt };
+    const totalDomains = data.categories.reduce((sum, c) => sum + (c.domains ? c.domains.length : 0), 0);
+    return { success: true, categoryCount: data.categories.length, totalDomains, updatedAt: data.updatedAt };
   } catch (e) {
     console.error('[Aegis] URL categories sync failed:', e);
     return { success: false, error: e.message };
@@ -918,13 +919,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SYNC_URL_CATEGORIES') {
     syncUrlCategories().then((result) => {
       sendResponse(result);
+    }).catch((err) => {
+      sendResponse({ success: false, error: err.message || 'Unknown error' });
     });
     return true;
   }
 
   if (message.type === 'GET_URL_CATEGORIES_SYNC_STATUS') {
-    chrome.storage.local.get([URL_CATEGORIES_SYNC_KEY], (result) => {
-      sendResponse({ lastSync: result[URL_CATEGORIES_SYNC_KEY] || null });
+    chrome.storage.local.get([URL_CATEGORIES_SYNC_KEY, 'aegis_url_categories_synced'], (result) => {
+      const lastSync = result[URL_CATEGORIES_SYNC_KEY] || null;
+      const synced = result.aegis_url_categories_synced || null;
+      let categoryCount = 0;
+      let totalDomains = 0;
+      if (synced && Array.isArray(synced.categories)) {
+        categoryCount = synced.categories.length;
+        totalDomains = synced.categories.reduce((sum, c) => sum + (c.domains ? c.domains.length : 0), 0);
+      }
+      sendResponse({ lastSync, categoryCount, totalDomains });
     });
     return true;
   }
