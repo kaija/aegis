@@ -4,7 +4,7 @@ Serverless REST API for collecting URL categorization and email domain feedback 
 
 ## Stack
 
-- **Runtime**: Node.js 20.x (ES Modules)
+- **Runtime**: Node.js 24.x (ES Modules)
 - **Framework**: Serverless Framework v4
 - **Cloud**: AWS Lambda + API Gateway V2 (HTTP API)
 - **Database**: DynamoDB (on-demand billing)
