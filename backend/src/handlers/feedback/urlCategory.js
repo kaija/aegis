@@ -3,7 +3,7 @@ import { isValidUrl, extractDomain } from '../../lib/validation.js';
 import { dynamo } from '../../lib/dynamo.js';
 import { config } from '../../config.js';
 import { validateRequest } from '../../middleware/validateRequest.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
 export const handler = async (event) => {
@@ -26,7 +26,7 @@ export const handler = async (event) => {
     }
 
     const domain = extractDomain(url);
-    const id = uuidv4();
+    const id = randomUUID();
 
     const headers = event.headers ?? {};
     const versionKey = Object.keys(headers).find(

@@ -3,7 +3,7 @@ import { isValidDomain, sanitizeUrlDomains } from '../../lib/validation.js';
 import { dynamo } from '../../lib/dynamo.js';
 import { config } from '../../config.js';
 import { validateRequest } from '../../middleware/validateRequest.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 export const handler = async (event) => {
@@ -39,7 +39,7 @@ export const handler = async (event) => {
       new PutCommand({
         TableName: config.SENDER_MAPPING_FEEDBACK_TABLE,
         Item: {
-          id: uuidv4(),
+          id: randomUUID(),
           createdAt: now,
           senderDomain,
           companyName: companyName ?? null,

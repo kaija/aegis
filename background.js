@@ -1,3 +1,37 @@
+// ---- Aegis API feedback ----
+
+const AEGIS_API_BASE_URL = 'https://aegis.penrose.services';
+
+function _getExtensionVersion() {
+  return chrome.runtime.getManifest().version;
+}
+
+async function _submitFeedback(path, body) {
+  try {
+    await fetch(`${AEGIS_API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Extension-Version': _getExtensionVersion(),
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    console.warn('[Aegis] Feedback submission failed:', e.message);
+  }
+}
+
+function submitUrlCategoryFeedback(url, suggestedCategory, currentCategory) {
+  _submitFeedback('/feedback/url-category', { url, suggestedCategory, currentCategory });
+}
+
+function submitEmailDomainFeedback(senderDomain, urlDomains, companyName) {
+  if (!senderDomain || !urlDomains || urlDomains.length === 0) return;
+  const body = { senderDomain, urlDomains };
+  if (companyName) body.companyName = companyName;
+  _submitFeedback('/feedback/sender-mapping', body);
+}
+
 // ---- URL Categories helpers ----
 
 let _urlCategoriesCache = null;
@@ -793,6 +827,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'SUBMIT_EMAIL_FEEDBACK') {
+    const { senderDomain, urlDomains, companyName } = message;
+    submitEmailDomainFeedback(senderDomain, urlDomains, companyName);
+    sendResponse({ ok: true });
+    return true;
+  }
+
   if (message.type === 'SAVE_SETTINGS') {
     chrome.storage.sync.set(message.settings, () => {
       sendResponse({ ok: true });
@@ -848,6 +889,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SAVE_URL_LABEL') {
     const { domain, categoryId, url } = message;
     const USER_LABELS_KEY = 'aegis_url_user_labels';
+    // Submit feedback to backend (fire-and-forget, only when a specific URL is available)
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+      submitUrlCategoryFeedback(url, categoryId, 'uncategorized');
+    }
     // Invalidate sorted lookup so future navigations use the new label
     _sortedDomainLookup = null;
     chrome.storage.local.get([USER_LABELS_KEY], (result) => {

@@ -340,6 +340,28 @@
 
       emailPopup.show(analysis);
       updateStats(0, 1);
+
+      // Submit email domain feedback (fire-and-forget, never blocks the user)
+      if (emailData.senderEmail && emailData.senderEmail.includes('@')) {
+        try {
+          const senderDomain = emailData.senderEmail.split('@')[1].toLowerCase();
+          const urlDomains = [...new Set(
+            (emailData.links || [])
+              .map(link => { try { return new URL(link).hostname.replace(/^www\./, ''); } catch { return null; } })
+              .filter(Boolean)
+          )];
+          if (urlDomains.length > 0) {
+            chrome.runtime.sendMessage({
+              type: 'SUBMIT_EMAIL_FEEDBACK',
+              senderDomain,
+              urlDomains,
+              companyName: emailData.sender || undefined,
+            });
+          }
+        } catch (e) {
+          // Feedback failure must never surface to the user
+        }
+      }
     } catch (err) {
       console.error('[Aegis] Email analysis error:', err);
     }

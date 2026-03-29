@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               type: 'SAVE_URL_LABEL',
               domain,
               categoryId,
-              url: ''
+              url: `https://${domain}`
             }, (response) => {
               if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message));
