@@ -77,6 +77,13 @@ functions:
           path: /health
           method: GET
 
+  privacyPolicy:
+    handler: src/handlers/pages/privacy.handler
+    events:
+      - httpApi:
+          path: /privacy
+          method: GET
+
 resources:
   Resources:
     # DynamoDB Tables
