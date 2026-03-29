@@ -273,6 +273,65 @@
           const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
           updateStats(classifiedCount, 0);
 
+        } else if (settings.analysisMode === 'nano') {
+          // Nano AI mode
+          console.log('[Aegis] Nano AI mode active, processing', emails.length, 'emails');
+
+          // Fallback initial categorization for all emails (same as AI mode)
+          emails.forEach(email => {
+            const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
+            email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
+          });
+
+          try {
+            const availability = await NanoAnalyzer.checkAvailability();
+            if (availability !== 'available') {
+              console.warn('[Aegis] Gemini Nano not available (' + availability + '), falling back to local analysis');
+              renderCurrentState(false);
+              const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
+              updateStats(classifiedCount, 0);
+            } else {
+              const batchData = emails.map((email, index) => ({
+                id: index,
+                subject: email.subject,
+                sender: email.sender,
+                senderEmail: email.senderEmail
+              }));
+
+              const nanoResult = await NanoAnalyzer.batchAnalyze(batchData, labels.map(l => l.name));
+
+              if (nanoResult && Array.isArray(nanoResult.results)) {
+                nanoResult.results.forEach(res => {
+                  const email = emails[res.id];
+                  if (email) {
+                    const matchedCategory = categories.find(c => c.name === res.category);
+                    if (matchedCategory) {
+                      email.category = Object.assign({}, matchedCategory);
+                    } else {
+                      const mappedIcon = getIconForLabel(res.category);
+                      const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
+                      email.category = {
+                        name: res.category,
+                        emoji: mappedIcon,
+                        color: colors.color,
+                        bgColor: colors.bgColor,
+                        id: 'ai-label-' + res.category
+                      };
+                    }
+                  }
+                });
+              }
+
+              renderCurrentState(false);
+              const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
+              updateStats(classifiedCount, 0);
+            }
+          } catch (err) {
+            console.warn('[Aegis] Nano batch analysis error, falling back to local:', err);
+            renderCurrentState(false);
+            const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
+            updateStats(classifiedCount, 0);
+          }
         } else {
           // Local analysis only
           emails.forEach(email => {
@@ -358,6 +417,50 @@
               analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
             }
           } catch (e) {
+            analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
+          }
+        } else if (settings.analysisMode === 'nano') {
+          try {
+            const nanoResult = await NanoAnalyzer.analyzeEmail(emailData);
+            const localAnalysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
+
+            let matchedCategory = (settings.categories || []).find(c => c.name === nanoResult.category);
+            let finalCategory;
+            if (matchedCategory) {
+              finalCategory = Object.assign({}, matchedCategory);
+            } else if (nanoResult.category) {
+              const mappedIcon = getIconForLabel(nanoResult.category);
+              const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
+              finalCategory = {
+                name: nanoResult.category,
+                emoji: mappedIcon,
+                color: colors.color,
+                bgColor: colors.bgColor,
+                id: 'ai-label-' + nanoResult.category
+              };
+            } else {
+              finalCategory = localAnalysis.category;
+            }
+
+            analysis = {
+              ...localAnalysis,
+              category: finalCategory,
+              tags: nanoResult.tags || localAnalysis.tags,
+              safetyScore: typeof nanoResult.safetyScore === 'number' ? nanoResult.safetyScore : localAnalysis.safetyScore,
+              issues: [...(nanoResult.issues || []), ...localAnalysis.issues].slice(0, 5)
+            };
+            if (analysis.safetyScore >= 80) {
+              analysis.safetyLevel = 'safe';
+              analysis.safetyColor = '#1a7f37';
+            } else if (analysis.safetyScore >= 50) {
+              analysis.safetyLevel = 'caution';
+              analysis.safetyColor = '#9a6700';
+            } else {
+              analysis.safetyLevel = 'danger';
+              analysis.safetyColor = '#cf222e';
+            }
+          } catch (e) {
+            console.warn('[Aegis] Nano single analysis error, falling back to local:', e);
             analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
           }
         } else {
@@ -450,6 +553,13 @@
     if (isEmailDetailView()) {
       setTimeout(analyzeOpenEmail, 1200);
     }
+
+    // Cleanup Nano AI session on page unload
+    window.addEventListener('beforeunload', () => {
+      if (typeof NanoAnalyzer !== 'undefined' && NanoAnalyzer.destroy) {
+        NanoAnalyzer.destroy();
+      }
+    });
   }
 
 })();

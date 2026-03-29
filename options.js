@@ -48,15 +48,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.checked = true;
     }
     input.addEventListener('change', () => {
-      const isAi = input.value === 'ai';
-      document.getElementById('aiSettingsSection').style.display = isAi ? 'block' : 'none';
-      document.getElementById('categoriesSection').style.display = isAi ? 'none' : 'block';
+      const nanoStatusSection = document.getElementById('nanoStatusSection');
+      if (input.value === 'nano') {
+        document.getElementById('aiSettingsSection').style.display = 'none';
+        document.getElementById('categoriesSection').style.display = 'none';
+        nanoStatusSection.style.display = 'block';
+        checkNanoAvailability();
+      } else if (input.value === 'ai') {
+        document.getElementById('aiSettingsSection').style.display = 'block';
+        document.getElementById('categoriesSection').style.display = 'none';
+        nanoStatusSection.style.display = 'none';
+      } else {
+        document.getElementById('aiSettingsSection').style.display = 'none';
+        document.getElementById('categoriesSection').style.display = 'block';
+        nanoStatusSection.style.display = 'none';
+      }
     });
   });
 
   if (settings.analysisMode === 'ai') {
     document.getElementById('aiSettingsSection').style.display = 'block';
     document.getElementById('categoriesSection').style.display = 'none';
+  } else if (settings.analysisMode === 'nano') {
+    document.getElementById('aiSettingsSection').style.display = 'none';
+    document.getElementById('categoriesSection').style.display = 'none';
+    document.getElementById('nanoStatusSection').style.display = 'block';
+    checkNanoAvailability();
   }
 
   // Set AI settings values
@@ -89,6 +106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initial load of cached models
   loadCachedModels();
+
+  // Wire Nano download button
+  const nanoDownloadBtn = document.getElementById('nanoDownloadBtn');
+  if (nanoDownloadBtn) nanoDownloadBtn.addEventListener('click', triggerNanoDownload);
 });
 
 async function testAiConnection() {
@@ -619,4 +640,81 @@ function showSuccessMessage(message) {
     notification.classList.remove('show');
     setTimeout(() => notification.remove(), 300);
   }, 3000);
+}
+
+
+// Nano AI availability and download functions
+
+async function checkNanoAvailability() {
+  const statusEl = document.getElementById('nanoStatus');
+  const downloadBtn = document.getElementById('nanoDownloadBtn');
+  const progressContainer = document.getElementById('nanoProgressContainer');
+
+  // Hide download controls by default
+  downloadBtn.style.display = 'none';
+  progressContainer.style.display = 'none';
+
+  if (typeof LanguageModel === 'undefined') {
+    updateNanoStatus('red', 'Prompt API is not available in this browser. Enable chrome://flags/#optimization-guide-on-device-model and chrome://flags/#prompt-api-for-gemini-nano');
+    return;
+  }
+
+  try {
+    const status = await LanguageModel.availability();
+    switch (status) {
+      case 'available':
+        updateNanoStatus('green', 'Gemini Nano is ready');
+        break;
+      case 'downloadable':
+        updateNanoStatus('amber', 'Gemini Nano needs to be downloaded');
+        downloadBtn.style.display = 'inline-block';
+        break;
+      case 'downloading':
+        updateNanoStatus('amber', 'Gemini Nano is downloading...');
+        progressContainer.style.display = 'block';
+        break;
+      case 'unavailable':
+      default:
+        updateNanoStatus('red', 'Gemini Nano is not supported on this device');
+        break;
+    }
+  } catch (e) {
+    updateNanoStatus('red', 'Failed to check Gemini Nano availability: ' + e.message);
+  }
+}
+
+function updateNanoStatus(color, message) {
+  const statusEl = document.getElementById('nanoStatus');
+  const colorMap = { green: '#1a7f37', amber: '#9a6700', red: '#cf222e' };
+  statusEl.style.color = colorMap[color] || '#5f6368';
+  statusEl.textContent = message;
+}
+
+async function triggerNanoDownload() {
+  const downloadBtn = document.getElementById('nanoDownloadBtn');
+  const progressContainer = document.getElementById('nanoProgressContainer');
+  const progressBar = document.getElementById('nanoProgressBar');
+
+  downloadBtn.disabled = true;
+  progressContainer.style.display = 'block';
+  updateNanoStatus('amber', 'Downloading Gemini Nano...');
+
+  try {
+    await LanguageModel.create({
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          const pct = e.total > 0 ? Math.round((e.loaded / e.total) * 100) : 0;
+          progressBar.style.width = pct + '%';
+          progressBar.textContent = pct + '%';
+        });
+      }
+    });
+    updateNanoStatus('green', 'Gemini Nano is ready');
+    progressContainer.style.display = 'none';
+    downloadBtn.style.display = 'none';
+  } catch (e) {
+    updateNanoStatus('red', 'Download failed: ' + e.message);
+    downloadBtn.disabled = false;
+    progressContainer.style.display = 'none';
+  }
 }

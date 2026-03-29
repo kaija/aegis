@@ -59,6 +59,25 @@
             </div>
           </div>
         </label>
+
+        <label class="ae-card" id="ae-card-nano">
+          <input type="radio" name="analysisMode" value="nano">
+          <div class="ae-card-content">
+            <div class="ae-radio-circle"></div>
+            <div class="ae-text">
+              <strong>Nano AI</strong>
+              <p>On-device LLM powered by Chrome's Gemini Nano. No API key needed, fully offline capable.</p>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div id="nanoStatusSection" style="display:none; margin-top: 16px;">
+        <div id="nanoStatus" style="font-size: 13px; font-weight: 500; margin-bottom: 10px;"></div>
+        <button type="button" id="nanoDownloadBtn" class="test-connection-btn" style="display:none;">Download Model</button>
+        <div id="nanoProgressContainer" style="display:none; margin-top: 10px; background: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+          <div id="nanoProgressBar" style="width: 0%; height: 100%; background: #1a73e8; color: #fff; text-align: center; font-size: 12px; line-height: 20px; transition: width 0.3s;"></div>
+        </div>
       </div>
     </section>
 
