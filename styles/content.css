@@ -920,3 +920,112 @@
   line-height: 1.4;
   font-weight: 500;
 }
+
+/* ========== EULA Dialog ========== */
+.aegis-eula-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aegis-fade-in 0.2s ease;
+}
+
+.aegis-eula-dialog {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--aegis-font);
+  animation: aegis-dialog-slide-up 0.3s ease;
+}
+
+.aegis-eula-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--aegis-border);
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.aegis-eula-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 50vh;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #3c4043;
+}
+
+.aegis-eula-body p {
+  margin: 0 0 10px;
+}
+
+.aegis-eula-notice {
+  margin: 0 20px 16px;
+  padding: 10px 12px;
+  background: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #174ea6;
+}
+
+.aegis-eula-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--aegis-border);
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+}
+
+.aegis-eula-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--aegis-font);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.aegis-eula-btn-decline {
+  background: white;
+  color: #5f6368;
+  border: 1px solid var(--aegis-border);
+}
+
+.aegis-eula-btn-decline:hover {
+  background: #f1f3f4;
+  border-color: #bbb;
+}
+
+.aegis-eula-btn-accept {
+  background: var(--aegis-primary);
+  color: white;
+}
+
+.aegis-eula-btn-accept:hover {
+  background: #1a73e8;
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+.aegis-eula-btn-accept:active {
+  background: #1765cc;
+}

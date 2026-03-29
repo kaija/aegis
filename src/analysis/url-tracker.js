@@ -66,7 +66,7 @@ const UrlTracker = (() => {
   async function _loadSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get([SETTINGS_KEY], (result) => {
-        resolve(result[SETTINGS_KEY] || { feedbackEnabled: false });
+        resolve(result[SETTINGS_KEY] || { feedbackEnabled: true });
       });
     });
   }
@@ -382,7 +382,7 @@ const UrlTracker = (() => {
    * Get settings
    */
   function getSettings() {
-    return _settings || { feedbackEnabled: false };
+    return _settings || { feedbackEnabled: true };
   }
 
   /**

@@ -21,12 +21,21 @@ async function _submitFeedback(path, body) {
   }
 }
 
-function submitUrlCategoryFeedback(url, suggestedCategory, currentCategory) {
+async function _isFeedbackAllowed() {
+  const { eulaAccepted, dataFeedbackEnabled } = await new Promise((resolve) =>
+    chrome.storage.sync.get(['eulaAccepted', 'dataFeedbackEnabled'], resolve)
+  );
+  return eulaAccepted === true && dataFeedbackEnabled === true;
+}
+
+async function submitUrlCategoryFeedback(url, suggestedCategory, currentCategory) {
+  if (!(await _isFeedbackAllowed())) return;
   _submitFeedback('/feedback/url-category', { url, suggestedCategory, currentCategory });
 }
 
-function submitEmailDomainFeedback(senderDomain, urlDomains, companyName) {
+async function submitEmailDomainFeedback(senderDomain, urlDomains, companyName) {
   if (!senderDomain || !urlDomains || urlDomains.length === 0) return;
+  if (!(await _isFeedbackAllowed())) return;
   const body = { senderDomain, urlDomains };
   if (companyName) body.companyName = companyName;
   _submitFeedback('/feedback/sender-mapping', body);
@@ -483,6 +492,8 @@ async function cleanupOldUrlHistory() {
 // ---- Default settings ----
 
 const DEFAULT_SETTINGS = {
+  eulaAccepted: false,
+  dataFeedbackEnabled: false,
   analysisMode: 'local',
   analysisDebug: false,
   aiSettings: {

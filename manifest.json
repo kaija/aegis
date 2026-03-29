@@ -16,6 +16,7 @@
         "src/platforms/gmail-platform.js",
         "src/ui/analysis-panel.js",
         "src/ui/email-popup.js",
+        "src/ui/eula-dialog.js",
         "content.js"
       ],
       "css": ["styles/content.css"],

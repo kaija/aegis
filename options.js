@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load debug toggle
   document.getElementById('analysisDebug').checked = !!settings.analysisDebug;
 
+  // Handle data feedback section visibility and toggle state
+  const dataFeedbackSection = document.getElementById('dataFeedbackSection');
+  const dataFeedbackToggle = document.getElementById('dataFeedbackToggle');
+  if (settings.eulaAccepted === true) {
+    dataFeedbackSection.style.display = '';
+    dataFeedbackToggle.checked = !!settings.dataFeedbackEnabled;
+  } else {
+    dataFeedbackSection.style.display = 'none';
+  }
+
   // Load and show whitelist status
   loadWhitelistStatus();
 
@@ -389,6 +399,7 @@ async function saveSettings() {
     },
     whitelistUrl: document.getElementById('whitelistUrl').value.trim(),
     analysisDebug: document.getElementById('analysisDebug').checked,
+    dataFeedbackEnabled: document.getElementById('dataFeedbackToggle').checked,
     categories: settings.categories
   };
 

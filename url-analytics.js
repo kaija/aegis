@@ -151,7 +151,7 @@ async function predictToday() {
 async function getSettings() {
   return new Promise((resolve) => {
     chrome.storage.local.get([SETTINGS_KEY], (result) => {
-      resolve(result[SETTINGS_KEY] || { feedbackEnabled: false });
+      resolve(result[SETTINGS_KEY] || { feedbackEnabled: true });
     });
   });
 }
