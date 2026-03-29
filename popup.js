@@ -8,6 +8,7 @@ async function ensureContentScript(tab) {
     files: [
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',
+      'src/analysis/nano-analyzer.js',
       'src/platforms/base-platform.js',
       'src/platforms/gmail-platform.js',
       'src/ui/analysis-panel.js',
@@ -67,6 +68,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   chrome.storage.sync.get(['analysisMode'], (result) => {
     if (result.analysisMode === 'ai') {
       modeBadge.textContent = 'AI-Powered';
+      modeDot.className = 'status-dot';
+      modeDot.style.background = 'var(--green)';
+    } else if (result.analysisMode === 'nano') {
+      modeBadge.textContent = 'Nano AI';
       modeDot.className = 'status-dot';
       modeDot.style.background = 'var(--green)';
     } else {

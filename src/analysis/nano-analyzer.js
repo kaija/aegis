@@ -91,6 +91,8 @@ Respond with JSON containing: category (string), tags (array of strings), safety
 
     const systemPrompt = _buildSystemPrompt(type, availableCategories);
     _session = await LanguageModel.create({
+      expectedInputLanguages: ['en', 'zh', 'ja'],
+      expectedOutputLanguages: ['en'],
       initialPrompts: [
         { role: 'system', content: systemPrompt }
       ]
@@ -112,7 +114,7 @@ Respond with JSON containing: category (string), tags (array of strings), safety
         return { results: [] };
       }
 
-      const session = await _getOrCreateSession('batch', availableCategories);
+      let session = await _getOrCreateSession('batch', availableCategories);
       const CHUNK_SIZE = 10;
       const allResults = [];
 
@@ -140,8 +142,8 @@ Respond with JSON containing: category (string), tags (array of strings), safety
           try { _session.destroy(); } catch (e) { /* ignore */ }
           _session = null;
           _sessionType = null;
-          // Recreate session for remaining chunks
-          await _getOrCreateSession('batch', availableCategories);
+          // Recreate session for remaining chunks and update local reference
+          session = await _getOrCreateSession('batch', availableCategories);
         }
       }
 

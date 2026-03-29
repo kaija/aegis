@@ -274,10 +274,10 @@
           updateStats(classifiedCount, 0);
 
         } else if (settings.analysisMode === 'nano') {
-          // Nano AI mode
+          // Nano AI mode — uses Gmail labels for classification (same as AI mode)
           console.log('[Aegis] Nano AI mode active, processing', emails.length, 'emails');
 
-          // Fallback initial categorization for all emails (same as AI mode)
+          // Initial categorization using keywords as fallback (overridden by Nano AI results)
           emails.forEach(email => {
             const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
             email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
@@ -304,20 +304,16 @@
                 nanoResult.results.forEach(res => {
                   const email = emails[res.id];
                   if (email) {
-                    const matchedCategory = categories.find(c => c.name === res.category);
-                    if (matchedCategory) {
-                      email.category = Object.assign({}, matchedCategory);
-                    } else {
-                      const mappedIcon = getIconForLabel(res.category);
-                      const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
-                      email.category = {
-                        name: res.category,
-                        emoji: mappedIcon,
-                        color: colors.color,
-                        bgColor: colors.bgColor,
-                        id: 'ai-label-' + res.category
-                      };
-                    }
+                    // Always create dynamic category from Gmail label (same as AI mode)
+                    const mappedIcon = getIconForLabel(res.category);
+                    const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
+                    email.category = {
+                      name: res.category,
+                      emoji: mappedIcon,
+                      color: colors.color,
+                      bgColor: colors.bgColor,
+                      id: 'ai-label-' + res.category
+                    };
                   }
                 });
               }
@@ -424,11 +420,9 @@
             const nanoResult = await NanoAnalyzer.analyzeEmail(emailData);
             const localAnalysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
 
-            let matchedCategory = (settings.categories || []).find(c => c.name === nanoResult.category);
             let finalCategory;
-            if (matchedCategory) {
-              finalCategory = Object.assign({}, matchedCategory);
-            } else if (nanoResult.category) {
+            if (nanoResult.category) {
+              // Always create dynamic category from Gmail label (same as AI mode)
               const mappedIcon = getIconForLabel(nanoResult.category);
               const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
               finalCategory = {
