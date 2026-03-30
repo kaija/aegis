@@ -110,27 +110,42 @@ class OutlookPlatform extends BasePlatform {
   getLabels() {
     const labels = [];
     const seen = new Set();
+    // Outlook system folders (EN + zh-TW) — these are NOT user-created folders
     const systemLabels = new Set([
       'Inbox', 'Sent Items', 'Drafts', 'Deleted Items', 'Archive', 'Junk Email',
-      '收件匣', '寄件備份', '草稿', '刪除的郵件', '封存', '垃圾郵件'
+      'Notes', 'Outbox', 'RSS Feeds', 'Sync Issues', 'Search Folders',
+      'Favorites', 'Go to Groups',
+      '收件匣', '寄件備份', '草稿', '刪除的郵件', '封存', '垃圾郵件',
+      '記事', '寄件匣', 'RSS 摘要', '同步處理問題', '搜尋資料夾',
+      '我的最愛', '前往群組'
     ]);
 
-    // Navigation sidebar folders typically have role="treeitem"
-    const els = document.querySelectorAll('div[role="treeitem"]');
+    // Navigation sidebar folders: only level-2 treeitems under the account
+    const els = document.querySelectorAll('[role="treeitem"]');
     for (const el of els) {
-      let name = el.getAttribute('title') || el.getAttribute('aria-label') || el.textContent || '';
-      name = name.trim();
-      
-      // Strip screen-reader additions like "19unread", "1item", "selected", or trailing numbers
-      name = name.replace(/(^\d+\s*unread\s*)|(^\d+\s*items?\s*)/i, '');
-      name = name.replace(/^selected\s+/i, '');
-      name = name.replace(/\s*\d+$/, '');
-      name = name.trim();
+      // Skip top-level items (account headers, Favorites, archive headers)
+      const level = el.getAttribute('aria-level');
+      if (level !== '2') continue;
 
-      if (name && !seen.has(name) && !systemLabels.has(name) && name.length > 0 && name.length < 50) {
-        seen.add(name);
-        labels.push({ name, element: el });
+      // The title attribute is the cleanest source: "FolderName - N items (M unread)"
+      const titleAttr = el.getAttribute('title') || '';
+      let name = titleAttr.split(' - ')[0].trim();
+
+      // Fallback: strip icon-font private-use chars from textContent
+      if (!name) {
+        name = (el.textContent || '').replace(/[\uE000-\uF8FF]/g, '').trim();
+        name = name.replace(/\d+\s*(unread|item)s?/gi, '');
+        name = name.replace(/^selected\s+/i, '');
+        name = name.replace(/\s*\d+$/, '');
+        name = name.trim();
       }
+
+      // Skip system folders, email addresses, and empty/too-long names
+      if (!name || seen.has(name) || systemLabels.has(name)) continue;
+      if (name.includes('@') || name.length > 50) continue;
+
+      seen.add(name);
+      labels.push({ name, element: el });
     }
     return labels;
   }
