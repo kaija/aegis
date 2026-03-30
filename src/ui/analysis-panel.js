@@ -155,15 +155,17 @@ class AnalysisPanel {
     const actions = document.createElement('div');
     actions.className = 'aegis-category-actions';
 
+    const isOutlook = this.platform && this.platform.getName() === 'Outlook';
+
     // Only show "Move All" if the label actually exists in Gmail
     const labelExists = labels.find(l => l.name === category.name);
     const moveAllBtnHtml = labelExists
-      ? `<button class="aegis-action-btn aegis-move-all-btn" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;">全部移至「${category.name}」標籤</button>`
+      ? `<button class="aegis-action-btn aegis-move-all-btn${isOutlook ? ' aegis-btn-disabled' : ''}" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;"${isOutlook ? ' disabled title="Outlook 暫不支援此功能"' : ''}>全部移至「${category.name}」標籤</button>`
       : '';
 
     actions.innerHTML = `
       ${moveAllBtnHtml}
-      <button class="aegis-action-btn aegis-move-btn">移至其他標籤 ▼</button>
+      <button class="aegis-action-btn aegis-move-btn${isOutlook ? ' aegis-btn-disabled' : ''}"${isOutlook ? ' disabled title="Outlook 暫不支援此功能"' : ''}>移至其他標籤 ▼</button>
       <button class="aegis-action-btn aegis-delete-btn">🗑 刪除</button>
     `;
 
@@ -205,7 +207,8 @@ class AnalysisPanel {
 
         if (remaining === 0) group.remove();
       } else {
-        this._showNotification('郵件刪除操作異常，請檢查 Gmail 已正常完成刪除流程。', 'error');
+        const platformName = this.platform ? this.platform.getName() : '平台';
+        this._showNotification(`郵件刪除操作異常，請檢查 ${platformName} 已正常完成刪除流程。`, 'error');
       }
     });
 
@@ -249,7 +252,8 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          this._showNotification(`移動失敗。請再次確認 Gmail 中已有「${targetLabelText}」標籤。`, 'error');
+          const platformName = this.platform ? this.platform.getName() : '平台';
+          this._showNotification(`移動失敗。請再次確認 ${platformName} 中已有「${targetLabelText}」標籤。`, 'error');
         }
 
         moveAllBtn.textContent = `全部移至「${category.name}」標籤`;
@@ -279,7 +283,8 @@ class AnalysisPanel {
     document.querySelectorAll('.aegis-label-picker').forEach(el => el.remove());
 
     if (labels.length === 0) {
-      this._showNotification('未找到標籤，請確認 Gmail 側欄已載入', 'error');
+      const platformName = this.platform ? this.platform.getName() : '平台';
+      this._showNotification(`未找到標籤/資料夾，請確認 ${platformName} 側欄已載入`, 'error');
       return;
     }
 
@@ -303,7 +308,8 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          this._showNotification('郵件移動操作異常，請檢查 Gmail 已正常完成流程。', 'error');
+          const platformName = this.platform ? this.platform.getName() : '平台';
+          this._showNotification(`郵件移動操作異常，請檢查 ${platformName} 已正常完成流程。`, 'error');
         }
       });
       picker.appendChild(item);

@@ -7,7 +7,7 @@
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
-      "matches": ["https://mail.google.com/*"],
+      "matches": ["https://mail.google.com/*", "https://outlook.live.com/*", "https://outlook.office.com/*", "https://outlook.office365.com/*"],
       "js": [
         "src/analysis/whitelist-manager.js",
         "src/analysis/email-analyzer.js",
@@ -15,6 +15,7 @@
         "src/analysis/nano-analyzer.js",
         "src/platforms/base-platform.js",
         "src/platforms/gmail-platform.js",
+        "src/platforms/outlook-platform.js",
         "src/ui/analysis-panel.js",
         "src/ui/email-popup.js",
         "src/ui/eula-dialog.js",

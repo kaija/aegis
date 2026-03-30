@@ -128,9 +128,15 @@ Respond with JSON containing: category (string), tags (array of strings), safety
         }));
 
         const userPrompt = JSON.stringify(emailMetadata);
-        const responseText = await session.prompt(userPrompt, {
-          responseConstraint: BATCH_RESPONSE_SCHEMA
-        });
+        let responseText;
+        try {
+          responseText = await session.prompt(userPrompt, {
+            responseConstraint: BATCH_RESPONSE_SCHEMA
+          });
+        } catch (constraintErr) {
+          console.warn('[Aegis] Nano constrained batch prompt failed, retrying unconstrained:', constraintErr);
+          responseText = await session.prompt(userPrompt);
+        }
 
         const parsed = JSON.parse(responseText);
         if (parsed.results && Array.isArray(parsed.results)) {
@@ -170,11 +176,21 @@ Body:
 ${truncatedBody}
 
 Links:
-${truncatedLinks.join('\n')}`;
+${truncatedLinks.join('\n')}
 
-    const responseText = await session.prompt(userPrompt, {
-      responseConstraint: SINGLE_RESPONSE_SCHEMA
-    });
+Respond ONLY with valid JSON.`;
+
+    let responseText;
+    try {
+      responseText = await session.prompt(userPrompt, {
+        responseConstraint: SINGLE_RESPONSE_SCHEMA
+      });
+    } catch (constraintErr) {
+      // responseConstraint can throw DOMException on some Chrome versions;
+      // retry without the constraint and rely on the system prompt instead.
+      console.warn('[Aegis] Nano constrained prompt failed, retrying unconstrained:', constraintErr);
+      responseText = await session.prompt(userPrompt);
+    }
 
     const parsed = JSON.parse(responseText);
 

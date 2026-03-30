@@ -247,7 +247,8 @@
         "office.com",
         "office365.com",
         "live.com",
-        "microsoftonline.com"
+        "microsoftonline.com",
+        "safelinks.protection.outlook.com"
       ],
       "senderDomains": [
         "microsoft.com",

@@ -6,11 +6,13 @@ async function ensureContentScript(tab) {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: [
+      'src/analysis/whitelist-manager.js',
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',
       'src/analysis/nano-analyzer.js',
       'src/platforms/base-platform.js',
       'src/platforms/gmail-platform.js',
+      'src/platforms/outlook-platform.js',
       'src/ui/analysis-panel.js',
       'src/ui/email-popup.js',
       'content.js',
@@ -50,13 +52,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to load stats', e);
   }
 
-  // Check if current tab is Gmail
+  // Check if current tab is Gmail or Outlook
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const isGmail = tab && tab.url && tab.url.includes('mail.google.com');
+  const url = tab && tab.url ? tab.url : '';
+  const isGmail = url.includes('mail.google.com');
+  const isOutlook = url.includes('outlook.live.com') || url.includes('outlook.office.com') || url.includes('outlook.office365.com');
 
   if (isGmail) {
     platformStatus.textContent = 'Gmail';
     platformStatus.style.color = 'var(--primary)';
+    analyzeBtn.disabled = false;
+  } else if (isOutlook) {
+    platformStatus.textContent = 'Outlook';
+    platformStatus.style.color = '#0078d4'; // Outlook Blue
     analyzeBtn.disabled = false;
   } else {
     platformStatus.textContent = 'Not Supported';

@@ -32,8 +32,22 @@
 
   async function initializeExtension() {
     // Initialize platform
-    const platform = new GmailPlatform();
-    if (!platform.isMatchingPage(window.location.href)) return;
+    let platform;
+    const url = window.location.href;
+    console.log('[Aegis] Initializing extension on URL:', url);
+    if (url.includes('outlook.live.com') || url.includes('outlook.office.com') || url.includes('outlook.office365.com')) {
+      console.log('[Aegis] Detected Outlook URL pattern');
+      platform = typeof OutlookPlatform !== 'undefined' ? new OutlookPlatform() : (window.OutlookPlatform ? new window.OutlookPlatform() : null);
+      console.log('[Aegis] OutlookPlatform loaded:', !!platform);
+    } else {
+      platform = typeof GmailPlatform !== 'undefined' ? new GmailPlatform() : (window.GmailPlatform ? new window.GmailPlatform() : null);
+    }
+
+    if (!platform || !platform.isMatchingPage(url)) {
+      console.log('[Aegis] No matching platform or platform not loaded. Aborting.');
+      return;
+    }
+    console.log('[Aegis] Platform initialized:', platform.getName());
 
     const analysisPanel = new AnalysisPanel(platform);
     const emailPopup = new EmailPopup();
@@ -347,7 +361,8 @@
     async function analyzeOpenEmail() {
       try {
         const emailData = platform.getEmailDetail();
-        if (!emailData || !emailData.subject) return;
+        console.log('[Aegis] analyzeOpenEmail called. emailData:', emailData ? { subject: emailData.subject?.slice(0, 50), sender: emailData.sender, senderEmail: emailData.senderEmail, bodyLen: emailData.body?.length, linksCount: emailData.links?.length } : null);
+        if (!emailData || (!emailData.subject && !emailData.body)) return;
 
         settings = settings || await getSettings();
 
@@ -461,6 +476,7 @@
           analysis = EmailAnalyzer.analyzeEmailDetail(emailData, settings.categories || [], whitelist);
         }
 
+        console.log('[Aegis] Analysis complete. Showing popup. safetyScore:', analysis.safetyScore, 'category:', analysis.category?.name);
         emailPopup.show(analysis);
         updateStats(0, 1);
 
@@ -490,9 +506,19 @@
       }
     }
 
-    // Detect if viewing an email detail (Gmail URL has hash with message ID)
+    // Detect if viewing an email detail (Gmail vs Outlook)
     function isEmailDetailView() {
       const hash = window.location.hash;
+      const path = window.location.pathname;
+      const search = window.location.search;
+
+      if (platform.getName() === 'Outlook') {
+        // Outlook uses pathname like /mail/0/id/... or /mail/deeplink/read/ or search param ?id=
+        if (path.includes('/id/') || path.includes('/read/') || search.includes('id=')) return true;
+        // Reading pane mode: the email body is loaded in-page without URL change
+        return !!document.querySelector('[aria-label="Message body"], [data-test-id="mailMessageBodyContainer"]');
+      }
+
       // Gmail email detail: #inbox/FMfcgz..., #sent/FMfcgz..., #search/query/FMfcgz...
       // Allows nested paths like #label/Phishing/FMfcgz...
       return /^#.*\/[A-Za-z0-9]{10,}/.test(hash);
@@ -500,9 +526,33 @@
 
     // Handle navigation changes
     let lastHash = window.location.hash;
+    let lastOutlookUrl = window.location.pathname;
     let emailAnalysisTimeout = null;
 
     platform.observeNavigate(() => {
+      if (platform.getName() === 'Outlook') {
+        // Outlook changes the pathname (e.g. /mail/inbox/id/...) when clicking emails.
+        // Detect URL changes instead of hash changes.
+        const currentUrl = window.location.pathname;
+        console.log('[Aegis] Outlook observeNavigate fired. currentUrl:', currentUrl.slice(-40), 'lastOutlookUrl:', lastOutlookUrl.slice(-40));
+        if (currentUrl === lastOutlookUrl) return;
+        lastOutlookUrl = currentUrl;
+        console.log('[Aegis] Outlook URL changed, scheduling analysis...');
+
+        clearTimeout(emailAnalysisTimeout);
+        emailAnalysisTimeout = setTimeout(() => {
+          const isDetail = isEmailDetailView();
+          console.log('[Aegis] isEmailDetailView:', isDetail);
+          if (isDetail) {
+            emailPopup.hide && emailPopup.hide();
+            analyzeOpenEmail();
+          } else {
+            emailPopup.hide && emailPopup.hide();
+          }
+        }, 800);
+        return;
+      }
+
       const currentHash = window.location.hash;
       if (currentHash === lastHash) return;
       lastHash = currentHash;
@@ -544,6 +594,7 @@
     });
 
     // Check initial state on load
+    console.log('[Aegis] Initial state check. Platform:', platform.getName(), 'pathname:', window.location.pathname, 'isEmailDetailView:', isEmailDetailView());
     if (isEmailDetailView()) {
       setTimeout(analyzeOpenEmail, 1200);
     }
