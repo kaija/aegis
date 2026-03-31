@@ -662,6 +662,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'CHECK_NANO_AVAILABILITY') {
+    // Check LanguageModel in the service worker context (where extension Prompt API lives)
+    try {
+      const hasNewApi = ('LanguageModel' in self);
+      const hasOldApi = (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
+      if (!hasNewApi && !hasOldApi) {
+        sendResponse({ status: 'no-api' });
+        return true;
+      }
+      if (hasNewApi) {
+        LanguageModel.availability().then(status => {
+          if (status === 'readily') status = 'available';
+          sendResponse({ status });
+        }).catch(e => {
+          sendResponse({ status: 'error', error: e.message });
+        });
+      } else {
+        self.ai.languageModel.capabilities().then(caps => {
+          const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
+          sendResponse({ status: map[caps.available] || 'unavailable' });
+        }).catch(e => {
+          sendResponse({ status: 'error', error: e.message });
+        });
+      }
+    } catch (e) {
+      sendResponse({ status: 'error', error: e.message });
+    }
+    return true;
+  }
+
   if (message.type === 'GET_SETTINGS') {
     chrome.storage.sync.get(null, (result) => {
       sendResponse(Object.assign({}, DEFAULT_SETTINGS, result));

@@ -45,7 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeInputs = document.querySelectorAll('input[name="analysisMode"]');
   modeInputs.forEach(input => {
     if (input.value === (settings.analysisMode || 'local')) {
-      input.checked = true;
+      // Don't check nano if it's disabled (flags not enabled yet — will be resolved by checkNanoFlagsAndDisable)
+      if (input.value === 'nano' && input.disabled) {
+        // Fall back to local
+        const localRadio = document.querySelector('input[name="analysisMode"][value="local"]');
+        if (localRadio) localRadio.checked = true;
+      } else {
+        input.checked = true;
+      }
     }
     input.addEventListener('change', () => {
       const nanoStatusSection = document.getElementById('nanoStatusSection');
@@ -70,10 +77,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('aiSettingsSection').style.display = 'block';
     document.getElementById('categoriesSection').style.display = 'none';
   } else if (settings.analysisMode === 'nano') {
-    document.getElementById('aiSettingsSection').style.display = 'none';
-    document.getElementById('categoriesSection').style.display = 'none';
-    document.getElementById('nanoStatusSection').style.display = 'block';
-    checkNanoAvailability();
+    // Only show nano section if the radio is actually checked (not disabled)
+    const nanoRadio = document.querySelector('input[name="analysisMode"][value="nano"]');
+    if (nanoRadio && !nanoRadio.disabled && nanoRadio.checked) {
+      document.getElementById('aiSettingsSection').style.display = 'none';
+      document.getElementById('categoriesSection').style.display = 'none';
+      document.getElementById('nanoStatusSection').style.display = 'block';
+      checkNanoAvailability();
+    }
   }
 
   // Set AI settings values
@@ -110,6 +121,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Wire Nano download button
   const nanoDownloadBtn = document.getElementById('nanoDownloadBtn');
   if (nanoDownloadBtn) nanoDownloadBtn.addEventListener('click', triggerNanoDownload);
+
+  // Check Nano AI availability and disable card if flags not enabled
+  checkNanoFlagsAndDisable();
 });
 
 async function testAiConnection() {
@@ -645,41 +659,142 @@ function showSuccessMessage(message) {
 
 // Nano AI availability and download functions
 
+async function checkNanoFlagsAndDisable() {
+  const nanoCard = document.getElementById('ae-card-nano');
+  const nanoRadio = nanoCard ? nanoCard.querySelector('input[type="radio"]') : null;
+  const flagsGuide = document.getElementById('nanoFlagsGuide');
+
+  let status = 'no-api';
+
+  // Strategy 1: Check directly in the options page context
+  const hasLocalApi = ('LanguageModel' in self) ||
+    (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
+
+  if (hasLocalApi) {
+    try {
+      if ('LanguageModel' in self) {
+        const s = await LanguageModel.availability();
+        status = (s === 'readily') ? 'available' : s;
+      } else {
+        const caps = await self.ai.languageModel.capabilities();
+        const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
+        status = map[caps.available] || 'unavailable';
+      }
+    } catch (e) {
+      status = 'error';
+    }
+  } else {
+    // Strategy 2: Ask background service worker (with timeout)
+    try {
+      const result = await Promise.race([
+        new Promise(resolve => {
+          chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
+            if (chrome.runtime.lastError || !res) {
+              resolve({ status: 'no-api' });
+            } else {
+              resolve(res);
+            }
+          });
+        }),
+        new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 3000))
+      ]);
+      status = result.status;
+    } catch (e) {
+      status = 'no-api';
+    }
+  }
+
+  if (status === 'no-api' || status === 'error' || status === 'unavailable') {
+    if (nanoCard) {
+      nanoCard.classList.add('ae-card-disabled');
+      if (nanoRadio) {
+        nanoRadio.disabled = true;
+        if (nanoRadio.checked) {
+          nanoRadio.checked = false;
+          const localRadio = document.querySelector('input[name="analysisMode"][value="local"]');
+          if (localRadio) {
+            localRadio.checked = true;
+            localRadio.dispatchEvent(new Event('change'));
+          }
+        }
+      }
+    }
+    if (flagsGuide) flagsGuide.style.display = 'flex';
+  } else {
+    if (nanoCard) nanoCard.classList.remove('ae-card-disabled');
+    if (nanoRadio) nanoRadio.disabled = false;
+    if (flagsGuide) flagsGuide.style.display = 'none';
+  }
+}
+
 async function checkNanoAvailability() {
   const statusEl = document.getElementById('nanoStatus');
   const downloadBtn = document.getElementById('nanoDownloadBtn');
   const progressContainer = document.getElementById('nanoProgressContainer');
 
-  // Hide download controls by default
   downloadBtn.style.display = 'none';
   progressContainer.style.display = 'none';
 
-  if (typeof LanguageModel === 'undefined') {
-    updateNanoStatus('red', 'Prompt API is not available in this browser. Enable chrome://flags/#optimization-guide-on-device-model and chrome://flags/#prompt-api-for-gemini-nano');
-    return;
+  let status = 'no-api';
+
+  // Try local context first, then background SW with timeout
+  const hasLocalApi = ('LanguageModel' in self) ||
+    (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
+
+  if (hasLocalApi) {
+    try {
+      if ('LanguageModel' in self) {
+        const s = await LanguageModel.availability();
+        status = (s === 'readily') ? 'available' : s;
+      } else {
+        const caps = await self.ai.languageModel.capabilities();
+        const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
+        status = map[caps.available] || 'unavailable';
+      }
+    } catch (e) {
+      status = 'error';
+    }
+  } else {
+    try {
+      const result = await Promise.race([
+        new Promise(resolve => {
+          chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
+            if (chrome.runtime.lastError || !res) {
+              resolve({ status: 'no-api' });
+            } else {
+              resolve(res);
+            }
+          });
+        }),
+        new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 3000))
+      ]);
+      status = result.status;
+    } catch (e) {
+      status = 'no-api';
+    }
   }
 
-  try {
-    const status = await LanguageModel.availability();
-    switch (status) {
-      case 'available':
-        updateNanoStatus('green', 'Gemini Nano is ready');
-        break;
-      case 'downloadable':
-        updateNanoStatus('amber', 'Gemini Nano needs to be downloaded');
-        downloadBtn.style.display = 'inline-block';
-        break;
-      case 'downloading':
-        updateNanoStatus('amber', 'Gemini Nano is downloading...');
-        progressContainer.style.display = 'block';
-        break;
-      case 'unavailable':
-      default:
-        updateNanoStatus('red', 'Gemini Nano is not supported on this device');
-        break;
-    }
-  } catch (e) {
-    updateNanoStatus('red', 'Failed to check Gemini Nano availability: ' + e.message);
+  switch (status) {
+    case 'available':
+      updateNanoStatus('green', 'Gemini Nano is ready');
+      break;
+    case 'downloadable':
+      updateNanoStatus('amber', 'Gemini Nano needs to be downloaded');
+      downloadBtn.style.display = 'inline-block';
+      break;
+    case 'downloading':
+      updateNanoStatus('amber', 'Gemini Nano is downloading...');
+      progressContainer.style.display = 'block';
+      break;
+    case 'no-api':
+      updateNanoStatus('red', 'Prompt API is not available. Please enable the required Chrome flags and relaunch Chrome.');
+      break;
+    case 'unavailable':
+      updateNanoStatus('red', 'Gemini Nano is not available. Please enable the required Chrome flags and relaunch Chrome, or check that your device meets the hardware requirements.');
+      break;
+    default:
+      updateNanoStatus('red', 'Failed to check Gemini Nano availability.');
+      break;
   }
 }
 

@@ -41,11 +41,20 @@ const NanoAnalyzer = (() => {
   // ── 1.2: checkAvailability ────────────────────────────────────────────────
   async function checkAvailability() {
     try {
-      if (typeof LanguageModel === 'undefined') {
-        return 'no-api';
+      // Chrome 138+: global LanguageModel
+      if ('LanguageModel' in self) {
+        const status = await LanguageModel.availability();
+        // Normalize: newer Chrome returns 'available', older returned 'readily'
+        if (status === 'readily') return 'available';
+        return status;
       }
-      const status = await LanguageModel.availability();
-      return status;
+      // Chrome 131-137: self.ai.languageModel
+      if (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel) {
+        const caps = await self.ai.languageModel.capabilities();
+        const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
+        return map[caps.available] || 'unavailable';
+      }
+      return 'no-api';
     } catch (e) {
       console.warn('[Aegis] Nano availability check failed:', e);
       return 'unavailable';
