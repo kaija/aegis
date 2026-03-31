@@ -43,7 +43,10 @@ const NanoAnalyzer = (() => {
     try {
       // Chrome 138+: global LanguageModel
       if ('LanguageModel' in self) {
-        const status = await LanguageModel.availability();
+        const status = await LanguageModel.availability({
+          expectedInputLanguages: ['en', 'zh', 'ja'],
+          expectedOutputLanguages: ['en']
+        });
         // Normalize: newer Chrome returns 'available', older returned 'readily'
         if (status === 'readily') return 'available';
         return status;

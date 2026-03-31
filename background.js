@@ -662,30 +662,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'OPEN_TAB') {
+    chrome.tabs.create({ url: message.url });
+    return false;
+  }
+
   if (message.type === 'CHECK_NANO_AVAILABILITY') {
-    // Check LanguageModel in the service worker context (where extension Prompt API lives)
+    // The only reliable way to check if Chrome flags are enabled is to try
+    // LanguageModel.create(). availability() returns 'available' even when
+    // flags are disabled if the model was previously downloaded.
     try {
-      const hasNewApi = ('LanguageModel' in self);
-      const hasOldApi = (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
-      if (!hasNewApi && !hasOldApi) {
+      if (!('LanguageModel' in self)) {
         sendResponse({ status: 'no-api' });
         return true;
       }
-      if (hasNewApi) {
-        LanguageModel.availability().then(status => {
-          if (status === 'readily') status = 'available';
-          sendResponse({ status });
-        }).catch(e => {
-          sendResponse({ status: 'error', error: e.message });
-        });
-      } else {
-        self.ai.languageModel.capabilities().then(caps => {
-          const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
-          sendResponse({ status: map[caps.available] || 'unavailable' });
-        }).catch(e => {
-          sendResponse({ status: 'error', error: e.message });
-        });
-      }
+      // Step 1: Try creating a session — this is the real flags check
+      LanguageModel.create({
+        expectedInputLanguages: ['en'],
+        expectedOutputLanguages: ['en']
+      }).then(session => {
+        session.destroy();
+        sendResponse({ status: 'available' });
+      }).catch(() => {
+        // create() failed — flags are likely disabled
+        sendResponse({ status: 'unavailable' });
+      });
     } catch (e) {
       sendResponse({ status: 'error', error: e.message });
     }

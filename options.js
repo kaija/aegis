@@ -45,30 +45,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeInputs = document.querySelectorAll('input[name="analysisMode"]');
   modeInputs.forEach(input => {
     if (input.value === (settings.analysisMode || 'local')) {
-      // Don't check nano if it's disabled (flags not enabled yet — will be resolved by checkNanoFlagsAndDisable)
-      if (input.value === 'nano' && input.disabled) {
-        // Fall back to local
-        const localRadio = document.querySelector('input[name="analysisMode"][value="local"]');
-        if (localRadio) localRadio.checked = true;
-      } else {
-        input.checked = true;
-      }
+      input.checked = true;
     }
     input.addEventListener('change', () => {
       const nanoStatusSection = document.getElementById('nanoStatusSection');
+      const nanoFlagsGuide = document.getElementById('nanoFlagsGuide');
       if (input.value === 'nano') {
         document.getElementById('aiSettingsSection').style.display = 'none';
         document.getElementById('categoriesSection').style.display = 'none';
         nanoStatusSection.style.display = 'block';
+        nanoFlagsGuide.style.display = 'flex';
         checkNanoAvailability();
       } else if (input.value === 'ai') {
         document.getElementById('aiSettingsSection').style.display = 'block';
         document.getElementById('categoriesSection').style.display = 'none';
         nanoStatusSection.style.display = 'none';
+        nanoFlagsGuide.style.display = 'none';
       } else {
         document.getElementById('aiSettingsSection').style.display = 'none';
         document.getElementById('categoriesSection').style.display = 'block';
         nanoStatusSection.style.display = 'none';
+        nanoFlagsGuide.style.display = 'none';
       }
     });
   });
@@ -77,14 +74,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('aiSettingsSection').style.display = 'block';
     document.getElementById('categoriesSection').style.display = 'none';
   } else if (settings.analysisMode === 'nano') {
-    // Only show nano section if the radio is actually checked (not disabled)
-    const nanoRadio = document.querySelector('input[name="analysisMode"][value="nano"]');
-    if (nanoRadio && !nanoRadio.disabled && nanoRadio.checked) {
-      document.getElementById('aiSettingsSection').style.display = 'none';
-      document.getElementById('categoriesSection').style.display = 'none';
-      document.getElementById('nanoStatusSection').style.display = 'block';
-      checkNanoAvailability();
-    }
+    document.getElementById('aiSettingsSection').style.display = 'none';
+    document.getElementById('categoriesSection').style.display = 'none';
+    document.getElementById('nanoStatusSection').style.display = 'block';
+    document.getElementById('nanoFlagsGuide').style.display = 'flex';
+    checkNanoAvailability();
   }
 
   // Set AI settings values
@@ -124,6 +118,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Check Nano AI availability and disable card if flags not enabled
   checkNanoFlagsAndDisable();
+
+  // Wire flag links to open chrome://flags via chrome.tabs.create
+  document.querySelectorAll('.nano-flag-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = link.dataset.flag;
+      if (chrome && chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url });
+      } else if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        // Ask background to open the tab
+        chrome.runtime.sendMessage({ type: 'OPEN_TAB', url });
+      } else {
+        // Last resort: copy to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+          alert('Copied to clipboard: ' + url + '\n\nPaste this into your Chrome address bar.');
+        }).catch(() => {
+          prompt('Copy this URL and paste it into your Chrome address bar:', url);
+        });
+      }
+    });
+  });
 });
 
 async function testAiConnection() {
@@ -662,49 +678,34 @@ function showSuccessMessage(message) {
 async function checkNanoFlagsAndDisable() {
   const nanoCard = document.getElementById('ae-card-nano');
   const nanoRadio = nanoCard ? nanoCard.querySelector('input[type="radio"]') : null;
-  const flagsGuide = document.getElementById('nanoFlagsGuide');
 
   let status = 'no-api';
 
-  // Strategy 1: Check directly in the options page context
-  const hasLocalApi = ('LanguageModel' in self) ||
-    (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
-
-  if (hasLocalApi) {
-    try {
-      if ('LanguageModel' in self) {
-        const s = await LanguageModel.availability();
-        status = (s === 'readily') ? 'available' : s;
-      } else {
-        const caps = await self.ai.languageModel.capabilities();
-        const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
-        status = map[caps.available] || 'unavailable';
-      }
-    } catch (e) {
-      status = 'error';
-    }
-  } else {
-    // Strategy 2: Ask background service worker (with timeout)
-    try {
-      const result = await Promise.race([
-        new Promise(resolve => {
-          chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
-            if (chrome.runtime.lastError || !res) {
-              resolve({ status: 'no-api' });
-            } else {
-              resolve(res);
-            }
-          });
-        }),
-        new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 3000))
-      ]);
-      status = result.status;
-    } catch (e) {
-      status = 'no-api';
-    }
+  // Probe via background SW — tries LanguageModel.create() to verify the API works.
+  try {
+    const result = await Promise.race([
+      new Promise(resolve => {
+        chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
+          if (chrome.runtime.lastError || !res) {
+            resolve({ status: 'no-api' });
+          } else {
+            resolve(res);
+          }
+        });
+      }),
+      new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 5000))
+    ]);
+    status = result.status;
+  } catch (e) {
+    status = 'no-api';
   }
 
-  if (status === 'no-api' || status === 'error' || status === 'unavailable') {
+  if (status === 'available') {
+    // API works — enable the card
+    if (nanoCard) nanoCard.classList.remove('ae-card-disabled');
+    if (nanoRadio) nanoRadio.disabled = false;
+  } else {
+    // API not working — gray out
     if (nanoCard) {
       nanoCard.classList.add('ae-card-disabled');
       if (nanoRadio) {
@@ -719,11 +720,6 @@ async function checkNanoFlagsAndDisable() {
         }
       }
     }
-    if (flagsGuide) flagsGuide.style.display = 'flex';
-  } else {
-    if (nanoCard) nanoCard.classList.remove('ae-card-disabled');
-    if (nanoRadio) nanoRadio.disabled = false;
-    if (flagsGuide) flagsGuide.style.display = 'none';
   }
 }
 
@@ -737,41 +733,22 @@ async function checkNanoAvailability() {
 
   let status = 'no-api';
 
-  // Try local context first, then background SW with timeout
-  const hasLocalApi = ('LanguageModel' in self) ||
-    (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel);
-
-  if (hasLocalApi) {
-    try {
-      if ('LanguageModel' in self) {
-        const s = await LanguageModel.availability();
-        status = (s === 'readily') ? 'available' : s;
-      } else {
-        const caps = await self.ai.languageModel.capabilities();
-        const map = { 'readily': 'available', 'after-download': 'downloadable', 'no': 'unavailable' };
-        status = map[caps.available] || 'unavailable';
-      }
-    } catch (e) {
-      status = 'error';
-    }
-  } else {
-    try {
-      const result = await Promise.race([
-        new Promise(resolve => {
-          chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
-            if (chrome.runtime.lastError || !res) {
-              resolve({ status: 'no-api' });
-            } else {
-              resolve(res);
-            }
-          });
-        }),
-        new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 3000))
-      ]);
-      status = result.status;
-    } catch (e) {
-      status = 'no-api';
-    }
+  try {
+    const result = await Promise.race([
+      new Promise(resolve => {
+        chrome.runtime.sendMessage({ type: 'CHECK_NANO_AVAILABILITY' }, (res) => {
+          if (chrome.runtime.lastError || !res) {
+            resolve({ status: 'no-api' });
+          } else {
+            resolve(res);
+          }
+        });
+      }),
+      new Promise(resolve => setTimeout(() => resolve({ status: 'no-api' }), 5000))
+    ]);
+    status = result.status;
+  } catch (e) {
+    status = 'no-api';
   }
 
   switch (status) {

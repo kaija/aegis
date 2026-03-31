@@ -914,7 +914,17 @@ body {
   font-size: 12px;
   font-family: 'SF Mono', 'Fira Code', monospace;
   color: #92400e;
-  user-select: all;
+}
+
+.nano-flag-link {
+  color: #92400e;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nano-flag-link:hover code {
+  background: #fde68a;
+  text-decoration: underline;
 }
 
 .nano-flag-desc {

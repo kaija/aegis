@@ -58,8 +58,8 @@
           </div>
         </label>
 
-        <label class="ae-card ae-card-disabled" id="ae-card-nano">
-          <input type="radio" name="analysisMode" value="nano" disabled>
+        <label class="ae-card" id="ae-card-nano">
+          <input type="radio" name="analysisMode" value="nano">
           <div class="ae-card-content">
             <div class="ae-radio-circle"></div>
             <div class="ae-text">
@@ -69,18 +69,18 @@
           </div>
         </label>
       </div>
-      <div id="nanoFlagsGuide" class="nano-flags-guide">
+      <div id="nanoFlagsGuide" class="nano-flags-guide" style="display:none;">
           <div class="nano-flags-icon">⚠️</div>
           <div class="nano-flags-body">
             <strong>Chrome flags required to enable Nano AI</strong>
             <p>Gemini Nano requires two Chrome flags to be enabled. Open each link below, set to <code>Enabled</code>, then relaunch Chrome.</p>
             <ol>
               <li>
-                <code>chrome://flags/#optimization-guide-on-device-model</code>
+                <a href="javascript:void(0)" class="nano-flag-link" data-flag="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a>
                 <span class="nano-flag-desc">— Enables on-device model download</span>
               </li>
               <li>
-                <code>chrome://flags/#prompt-api-for-gemini-nano-multimodal-input</code>
+                <a href="javascript:void(0)" class="nano-flag-link" data-flag="chrome://flags/#prompt-api-for-gemini-nano-multimodal-input"><code>chrome://flags/#prompt-api-for-gemini-nano-multimodal-input</code></a>
                 <span class="nano-flag-desc">— Enables the Prompt API</span>
               </li>
             </ol>
