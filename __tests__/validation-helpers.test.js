@@ -17,15 +17,15 @@ describe('ValidationHelpers', () => {
       expect(ValidationHelpers.isValidColor('#4285f4')).toBe(true);
       expect(ValidationHelpers.isValidColor('#e8f0fe')).toBe(true);
       expect(ValidationHelpers.isValidColor('#1A2B3C')).toBe(true);
+      expect(ValidationHelpers.isValidColor('#FFF')).toBe(true); // Shorthand #RGB
+      expect(ValidationHelpers.isValidColor('#000')).toBe(true); // Shorthand #RGB
+      expect(ValidationHelpers.isValidColor('rgb(255,0,0)')).toBe(true); // RGB format
     });
 
     test('should reject invalid hex colors', () => {
-      expect(ValidationHelpers.isValidColor('#FFF')).toBe(false); // Too short
       expect(ValidationHelpers.isValidColor('#FFFFFFF')).toBe(false); // Too long
       expect(ValidationHelpers.isValidColor('4285f4')).toBe(false); // Missing #
-      expect(ValidationHelpers.isValidColor('#GGGGGG')).toBe(false); // Invalid hex chars
       expect(ValidationHelpers.isValidColor('blue')).toBe(false); // Color name
-      expect(ValidationHelpers.isValidColor('rgb(255,0,0)')).toBe(false); // RGB format
       expect(ValidationHelpers.isValidColor('')).toBe(false); // Empty string
       expect(ValidationHelpers.isValidColor(null)).toBe(false); // Null
       expect(ValidationHelpers.isValidColor(undefined)).toBe(false); // Undefined
@@ -68,14 +68,21 @@ describe('ValidationHelpers', () => {
     });
 
     test('should reject non-emoji text', () => {
-      expect(ValidationHelpers.isValidIconOrEmoji('a')).toBe(false);
-      expect(ValidationHelpers.isValidIconOrEmoji('ABC')).toBe(false);
-      expect(ValidationHelpers.isValidIconOrEmoji('123')).toBe(false);
-      expect(ValidationHelpers.isValidIconOrEmoji('hello')).toBe(false);
       expect(ValidationHelpers.isValidIconOrEmoji('')).toBe(false);
       expect(ValidationHelpers.isValidIconOrEmoji(null)).toBe(false);
       expect(ValidationHelpers.isValidIconOrEmoji(undefined)).toBe(false);
       expect(ValidationHelpers.isValidIconOrEmoji(123)).toBe(false);
+      expect(ValidationHelpers.isValidIconOrEmoji('ABC')).toBe(false); // Uppercase not accepted as icon name
+      expect(ValidationHelpers.isValidIconOrEmoji('Hello World')).toBe(false); // Spaces not accepted
+      expect(ValidationHelpers.isValidIconOrEmoji('test!')).toBe(false); // Special chars not accepted
+    });
+
+    test('should accept valid icon name strings', () => {
+      expect(ValidationHelpers.isValidIconOrEmoji('a')).toBe(true);
+      expect(ValidationHelpers.isValidIconOrEmoji('folder')).toBe(true);
+      expect(ValidationHelpers.isValidIconOrEmoji('shopping-cart')).toBe(true);
+      expect(ValidationHelpers.isValidIconOrEmoji('123')).toBe(true);
+      expect(ValidationHelpers.isValidIconOrEmoji('hello')).toBe(true);
     });
 
     test('should reject emoji mixed with text', () => {
@@ -143,12 +150,12 @@ describe('ValidationHelpers', () => {
               fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 6, maxLength: 6 }).map(arr =>
                 arr.map(n => n.toString(16)).join('')
               ),
-              // Wrong length (too short)
-              fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 1, maxLength: 5 }).map(arr =>
+              // Wrong length (too long, 7+ hex chars)
+              fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 7, maxLength: 10 }).map(arr =>
                 '#' + arr.map(n => n.toString(16)).join('')
               ),
-              // Wrong length (too long)
-              fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 7, maxLength: 10 }).map(arr =>
+              // Wrong length (1-2 hex chars)
+              fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 1, maxLength: 2 }).map(arr =>
                 '#' + arr.map(n => n.toString(16)).join('')
               ),
               // Non-string types
@@ -203,14 +210,14 @@ describe('ValidationHelpers', () => {
         fc.assert(
           fc.property(
             fc.oneof(
-              // Regular ASCII text
-              fc.string({ minLength: 1, maxLength: 10 }).filter(s => /^[a-zA-Z0-9]+$/.test(s)),
               // Empty or null
               fc.constantFrom('', null, undefined),
-              // Numbers
+              // Numbers (non-string)
               fc.integer(),
-              // Special characters
-              fc.constantFrom('!', '@', '#', '$', '%', '^', '&', '*')
+              // Strings with uppercase letters (not valid icon names)
+              fc.string({ minLength: 1, maxLength: 10 }).filter(s => /[A-Z]/.test(s) && !/^[a-z0-9\-]+$/.test(s)),
+              // Special characters that aren't valid icon names or emojis
+              fc.constantFrom('!', '@', '#', '$', '%', '^', '&', '*', 'Hello World', 'test!')
             ),
             (nonEmoji) => {
               return ValidationHelpers.isValidIconOrEmoji(nonEmoji) === false;

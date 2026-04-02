@@ -288,14 +288,35 @@
           updateStats(classifiedCount, 0);
 
         } else if (settings.analysisMode === 'nano') {
-          // Nano AI mode — uses Gmail labels for classification (same as AI mode)
+          // Nano AI mode — sequential batch processing with progressive rendering
           console.log('[Aegis] Nano AI mode active, processing', emails.length, 'emails');
+          const NANO_BATCH_SIZE = 5;
 
           // Initial categorization using keywords as fallback (overridden by Nano AI results)
           emails.forEach(email => {
             const text = `${email.subject} ${email.sender} ${email.senderEmail}`;
             email.category = EmailAnalyzer.categorizeByKeywords(text, categories, labels.map(l => l.name));
           });
+
+          // Helper: apply nano results to the correct emails using startIndex offset
+          function applyNanoResults(nanoResult, allEmails, startIndex) {
+            if (nanoResult && Array.isArray(nanoResult.results)) {
+              nanoResult.results.forEach(res => {
+                const email = allEmails[startIndex + res.id];
+                if (email) {
+                  const mappedIcon = getIconForLabel(res.category);
+                  const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
+                  email.category = {
+                    name: res.category,
+                    emoji: mappedIcon,
+                    color: colors.color,
+                    bgColor: colors.bgColor,
+                    id: 'ai-label-' + res.category
+                  };
+                }
+              });
+            }
+          }
 
           try {
             const availability = await NanoAnalyzer.checkAvailability();
@@ -305,34 +326,33 @@
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
             } else {
-              const batchData = emails.map((email, index) => ({
-                id: index,
-                subject: email.subject,
-                sender: email.sender,
-                senderEmail: email.senderEmail
-              }));
-
-              const nanoResult = await NanoAnalyzer.batchAnalyze(batchData, labels.map(l => l.name));
-
-              if (nanoResult && Array.isArray(nanoResult.results)) {
-                nanoResult.results.forEach(res => {
-                  const email = emails[res.id];
-                  if (email) {
-                    // Always create dynamic category from Gmail label (same as AI mode)
-                    const mappedIcon = getIconForLabel(res.category);
-                    const colors = LABEL_COLORS[mappedIcon] || LABEL_COLORS['tag'];
-                    email.category = {
-                      name: res.category,
-                      emoji: mappedIcon,
-                      color: colors.color,
-                      bgColor: colors.bgColor,
-                      id: 'ai-label-' + res.category
-                    };
-                  }
-                });
+              // Chunk emails into batches of NANO_BATCH_SIZE
+              const chunks = [];
+              for (let i = 0; i < emails.length; i += NANO_BATCH_SIZE) {
+                chunks.push({ startIndex: i, data: emails.slice(i, i + NANO_BATCH_SIZE) });
               }
 
-              renderCurrentState(false);
+              const labelNames = labels.map(l => l.name);
+
+              // Process each batch sequentially with progressive rendering
+              for (let ci = 0; ci < chunks.length; ci++) {
+                try {
+                  const batchData = chunks[ci].data.map((email, index) => ({
+                    id: index,
+                    subject: email.subject,
+                    sender: email.sender,
+                    senderEmail: email.senderEmail
+                  }));
+
+                  const nanoResult = await NanoAnalyzer.batchAnalyze(batchData, labelNames);
+                  applyNanoResults(nanoResult, emails, chunks[ci].startIndex);
+                } catch (err) {
+                  console.warn('[Aegis] Nano batch', ci, 'failed:', err);
+                  // Continue to next batch
+                }
+                renderCurrentState(ci < chunks.length - 1); // true = still loading, false = final
+              }
+
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
             }

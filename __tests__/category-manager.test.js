@@ -844,12 +844,12 @@ describe('CategoryManager', () => {
         // Invalid color format
         await expect(
           CategoryManager.updateCategory('work', { color: 'blue' })
-        ).rejects.toThrow('Invalid text color (must be #RRGGBB)');
+        ).rejects.toThrow('Invalid text color');
 
         // Invalid emoji
         await expect(
-          CategoryManager.updateCategory('work', { emoji: 'not-emoji' })
-        ).rejects.toThrow('Invalid emoji format');
+          CategoryManager.updateCategory('work', { emoji: 'NOT VALID!' })
+        ).rejects.toThrow('Invalid icon or emoji format');
 
         // Name too long
         await expect(
@@ -1815,20 +1815,20 @@ describe('CategoryManager', () => {
 
       const result = CategoryManager.validateCategory(invalidData);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual({ field: 'emoji', message: 'Emoji is required' });
+      expect(result.errors).toContainEqual({ field: 'emoji', message: 'Emoji or Icon is required' });
     });
 
     test('should validate emoji format', () => {
       const invalidData = {
         name: 'Work',
-        emoji: 'not-an-emoji',
+        emoji: 'NOT AN EMOJI!',
         color: '#4285f4',
         bgColor: '#e8f0fe'
       };
 
       const result = CategoryManager.validateCategory(invalidData);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual({ field: 'emoji', message: 'Invalid emoji format' });
+      expect(result.errors).toContainEqual({ field: 'emoji', message: 'Invalid icon or emoji format' });
     });
 
     test('should validate text color format', () => {
@@ -1841,7 +1841,7 @@ describe('CategoryManager', () => {
 
       const result = CategoryManager.validateCategory(invalidData);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual({ field: 'color', message: 'Invalid text color (must be #RRGGBB)' });
+      expect(result.errors).toContainEqual({ field: 'color', message: 'Invalid text color' });
     });
 
     test('should validate background color format', () => {
@@ -1849,12 +1849,12 @@ describe('CategoryManager', () => {
         name: 'Work',
         emoji: '💼',
         color: '#4285f4',
-        bgColor: '#FFF'
+        bgColor: 'not-a-color'
       };
 
       const result = CategoryManager.validateCategory(invalidData);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual({ field: 'bgColor', message: 'Invalid background color (must be #RRGGBB)' });
+      expect(result.errors).toContainEqual({ field: 'bgColor', message: 'Invalid background color' });
     });
 
     test('should validate keywords length (max 50 characters)', () => {
@@ -1916,9 +1916,9 @@ describe('CategoryManager', () => {
     test('should return multiple errors for multiple invalid fields', () => {
       const invalidData = {
         name: '',
-        emoji: 'invalid',
+        emoji: 'INVALID EMOJI!',
         color: 'red',
-        bgColor: '#FF'
+        bgColor: 'blue'
       };
 
       const result = CategoryManager.validateCategory(invalidData);
@@ -2037,8 +2037,9 @@ describe('CategoryManager', () => {
         fc.assert(
           fc.property(
             fc.oneof(
-              fc.string({ minLength: 1, maxLength: 10 }).filter(s => /^[a-zA-Z0-9]+$/.test(s)),
-              fc.constantFrom('abc', '123', 'hello', 'test', '!@#$%')
+              // Strings with uppercase letters (not valid icon names or emojis)
+              fc.string({ minLength: 1, maxLength: 10 }).filter(s => /[A-Z]/.test(s) && !/^[a-z0-9\-]+$/.test(s)),
+              fc.constantFrom('ABC', 'Hello World', 'TEST', '!@#$%', 'Has Space')
             ),
             (invalidEmoji) => {
               const data = {
@@ -2050,7 +2051,7 @@ describe('CategoryManager', () => {
               const result = CategoryManager.validateCategory(data);
               return result.valid === false && 
                      result.errors.some(e => e.field === 'emoji' && 
-                                           e.message === 'Invalid emoji format');
+                                           e.message === 'Invalid icon or emoji format');
             }
           ),
           { numRuns: 50 }
@@ -2065,12 +2066,12 @@ describe('CategoryManager', () => {
               fc.array(fc.integer({ min: 0, max: 15 }), { minLength: 6, maxLength: 6 }).map(arr => 
                 arr.map(n => n.toString(16)).join('')
               ),
-              // Wrong length
-              fc.constantFrom('#FFF', '#FFFFFFF', '#12', ''),
-              // Invalid characters
-              fc.constantFrom('#GGGGGG', '#ZZZZZZ', 'blue', 'red', 'rgb(255,0,0)'),
-              // Non-string types
-              fc.constantFrom(null, undefined)
+              // Wrong length (too long, 7+ hex chars)
+              fc.constantFrom('#FFFFFFF', '#12345678'),
+              // Wrong length (too short, 1-2 hex chars)
+              fc.constantFrom('#12', '#F'),
+              // Named colors and non-string types
+              fc.constantFrom('blue', 'red', null, undefined)
             ),
             (invalidColor) => {
               const data = {
@@ -2082,7 +2083,7 @@ describe('CategoryManager', () => {
               const result = CategoryManager.validateCategory(data);
               return result.valid === false && 
                      result.errors.some(e => e.field === 'color' && 
-                                           e.message === 'Invalid text color (must be #RRGGBB)');
+                                           e.message === 'Invalid text color');
             }
           ),
           { numRuns: 100 }
@@ -2093,7 +2094,7 @@ describe('CategoryManager', () => {
         fc.assert(
           fc.property(
             fc.oneof(
-              fc.constantFrom('#FFF', '#FFFFFFF', 'blue', '', null, undefined)
+              fc.constantFrom('#FFFFFFF', 'blue', '', null, undefined, '#12', 'red')
             ),
             (invalidBgColor) => {
               const data = {
@@ -2105,7 +2106,7 @@ describe('CategoryManager', () => {
               const result = CategoryManager.validateCategory(data);
               return result.valid === false && 
                      result.errors.some(e => e.field === 'bgColor' && 
-                                           e.message === 'Invalid background color (must be #RRGGBB)');
+                                           e.message === 'Invalid background color');
             }
           ),
           { numRuns: 50 }

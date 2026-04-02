@@ -57,6 +57,7 @@ describe('EULA gate in content.js', () => {
     // --- Mock GmailPlatform ---
     mockGmailPlatformInstance = {
       isMatchingPage: jest.fn().mockReturnValue(true),
+      getName: jest.fn().mockReturnValue('Gmail'),
       getEmails: jest.fn().mockReturnValue([]),
       getLabels: jest.fn().mockReturnValue([]),
       getEmailDetail: jest.fn().mockReturnValue(null),
@@ -284,6 +285,7 @@ describe('Feature: eula-data-feedback, Property 1: EULA gate controls initializa
     // --- Mock GmailPlatform ---
     mockGmailPlatformInstance = {
       isMatchingPage: jest.fn().mockReturnValue(true),
+      getName: jest.fn().mockReturnValue('Gmail'),
       getEmails: jest.fn().mockReturnValue([]),
       getLabels: jest.fn().mockReturnValue([]),
       getEmailDetail: jest.fn().mockReturnValue(null),

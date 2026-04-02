@@ -132,6 +132,57 @@ describe('NanoAnalyzer', () => {
       const result = await NanoAnalyzer.batchAnalyze(sampleEmails, categories);
       expect(result).toEqual({ results: [] });
     });
+
+    // ── chunkSize parameter tests ──────────────────────────────────────────
+
+    test('default chunkSize (omitted) uses 10 — backward compatible', async () => {
+      const emails = Array.from({ length: 25 }, (_, i) => ({
+        id: i, subject: `Email ${i}`, sender: `S ${i}`, senderEmail: `s${i}@e.com`
+      }));
+      mockSession.prompt.mockResolvedValue(JSON.stringify({ results: [{ id: 0, category: 'Work' }] }));
+
+      await NanoAnalyzer.batchAnalyze(emails, categories);
+      // 25 / 10 = 3 chunks
+      expect(mockSession.prompt).toHaveBeenCalledTimes(3);
+    });
+
+    test('chunkSize=5 with 12 emails → 3 prompt calls (5, 5, 2)', async () => {
+      const emails = Array.from({ length: 12 }, (_, i) => ({
+        id: i, subject: `Email ${i}`, sender: `S ${i}`, senderEmail: `s${i}@e.com`
+      }));
+      const promptArgs = [];
+      mockSession.prompt.mockImplementation((prompt) => {
+        promptArgs.push(JSON.parse(prompt));
+        return Promise.resolve(JSON.stringify({ results: [{ id: 0, category: 'Work' }] }));
+      });
+
+      await NanoAnalyzer.batchAnalyze(emails, categories, 5);
+      expect(mockSession.prompt).toHaveBeenCalledTimes(3);
+      expect(promptArgs[0]).toHaveLength(5);
+      expect(promptArgs[1]).toHaveLength(5);
+      expect(promptArgs[2]).toHaveLength(2);
+    });
+
+    test('chunkSize=1 → one prompt call per email', async () => {
+      mockSession.prompt.mockResolvedValue(JSON.stringify({ results: [{ id: 0, category: 'Work' }] }));
+
+      await NanoAnalyzer.batchAnalyze(sampleEmails, categories, 1);
+      expect(mockSession.prompt).toHaveBeenCalledTimes(sampleEmails.length);
+    });
+
+    test('chunkSize=0 → sanitized to 1', async () => {
+      mockSession.prompt.mockResolvedValue(JSON.stringify({ results: [{ id: 0, category: 'Work' }] }));
+
+      await NanoAnalyzer.batchAnalyze(sampleEmails, categories, 0);
+      expect(mockSession.prompt).toHaveBeenCalledTimes(sampleEmails.length);
+    });
+
+    test('chunkSize=-5 → sanitized to 1', async () => {
+      mockSession.prompt.mockResolvedValue(JSON.stringify({ results: [{ id: 0, category: 'Work' }] }));
+
+      await NanoAnalyzer.batchAnalyze(sampleEmails, categories, -5);
+      expect(mockSession.prompt).toHaveBeenCalledTimes(sampleEmails.length);
+    });
   });
 
   // ── analyzeEmail ──────────────────────────────────────────────────────

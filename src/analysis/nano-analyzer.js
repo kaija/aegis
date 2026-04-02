@@ -120,14 +120,14 @@ Respond with JSON containing: category (string), tags (array of strings), safety
   }
 
   // ── 1.4: batchAnalyze ────────────────────────────────────────────────────
-  async function batchAnalyze(emails, availableCategories) {
+  async function batchAnalyze(emails, availableCategories, chunkSize = 10) {
     try {
       if (!emails || emails.length === 0) {
         return { results: [] };
       }
 
       let session = await _getOrCreateSession('batch', availableCategories);
-      const CHUNK_SIZE = 10;
+      const CHUNK_SIZE = Math.max(1, Math.floor(chunkSize));
       const allResults = [];
 
       for (let i = 0; i < emails.length; i += CHUNK_SIZE) {

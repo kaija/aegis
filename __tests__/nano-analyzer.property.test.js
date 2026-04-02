@@ -307,8 +307,8 @@ describe('NanoAnalyzer Property Tests', () => {
               expect(bodyMatch[1].length).toBeLessThanOrEqual(1000);
             }
 
-            // Count links in prompt (after "Links:\n")
-            const linksMatch = capturedPrompt.match(/Links:\n([\s\S]*)$/);
+            // Count links in prompt (between "Links:\n" and "\n\nRespond")
+            const linksMatch = capturedPrompt.match(/Links:\n([\s\S]*?)\n\nRespond/);
             if (linksMatch && linksMatch[1].trim().length > 0) {
               const linkLines = linksMatch[1].trim().split('\n').filter(l => l.length > 0);
               expect(linkLines.length).toBeLessThanOrEqual(10);
@@ -397,6 +397,60 @@ describe('NanoAnalyzer Property Tests', () => {
             expect(Array.isArray(result.issues)).toBe(true);
             expect(Array.isArray(result.detectedServices)).toBe(true);
             expect(Array.isArray(result.flags)).toBe(true);
+
+            NanoAnalyzer.destroy();
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  // ── Property (Progressive Batch) 1: Configurable chunk size controls prompt call count ──
+  // **Validates: Requirements 1.1, 1.3, 4.3**
+  describe('Property PB-1: Configurable chunk size controls prompt call count and chunk boundaries', () => {
+    test('prompt called ceil(N/chunkSize) times, each with at most chunkSize emails', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.integer({ min: 1, max: 50 }),
+          fc.integer({ min: 1, max: 20 }),
+          async (emailCount, chunkSize) => {
+            delete global.NanoAnalyzer;
+            delete global.window.NanoAnalyzer;
+
+            const promptArgs = [];
+            const session = createMockSession(0.1);
+            session.prompt.mockImplementation((prompt) => {
+              const parsed = JSON.parse(prompt);
+              promptArgs.push(parsed);
+              return Promise.resolve(JSON.stringify({
+                results: parsed.map(e => ({ id: e.id, category: 'Work' }))
+              }));
+            });
+
+            global.LanguageModel.create = jestGlobal.fn().mockResolvedValue(session);
+            loadNanoAnalyzer();
+
+            const emails = Array.from({ length: emailCount }, (_, i) => ({
+              id: i,
+              subject: `Email ${i}`,
+              sender: `Sender ${i}`,
+              senderEmail: `sender${i}@example.com`
+            }));
+
+            await NanoAnalyzer.batchAnalyze(emails, ['Work'], chunkSize);
+
+            const expectedChunks = Math.ceil(emailCount / chunkSize);
+            expect(session.prompt).toHaveBeenCalledTimes(expectedChunks);
+
+            // Each prompt receives at most chunkSize emails
+            for (let i = 0; i < promptArgs.length; i++) {
+              expect(promptArgs[i].length).toBeLessThanOrEqual(chunkSize);
+            }
+
+            // Last prompt receives the remainder
+            const expectedLast = emailCount % chunkSize === 0 ? chunkSize : emailCount % chunkSize;
+            expect(promptArgs[promptArgs.length - 1].length).toBe(expectedLast);
 
             NanoAnalyzer.destroy();
           }

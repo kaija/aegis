@@ -9,6 +9,19 @@ class AnalysisPanel {
   show(groups, labels, options = {}) {
     this._filter = options.filter || 'unread';
     this._onFilterChange = options.onFilterChange || null;
+
+    if (this.panel && document.contains(this.panel)) {
+      // Incremental update — preserve state
+      const body = this.panel.querySelector('#aegis-panel-body');
+      const savedScroll = body ? body.scrollTop : 0;
+      const savedChecks = this._captureCheckboxState();
+      this._render(groups, labels || [], options.isLoading);
+      const newBody = this.panel.querySelector('#aegis-panel-body');
+      if (newBody) newBody.scrollTop = savedScroll;
+      this._restoreCheckboxState(savedChecks);
+      return;
+    }
+
     this.hide();
     this.panel = this._createPanel();
     this._render(groups, labels || [], options.isLoading);
@@ -361,6 +374,52 @@ class AnalysisPanel {
       };
       document.addEventListener('click', dismissHandler, true);
     }, 50);
+  }
+
+  _captureCheckboxState() {
+    const state = new Map();
+    if (!this.panel) return state;
+    // Individual email checkboxes
+    this.panel.querySelectorAll('.aegis-email-item').forEach(item => {
+      const id = item.dataset.emailId;
+      const cb = item.querySelector('.aegis-email-checkbox');
+      if (id && cb) state.set(id, cb.checked);
+    });
+    // Select-all checkboxes per category group
+    this.panel.querySelectorAll('.aegis-category-group').forEach(group => {
+      const header = group.querySelector('.aegis-category-header');
+      const selectAll = header ? header.querySelector('.aegis-select-all') : null;
+      // Use the category name from the header as key
+      const nameEl = header ? header.querySelector('.aegis-category-name') : null;
+      if (selectAll && nameEl) {
+        state.set('selectAll-' + nameEl.textContent, selectAll.checked);
+      }
+    });
+    return state;
+  }
+
+  _restoreCheckboxState(savedChecks) {
+    if (!this.panel || !savedChecks || savedChecks.size === 0) return;
+    // Restore individual email checkboxes
+    this.panel.querySelectorAll('.aegis-email-item').forEach(item => {
+      const id = item.dataset.emailId;
+      const cb = item.querySelector('.aegis-email-checkbox');
+      if (id && cb && savedChecks.has(id)) {
+        cb.checked = savedChecks.get(id);
+      }
+    });
+    // Restore select-all checkboxes
+    this.panel.querySelectorAll('.aegis-category-group').forEach(group => {
+      const header = group.querySelector('.aegis-category-header');
+      const selectAll = header ? header.querySelector('.aegis-select-all') : null;
+      const nameEl = header ? header.querySelector('.aegis-category-name') : null;
+      if (selectAll && nameEl) {
+        const key = 'selectAll-' + nameEl.textContent;
+        if (savedChecks.has(key)) {
+          selectAll.checked = savedChecks.get(key);
+        }
+      }
+    });
   }
 
   _escapeHtml(str) {
