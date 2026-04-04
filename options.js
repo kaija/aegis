@@ -10,12 +10,20 @@ function debouncedSaveKeywords() {
       console.log('[Aegis Options] Keywords saved');
     } catch (error) {
       console.error('[Aegis Options] Error saving keywords:', error);
-      showErrorMessage('儲存關鍵字失敗');
+      showErrorMessage(t('optSaveKeywordsFailed'));
     }
   }, 500);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Apply i18n translations to static HTML elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+
   // Load all settings
   settings = await new Promise(resolve => chrome.storage.sync.get(null, resolve));
 
@@ -133,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         // Last resort: copy to clipboard
         navigator.clipboard.writeText(url).then(() => {
-          alert('Copied to clipboard: ' + url + '\n\nPaste this into your Chrome address bar.');
+          alert(t('optCopiedToClipboard', url));
         }).catch(() => {
           prompt('Copy this URL and paste it into your Chrome address bar:', url);
         });
@@ -151,12 +159,12 @@ async function testAiConnection() {
   const model = document.getElementById('aiModel').value.trim() || 'gpt-5-nano-2025-08-07';
 
   if (!apiKey) {
-    statusEl.textContent = '❌ 請先輸入 API Key';
+    statusEl.textContent = '❌ ' + t('optApiKeyRequired');
     statusEl.style.color = '#cf222e';
     return;
   }
 
-  statusEl.textContent = '⏳ 測試連線中...';
+  statusEl.textContent = '⏳ ' + t('optTestingConnection');
   statusEl.style.color = '#0969da';
   btn.disabled = true;
 
@@ -171,10 +179,10 @@ async function testAiConnection() {
     if (oldDump) oldDump.remove();
 
     if (chrome.runtime.lastError || !response) {
-      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.textContent = '❌ ' + t('optBackgroundError');
       statusEl.style.color = '#cf222e';
     } else if (response.success) {
-      statusEl.textContent = '✅ API 成功回傳！請查看下方原始資料：';
+      statusEl.textContent = '✅ ' + t('optApiSuccess');
       statusEl.style.color = '#1a7f37';
 
       const dumpArea = document.createElement('textarea');
@@ -192,7 +200,7 @@ async function testAiConnection() {
       // Append below the test status so it doesn't break the flex row layout.
       document.getElementById('testAiStatus').after(dumpArea);
     } else {
-      statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
+      statusEl.textContent = '❌ ' + (response.error || t('optUnknownError'));
       statusEl.style.color = '#cf222e';
     }
   });
@@ -217,7 +225,7 @@ async function autoFetchModelsIfChanged() {
     return;
   }
 
-  statusEl.textContent = '⏳ 取得模型中...';
+  statusEl.textContent = '⏳ ' + t('optFetchingModels');
   statusEl.style.color = '#0969da';
 
   chrome.runtime.sendMessage({
@@ -225,10 +233,10 @@ async function autoFetchModelsIfChanged() {
     settings: { baseUrl, apiKey }
   }, (response) => {
     if (chrome.runtime.lastError || !response) {
-      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.textContent = '❌ ' + t('optBackgroundError');
       statusEl.style.color = '#cf222e';
     } else if (response.success && response.models) {
-      statusEl.textContent = `✅ 成功取得 ${response.models.length} 個模型`;
+      statusEl.textContent = '✅ ' + t('optModelsFetched', response.models.length);
       statusEl.style.color = '#1a7f37';
 
       renderModelList(response.models);
@@ -242,7 +250,7 @@ async function autoFetchModelsIfChanged() {
         }
       });
     } else {
-      statusEl.textContent = '❌ ' + (response.error || '不明錯誤');
+      statusEl.textContent = '❌ ' + (response.error || t('optUnknownError'));
       statusEl.style.color = '#cf222e';
     }
   });
@@ -253,7 +261,7 @@ async function loadCachedModels() {
   if (cachedData.modelCache && cachedData.modelCache.models) {
     renderModelList(cachedData.modelCache.models);
     const statusEl = document.getElementById('fetchModelsStatus');
-    statusEl.textContent = `✅ 已載入 ${cachedData.modelCache.models.length} 個模型`;
+    statusEl.textContent = '✅ ' + t('optModelsLoaded', cachedData.modelCache.models.length);
     statusEl.style.color = '#1a7f37';
   } else {
     // If no cache but we have credentials from sync storage, try fetching
@@ -289,7 +297,7 @@ function renderCategories(categories) {
         </div>
         <div class="cat-title-stack">
           <span class="cat-name">${cat.name}</span>
-          <span class="cat-count">${cat.keywords.length} active keywords</span>
+          <span class="cat-count">${t('optActiveKeywords', cat.keywords.length)}</span>
         </div>
         <div class="category-actions-inline">
           <button class="category-edit-btn" data-cat-id="${cat.id}" title="Edit Category">
@@ -302,7 +310,7 @@ function renderCategories(categories) {
       </div>
       <div class="category-keywords" id="cat-body-${cat.id}">
         <div class="keywords-tags" id="tags-${cat.id}"></div>
-        <button class="keyword-add-btn" data-cat-id="${cat.id}">+ Add keyword</button>
+        <button class="keyword-add-btn" data-cat-id="${cat.id}">${t('optAddKeyword')}</button>
       </div>
     `;
 
@@ -356,10 +364,10 @@ function renderCategories(categories) {
       // Toggle the line edit or prompt for a simple keyword?
       // Since it's inline in the mockup: "+ Add keyword" button is next to tags
       const currentLabel = item.querySelector('.keyword-add-btn').textContent;
-      if (currentLabel === '+ Add keyword') {
+      if (currentLabel === t('optAddKeyword')) {
         item.querySelector('.keyword-add-btn').outerHTML = `
             <div class="keyword-add-row inline-add-row" style="display:inline-flex;">
-              <input type="text" class="keyword-input" id="input-${cat.id}" placeholder="Type keyword...">
+              <input type="text" class="keyword-input" id="input-${cat.id}" placeholder="${t('optTypeKeyword')}">
               <button class="keyword-save-btn" data-cat-id="${cat.id}">Add</button>
             </div>
           `;
@@ -403,7 +411,7 @@ function renderKeywordTags(cat) {
 
   // Update count
   const countEl = document.querySelector(`[data-cat-id="${cat.id}"] .cat-count`);
-  if (countEl) countEl.textContent = `${cat.keywords.length} active keywords`;
+  if (countEl) countEl.textContent = t('optActiveKeywords', cat.keywords.length);
 }
 
 function addKeyword(catId) {
@@ -459,7 +467,7 @@ async function saveSettings() {
   settings = { ...settings, ...newSettings };
 
   const status = document.getElementById('saveStatus');
-  status.textContent = '✓ 設定已儲存';
+  status.textContent = '✓ ' + t('optSettingsSaved');
   setTimeout(() => { status.textContent = ''; }, 2500);
 }
 
@@ -477,11 +485,11 @@ function loadWhitelistStatus() {
     const infoEl = document.getElementById('whitelistInfo');
     if (!infoEl) return;
     const parts = [];
-    if (res.serviceCount) parts.push(`${res.serviceCount} 個服務`);
-    if (res.shortUrlCount) parts.push(`${res.shortUrlCount} 個短網址服務`);
+    if (res.serviceCount) parts.push(t('optWhitelistServices', res.serviceCount));
+    if (res.shortUrlCount) parts.push(t('optWhitelistShortUrls', res.shortUrlCount));
     if (res.lastUpdated) {
       const d = new Date(res.lastUpdated);
-      parts.push(`上次更新：${d.toLocaleString('zh-TW')}`);
+      parts.push(t('optWhitelistLastUpdated', d.toLocaleString()));
     }
     infoEl.textContent = parts.join(' | ');
   });
@@ -493,28 +501,28 @@ async function updateWhitelistNow() {
   const url = document.getElementById('whitelistUrl').value.trim();
 
   if (!url) {
-    statusEl.textContent = '❌ 請先填寫白名單 URL';
+    statusEl.textContent = '❌ ' + t('optWhitelistUrlRequired');
     statusEl.style.color = '#cf222e';
     return;
   }
 
   btn.disabled = true;
-  statusEl.textContent = '⏳ 下載中...';
+  statusEl.textContent = '⏳ ' + t('optDownloading');
   statusEl.style.color = '#0969da';
 
   chrome.runtime.sendMessage({ type: 'FETCH_WHITELIST', url }, (res) => {
     btn.disabled = false;
     if (chrome.runtime.lastError || !res) {
-      statusEl.textContent = '❌ 背景連線錯誤';
+      statusEl.textContent = '❌ ' + t('optBackgroundError');
       statusEl.style.color = '#cf222e';
       return;
     }
     if (res.success) {
-      statusEl.textContent = `✅ 更新成功（${res.serviceCount} 個服務）`;
+      statusEl.textContent = '✅ ' + t('optWhitelistUpdateSuccess', res.serviceCount);
       statusEl.style.color = '#1a7f37';
       loadWhitelistStatus();
     } else {
-      statusEl.textContent = `❌ ${res.error || '下載失敗'}`;
+      statusEl.textContent = '❌ ' + (res.error || t('optDownloadFailed'));
       statusEl.style.color = '#cf222e';
     }
   });
@@ -535,7 +543,7 @@ function showAddCategoryDialog() {
       const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
       settings.categories = updatedSettings.categories || [];
       renderCategories(settings.categories);
-      showSuccessMessage('分類已新增');
+      showSuccessMessage(t('optCategoryAdded'));
     } catch (error) {
       showErrorMessage(error.message);
     }
@@ -545,7 +553,7 @@ function showAddCategoryDialog() {
 function editCategory(categoryId) {
   const category = settings.categories.find(c => c.id === categoryId);
   if (!category) {
-    showErrorMessage('找不到分類');
+    showErrorMessage(t('optCategoryNotFound'));
     return;
   }
 
@@ -561,7 +569,7 @@ function editCategory(categoryId) {
       const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
       settings.categories = updatedSettings.categories || [];
       renderCategories(settings.categories);
-      showSuccessMessage('分類已更新');
+      showSuccessMessage(t('optCategoryUpdated'));
     } catch (error) {
       showErrorMessage(error.message);
     }
@@ -573,22 +581,22 @@ function editCategory(categoryId) {
 async function deleteCategory(categoryId) {
   const category = settings.categories.find(c => c.id === categoryId);
   if (!category) {
-    showErrorMessage('找不到分類');
+    showErrorMessage(t('optCategoryNotFound'));
     return;
   }
 
   // Show confirmation dialog
-  let message = `確定要刪除「${category.name}」分類嗎？`;
+  let message = t('optDeleteCategoryConfirm', category.name);
   if (category.keywords.length > 0) {
-    message += `\n\n此分類包含 ${category.keywords.length} 個關鍵字，刪除後將無法復原。`;
+    message += '\n\n' + t('optDeleteCategoryKeywords', category.keywords.length);
   }
 
   // Warn if deleting last category
   if (settings.categories.length === 1) {
-    message += '\n\n⚠️ 這是最後一個分類，刪除後郵件分類功能將無法運作。';
+    message += '\n\n⚠️ ' + t('optLastCategoryWarning');
   }
 
-  const confirmed = await showConfirmDialog('刪除分類', message);
+  const confirmed = await showConfirmDialog(t('optDeleteCategoryTitle'), message);
   if (!confirmed) return;
 
   try {
@@ -598,7 +606,7 @@ async function deleteCategory(categoryId) {
       const updatedSettings = await new Promise(resolve => chrome.storage.sync.get(['categories'], resolve));
       settings.categories = updatedSettings.categories || [];
       renderCategories(settings.categories);
-      showSuccessMessage('分類已刪除');
+      showSuccessMessage(t('optCategoryDeleted'));
     }
   } catch (error) {
     showErrorMessage(error.message);
@@ -614,8 +622,8 @@ function showConfirmDialog(title, message) {
         <h3>${escapeHtml(title)}</h3>
         <p style="white-space: pre-line;">${escapeHtml(message)}</p>
         <div class="aegis-confirm-actions">
-          <button class="aegis-confirm-cancel">取消</button>
-          <button class="aegis-confirm-ok">確定</button>
+          <button class="aegis-confirm-cancel">${t('optCancel')}</button>
+          <button class="aegis-confirm-ok">${t('optConfirm')}</button>
         </div>
       </div>
     `;
@@ -753,24 +761,24 @@ async function checkNanoAvailability() {
 
   switch (status) {
     case 'available':
-      updateNanoStatus('green', 'Gemini Nano is ready');
+      updateNanoStatus('green', t('optNanoReady'));
       break;
     case 'downloadable':
-      updateNanoStatus('amber', 'Gemini Nano needs to be downloaded');
+      updateNanoStatus('amber', t('optNanoNeedsDownload'));
       downloadBtn.style.display = 'inline-block';
       break;
     case 'downloading':
-      updateNanoStatus('amber', 'Gemini Nano is downloading...');
+      updateNanoStatus('amber', t('optNanoDownloading'));
       progressContainer.style.display = 'block';
       break;
     case 'no-api':
-      updateNanoStatus('red', 'Prompt API is not available. Please enable the required Chrome flags and relaunch Chrome.');
+      updateNanoStatus('red', t('optNanoNoApi'));
       break;
     case 'unavailable':
-      updateNanoStatus('red', 'Gemini Nano is not available. Please enable the required Chrome flags and relaunch Chrome, or check that your device meets the hardware requirements.');
+      updateNanoStatus('red', t('optNanoUnavailable'));
       break;
     default:
-      updateNanoStatus('red', 'Failed to check Gemini Nano availability.');
+      updateNanoStatus('red', t('optNanoCheckFailed'));
       break;
   }
 }
@@ -789,7 +797,7 @@ async function triggerNanoDownload() {
 
   downloadBtn.disabled = true;
   progressContainer.style.display = 'block';
-  updateNanoStatus('amber', 'Downloading Gemini Nano...');
+  updateNanoStatus('amber', t('optNanoDownloadingProgress'));
 
   try {
     await LanguageModel.create({
@@ -801,11 +809,11 @@ async function triggerNanoDownload() {
         });
       }
     });
-    updateNanoStatus('green', 'Gemini Nano is ready');
+    updateNanoStatus('green', t('optNanoReady'));
     progressContainer.style.display = 'none';
     downloadBtn.style.display = 'none';
   } catch (e) {
-    updateNanoStatus('red', 'Download failed: ' + e.message);
+    updateNanoStatus('red', t('optNanoDownloadFailed', e.message));
     downloadBtn.disabled = false;
     progressContainer.style.display = 'none';
   }

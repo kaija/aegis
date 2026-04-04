@@ -41,10 +41,10 @@ class AnalysisPanel {
     panel.id = 'aegis-panel';
     panel.innerHTML = `
       <div class="aegis-panel-header">
-        <h3>📧 Aegis 郵件分析</h3>
+        <h3>📧 ${t('panelTitle')}</h3>
         <div class="aegis-filter-toggle">
-          <button class="aegis-filter-btn ${this._filter === 'unread' ? 'active' : ''}" data-filter="unread">未讀</button>
-          <button class="aegis-filter-btn ${this._filter === 'all' ? 'active' : ''}" data-filter="all">全部</button>
+          <button class="aegis-filter-btn ${this._filter === 'unread' ? 'active' : ''}" data-filter="unread">${t('filterUnread')}</button>
+          <button class="aegis-filter-btn ${this._filter === 'all' ? 'active' : ''}" data-filter="all">${t('filterAll')}</button>
         </div>
         <div class="aegis-spinner" id="aegis-spinner"></div>
         <button class="aegis-close-btn" id="aegis-panel-close">✕</button>
@@ -89,19 +89,19 @@ class AnalysisPanel {
         body.innerHTML = `
           <div class="aegis-empty-state">
             <div class="aegis-empty-icon" style="animation: pulse 1.5s infinite">✨</div>
-            <div>AI 正在認真閱讀與分類...</div>
-            <div style="font-size: 12px; color: #5f6368; margin-top: 5px;">請稍候片刻</div>
+            <div>${t('loadingAiClassifying')}</div>
+            <div style="font-size: 12px; color: #5f6368; margin-top: 5px;">${t('loadingPleaseWait')}</div>
           </div>
         `;
-        footer.textContent = '載入中...';
+        footer.textContent = t('loadingFooter');
       } else {
         body.innerHTML = `
           <div class="aegis-empty-state">
             <div class="aegis-empty-icon">📭</div>
-            <div>沒有找到未讀郵件</div>
+            <div>${t('noUnreadEmails')}</div>
           </div>
         `;
-        footer.textContent = '共 0 封未讀郵件';
+        footer.textContent = t('footerZeroEmails');
       }
       return;
     }
@@ -114,7 +114,7 @@ class AnalysisPanel {
       loadingRow.style.color = '#5f6368';
       loadingRow.style.fontSize = '13px';
       loadingRow.style.borderBottom = '1px solid #eee';
-      loadingRow.innerHTML = '<span style="display:inline-block; animation: pulse 1.5s infinite">✨</span> AI 繼續分析剩餘郵件中...';
+      loadingRow.innerHTML = '<span style="display:inline-block; animation: pulse 1.5s infinite">✨</span> ' + t('loadingRemainingEmails');
       body.appendChild(loadingRow);
     }
 
@@ -124,7 +124,7 @@ class AnalysisPanel {
       body.appendChild(groupEl);
     }
 
-    footer.textContent = `共 ${totalEmails} 封未讀郵件，${groups.size} 個分類`;
+    footer.textContent = t('panelFooterStats', totalEmails, groups.size);
   }
 
   _createCategoryGroup(category, emails, labels) {
@@ -136,7 +136,7 @@ class AnalysisPanel {
     header.className = 'aegis-category-header';
     header.style.borderLeft = `3px solid ${category.color}`;
     header.innerHTML = `
-      <input type="checkbox" class="aegis-select-all" title="全選">
+      <input type="checkbox" class="aegis-select-all" title="${t('selectAll')}">
       <span class="aegis-category-emoji" style="display:inline-flex;align-items:center;">${window.getPopupIconSvg ? window.getPopupIconSvg(category.emoji) : category.emoji}</span>
       <span class="aegis-category-name">${category.name}</span>
       <span class="aegis-category-count">${emails.length}</span>
@@ -173,13 +173,13 @@ class AnalysisPanel {
     // Only show "Move All" if the label actually exists in Gmail
     const labelExists = labels.find(l => l.name === category.name);
     const moveAllBtnHtml = labelExists
-      ? `<button class="aegis-action-btn aegis-move-all-btn${isOutlook ? ' aegis-btn-disabled' : ''}" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;"${isOutlook ? ' disabled title="Outlook 暫不支援此功能"' : ''}>全部移至「${category.name}」標籤</button>`
+      ? `<button class="aegis-action-btn aegis-move-all-btn${isOutlook ? ' aegis-btn-disabled' : ''}" style="background: ${category.color}; color: white; border-color: ${category.color}; font-weight: bold;"${isOutlook ? ' disabled title="' + t('outlookNotSupported') + '"' : ''}>${t('moveAllToLabel', category.name)}</button>`
       : '';
 
     actions.innerHTML = `
       ${moveAllBtnHtml}
-      <button class="aegis-action-btn aegis-move-btn${isOutlook ? ' aegis-btn-disabled' : ''}"${isOutlook ? ' disabled title="Outlook 暫不支援此功能"' : ''}>移至其他標籤 ▼</button>
-      <button class="aegis-action-btn aegis-delete-btn">🗑 刪除</button>
+      <button class="aegis-action-btn aegis-move-btn${isOutlook ? ' aegis-btn-disabled' : ''}"${isOutlook ? ' disabled title="' + t('outlookNotSupported') + '"' : ''}>${t('moveToOtherLabel')}</button>
+      <button class="aegis-action-btn aegis-delete-btn">🗑 ${t('deleteBtn')}</button>
     `;
 
     group.appendChild(header);
@@ -200,7 +200,7 @@ class AnalysisPanel {
         .filter(item => item.querySelector('.aegis-email-checkbox').checked);
 
       if (selectedItems.length === 0) {
-        this._showNotification('請先選擇要刪除的郵件', 'warning');
+        this._showNotification(t('selectEmailsToDelete'), 'warning');
         return;
       }
 
@@ -220,8 +220,8 @@ class AnalysisPanel {
 
         if (remaining === 0) group.remove();
       } else {
-        const platformName = this.platform ? this.platform.getName() : '平台';
-        this._showNotification(`郵件刪除操作異常，請檢查 ${platformName} 已正常完成刪除流程。`, 'error');
+        const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+        this._showNotification(t('deleteError', platformName), 'error');
       }
     });
 
@@ -248,7 +248,7 @@ class AnalysisPanel {
         const rows = selectedItems.map(item => item._emailRow).filter(Boolean);
         if (rows.length === 0 || !this.platform) return;
 
-        moveAllBtn.textContent = '移動中...';
+        moveAllBtn.textContent = t('moving');
         moveAllBtn.disabled = true;
 
         // 3. Perform move
@@ -265,11 +265,11 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          const platformName = this.platform ? this.platform.getName() : '平台';
-          this._showNotification(`移動失敗。請再次確認 ${platformName} 中已有「${targetLabelText}」標籤。`, 'error');
+          const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+          this._showNotification(t('moveError', targetLabelText, platformName), 'error');
         }
 
-        moveAllBtn.textContent = `全部移至「${category.name}」標籤`;
+        moveAllBtn.textContent = t('moveAllToLabel', category.name);
         moveAllBtn.disabled = false;
       });
     }
@@ -280,7 +280,7 @@ class AnalysisPanel {
         .filter(item => item.querySelector('.aegis-email-checkbox').checked);
 
       if (selectedItems.length === 0) {
-        this._showNotification('請先選擇要移動的郵件', 'warning');
+        this._showNotification(t('selectEmailsToMove'), 'warning');
         return;
       }
 
@@ -296,8 +296,8 @@ class AnalysisPanel {
     document.querySelectorAll('.aegis-label-picker').forEach(el => el.remove());
 
     if (labels.length === 0) {
-      const platformName = this.platform ? this.platform.getName() : '平台';
-      this._showNotification(`未找到標籤/資料夾，請確認 ${platformName} 側欄已載入`, 'error');
+      const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+      this._showNotification(t('noLabelsFound', platformName), 'error');
       return;
     }
 
@@ -321,8 +321,8 @@ class AnalysisPanel {
           header.querySelector('.aegis-category-count').textContent = remaining;
           if (remaining === 0) group.remove();
         } else {
-          const platformName = this.platform ? this.platform.getName() : '平台';
-          this._showNotification(`郵件移動操作異常，請檢查 ${platformName} 已正常完成流程。`, 'error');
+          const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+          this._showNotification(t('moveOperationError', platformName), 'error');
         }
       });
       picker.appendChild(item);

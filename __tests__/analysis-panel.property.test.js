@@ -87,7 +87,7 @@ describe('AnalysisPanel Property Tests', () => {
               // Empty state: loading shown via empty-state div with animation
               if (isLoading) {
                 expect(emptyLoading).not.toBeNull();
-                expect(emptyLoading.innerHTML).toContain('分類');
+                expect(emptyLoading.innerHTML).toContain('loadingAiClassifying');
               }
               // No loading row when empty
             } else {

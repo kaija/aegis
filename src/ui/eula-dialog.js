@@ -73,21 +73,21 @@ class EulaDialog {
     });
 
     dialog.innerHTML = `
-      <h2 id="aegis-eula-title" class="aegis-eula-title">End User License Agreement</h2>
+      <h2 id="aegis-eula-title" class="aegis-eula-title">${t('eulaTitle')}</h2>
       <div class="aegis-eula-body">
-        <p>Please read the following End User License Agreement carefully before using the Aegis extension.</p>
-        <p>By using this extension, you agree to the following terms:</p>
-        <p>1. <strong>License Grant.</strong> You are granted a non-exclusive, non-transferable license to use the Aegis Chrome Extension for personal, non-commercial purposes.</p>
-        <p>2. <strong>Data Collection.</strong> The extension may collect anonymous category-level data (such as email category labels and domain names) to improve classification accuracy. No personal email content, subject lines, full email addresses, or attachment data is ever collected.</p>
-        <p>3. <strong>Privacy.</strong> Your privacy is important to us. All data processing occurs locally in your browser unless you have opted in to anonymous data feedback. You may disable data feedback at any time from the Settings page.</p>
-        <p>4. <strong>No Warranty.</strong> This extension is provided "as is" without warranty of any kind, express or implied.</p>
-        <p>5. <strong>Limitation of Liability.</strong> In no event shall the developers be liable for any damages arising from the use of this extension.</p>
-        <p>6. <strong>Modifications.</strong> We reserve the right to modify these terms at any time. Continued use of the extension constitutes acceptance of modified terms.</p>
+        <p>${t('eulaIntro')}</p>
+        <p>${t('eulaAgree')}</p>
+        <p>${t('eulaClause1')}</p>
+        <p>${t('eulaClause2')}</p>
+        <p>${t('eulaClause3')}</p>
+        <p>${t('eulaClause4')}</p>
+        <p>${t('eulaClause5')}</p>
+        <p>${t('eulaClause6')}</p>
       </div>
-      <p class="aegis-eula-notice">By accepting, anonymous category data feedback will be enabled by default. You can disable this in Settings at any time.</p>
+      <p class="aegis-eula-notice">${t('eulaNotice')}</p>
       <div class="aegis-eula-actions">
-        <button class="aegis-eula-btn aegis-eula-btn-decline">Decline</button>
-        <button class="aegis-eula-btn aegis-eula-btn-accept">Accept</button>
+        <button class="aegis-eula-btn aegis-eula-btn-decline">${t('eulaDecline')}</button>
+        <button class="aegis-eula-btn aegis-eula-btn-accept">${t('eulaAccept')}</button>
       </div>
     `;
 

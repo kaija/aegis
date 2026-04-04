@@ -27,7 +27,7 @@
           <path d="M11 17v.01"></path>
           <path d="M7 14v.01"></path>
         </svg>
-        <h2>Analysis Engine</h2>
+        <h2 data-i18n="optAnalysisEngine">Analysis Engine</h2>
       </div>
 
       <div class="analysis-engine-cards">
@@ -36,8 +36,8 @@
           <div class="ae-card-content">
             <div class="ae-radio-circle"></div>
             <div class="ae-text">
-              <strong>Local Rules</strong>
-              <p>Processing happens entirely on your device. Fast, private, and works without an internet connection.
+              <strong data-i18n="optLocalRules">Local Rules</strong>
+              <p data-i18n="optLocalRulesDesc">Processing happens entirely on your device. Fast, private, and works without an internet connection.
               </p>
             </div>
           </div>
@@ -49,10 +49,10 @@
             <div class="ae-radio-circle"></div>
             <div class="ae-text">
               <div class="ae-header">
-                <strong>AI Mode</strong>
-                <span class="badge-recommended">RECOMMENDED</span>
+                <strong data-i18n="optAiMode">AI Mode</strong>
+                <span class="badge-recommended" data-i18n="optRecommended">RECOMMENDED</span>
               </div>
-              <p>Advanced neural analysis using large language models for superior classification accuracy and threat
+              <p data-i18n="optAiModeDesc">Advanced neural analysis using large language models for superior classification accuracy and threat
                 detection.</p>
             </div>
           </div>
@@ -63,8 +63,8 @@
           <div class="ae-card-content">
             <div class="ae-radio-circle"></div>
             <div class="ae-text">
-              <strong>Nano AI</strong>
-              <p>On-device LLM powered by Chrome's Gemini Nano. No API key needed, fully offline capable.</p>
+              <strong data-i18n="optNanoAi">Nano AI</strong>
+              <p data-i18n="optNanoAiDesc">On-device LLM powered by Chrome's Gemini Nano. No API key needed, fully offline capable.</p>
             </div>
           </div>
         </label>
@@ -72,25 +72,25 @@
       <div id="nanoFlagsGuide" class="nano-flags-guide" style="display:none;">
           <div class="nano-flags-icon">⚠️</div>
           <div class="nano-flags-body">
-            <strong>Chrome flags required to enable Nano AI</strong>
-            <p>Gemini Nano requires two Chrome flags to be enabled. Open each link below, set to <code>Enabled</code>, then relaunch Chrome.</p>
+            <strong data-i18n="optNanoFlagsRequired">Chrome flags required to enable Nano AI</strong>
+            <p data-i18n="optNanoFlagsInstructions">Gemini Nano requires two Chrome flags to be enabled. Open each link below, set to Enabled, then relaunch Chrome.</p>
             <ol>
               <li>
                 <a href="javascript:void(0)" class="nano-flag-link" data-flag="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a>
-                <span class="nano-flag-desc">— Enables on-device model download</span>
+                <span class="nano-flag-desc" data-i18n="optNanoFlagModel">— Enables on-device model download</span>
               </li>
               <li>
                 <a href="javascript:void(0)" class="nano-flag-link" data-flag="chrome://flags/#prompt-api-for-gemini-nano-multimodal-input"><code>chrome://flags/#prompt-api-for-gemini-nano-multimodal-input</code></a>
-                <span class="nano-flag-desc">— Enables the Prompt API</span>
+                <span class="nano-flag-desc" data-i18n="optNanoFlagPromptApi">— Enables the Prompt API</span>
               </li>
             </ol>
-            <p class="nano-flags-note">After enabling both flags and relaunching, return here and select Nano AI.</p>
+            <p class="nano-flags-note" data-i18n="optNanoFlagsNote">After enabling both flags and relaunching, return here and select Nano AI.</p>
           </div>
         </div>
 
       <div id="nanoStatusSection" style="display:none; margin-top: 16px;">
         <div id="nanoStatus" style="font-size: 13px; font-weight: 500; margin-bottom: 10px;"></div>
-        <button type="button" id="nanoDownloadBtn" class="test-connection-btn" style="display:none;">Download Model</button>
+        <button type="button" id="nanoDownloadBtn" class="test-connection-btn" style="display:none;" data-i18n="optDownloadModel">Download Model</button>
         <div id="nanoProgressContainer" style="display:none; margin-top: 10px; background: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
           <div id="nanoProgressBar" style="width: 0%; height: 100%; background: #1a73e8; color: #fff; text-align: center; font-size: 12px; line-height: 20px; transition: width 0.3s;"></div>
         </div>
@@ -106,14 +106,14 @@
             d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
           </path>
         </svg>
-        <h2>Model Configuration</h2>
+        <h2 data-i18n="optModelConfig">Model Configuration</h2>
       </div>
-      <p style="font-size: 13px; color: #5f6368; margin-top: 0; margin-bottom: 20px;">
+      <p style="font-size: 13px; color: #5f6368; margin-top: 0; margin-bottom: 20px;" data-i18n="optAiModeInfo">
         AI Mode will smartly categorize your emails using your existing custom Gmail labels automatically.
       </p>
 
       <div class="form-group row-group">
-        <label for="aiBaseUrl">API BASE URL</label>
+        <label for="aiBaseUrl" data-i18n="optApiBaseUrl">API BASE URL</label>
         <div class="input-with-icon">
           <input type="url" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
           <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -125,7 +125,7 @@
       </div>
 
       <div class="form-group row-group">
-        <label for="aiApiKey">API KEY</label>
+        <label for="aiApiKey" data-i18n="optApiKey">API KEY</label>
         <div class="input-with-icon">
           <input type="password" id="aiApiKey" placeholder="sk-...">
           <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -139,7 +139,7 @@
 
       <div class="form-group row-group split-group">
         <div class="split-left">
-          <label for="aiModel">SELECTED MODEL <span id="fetchModelsStatus"
+          <label for="aiModel"><span data-i18n="optSelectedModel">SELECTED MODEL</span> <span id="fetchModelsStatus"
               style="font-weight:normal; text-transform:none;"></span></label>
           <div class="input-with-icon">
             <input type="text" id="aiModel" list="aiModelList" placeholder="gpt-4o-latest">
@@ -157,7 +157,7 @@
               stroke-linecap="round" stroke-linejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
-            TEST CONNECTION
+            <span data-i18n="optTestConnection">TEST CONNECTION</span>
           </button>
         </div>
       </div>
@@ -173,9 +173,9 @@
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
               <line x1="7" y1="7" x2="7.01" y2="7"></line>
             </svg>
-            <h2>Smart Categories</h2>
+            <h2 data-i18n="optSmartCategories">Smart Categories</h2>
           </div>
-          <p class="sc-desc">Define classification rules and keywords for your inbox</p>
+          <p class="sc-desc" data-i18n="optSmartCategoriesDesc">Define classification rules and keywords for your inbox</p>
         </div>
         <button type="button" class="add-category-btn-new" id="addCategoryBtn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -183,7 +183,7 @@
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Add Category
+          <span data-i18n="optAddCategory">Add Category</span>
         </button>
       </div>
 
@@ -196,22 +196,22 @@
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
         </svg>
-        <h2>Anonymous Data Feedback</h2>
+        <h2 data-i18n="optAnonymousFeedback">Anonymous Data Feedback</h2>
       </div>
-      <p class="feedback-desc" style="font-size: 13px; color: #5f6368; margin-top: -12px; margin-bottom: 20px; margin-left: 32px;">
+      <p class="feedback-desc" style="font-size: 13px; color: #5f6368; margin-top: -12px; margin-bottom: 20px; margin-left: 32px;" data-i18n="optAnonymousFeedbackDesc">
         Help improve Aegis by sharing anonymous category data (category labels and domains only — no email content or personal information).
       </p>
       <label class="toggle-option">
         <input type="checkbox" id="dataFeedbackToggle">
-        <span>Enable anonymous data feedback</span>
+        <span data-i18n="optEnableFeedback">Enable anonymous data feedback</span>
       </label>
     </section>
 
     <!-- Hidden older sections, kept for JS backwards compatibility but hidden from UI as per mock -->
     <section class="options-section" style="display:none;">
-      <h2>白名單設定</h2>
+      <h2 data-i18n="optWhitelistSettings">白名單設定</h2>
       <input type="url" id="whitelistUrl">
-      <button id="updateWhitelistBtn">更新</button>
+      <button id="updateWhitelistBtn" data-i18n="optWhitelistUpdate">更新</button>
       <span id="whitelistStatus"></span>
       <div id="whitelistInfo"></div>
     </section>
@@ -219,14 +219,14 @@
     <section class="options-section" style="display:none;">
       <label class="toggle-option">
         <input type="checkbox" id="analysisDebug">
-        <span>Debug 模式</span>
+        <span data-i18n="optDebugMode">Debug 模式</span>
       </label>
     </section>
 
     <div class="options-actions" style="margin-top: 20px;">
-      <button class="save-btn" id="saveBtn">Save Settings</button>
+      <button class="save-btn" id="saveBtn" data-i18n="optSaveSettings">Save Settings</button>
       <span class="save-status" id="saveStatus"></span>
-      <small style="color: #5f6368; margin-left: 12px;">Keywords are saved automatically</small>
+      <small style="color: #5f6368; margin-left: 12px;" data-i18n="optKeywordsAutoSaved">Keywords are saved automatically</small>
     </div>
   </div>
 

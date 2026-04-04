@@ -67,7 +67,7 @@ describe('CategoryDialog', () => {
       CategoryDialog.show('create', null);
       
       const title = document.querySelector('.aegis-dialog-title');
-      expect(title.textContent).toBe('Add New Category');
+      expect(title.textContent).toBe('catDialogAddTitle');
     });
 
     test('should set title to "Edit Category" in edit mode', () => {
@@ -82,14 +82,14 @@ describe('CategoryDialog', () => {
       CategoryDialog.show('edit', categoryData);
       
       const title = document.querySelector('.aegis-dialog-title');
-      expect(title.textContent).toBe('Edit Category');
+      expect(title.textContent).toBe('catDialogEditTitle');
     });
 
     test('should set save button text to "Create Category" in create mode', () => {
       CategoryDialog.show('create', null);
       
       const saveBtn = document.querySelector('.aegis-dialog-btn-primary');
-      expect(saveBtn.textContent).toBe('Create Category');
+      expect(saveBtn.textContent).toBe('catDialogCreate');
     });
 
     test('should set save button text to "Save Changes" in edit mode', () => {
@@ -104,7 +104,7 @@ describe('CategoryDialog', () => {
       CategoryDialog.show('edit', categoryData);
       
       const saveBtn = document.querySelector('.aegis-dialog-btn-primary');
-      expect(saveBtn.textContent).toBe('Save Changes');
+      expect(saveBtn.textContent).toBe('catDialogSave');
     });
 
     test('should populate form with category data in edit mode', () => {
@@ -376,7 +376,7 @@ describe('CategoryDialog', () => {
       CategoryDialog.show('create', null);
       
       const cancelBtn = document.querySelector('.aegis-dialog-btn-secondary');
-      expect(cancelBtn.textContent).toBe('Cancel');
+      expect(cancelBtn.textContent).toBe('catDialogCancel');
     });
 
     test('cancel button should have correct type', () => {
@@ -448,7 +448,7 @@ describe('CategoryDialog', () => {
       const errorMsg = nameGroup.querySelector('.aegis-form-error');
       
       expect(errorMsg.style.display).toBe('block');
-      expect(errorMsg.textContent).toContain('required');
+      expect(errorMsg.textContent).toContain('catDialogNameRequired');
     });
 
     test('should clear previous errors before validating', () => {

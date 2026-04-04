@@ -179,7 +179,7 @@
           isLoading: true // Enable new loading UI
         });
         const headerStats = document.querySelector('.aegis-header-stats');
-        if (headerStats) headerStats.innerHTML = '✨ <span>AI 分析中...</span>';
+        if (headerStats) headerStats.innerHTML = '✨ <span>' + t('aiAnalyzing') + '</span>';
 
         // Determine categories to use
         const categories = settings.categories || [];
