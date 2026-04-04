@@ -636,5 +636,59 @@
   },
   "analyticsClose": {
     "message": "Close"
+  },
+
+  "_comment_domain_security": { "message": "--- Domain Security Analysis ---" },
+
+  "domainSecScore": {
+    "message": "DOMAIN SCORE"
+  },
+  "domainSecAnalyzing": {
+    "message": "Analyzing..."
+  },
+  "domainSecRegistered": {
+    "message": "Registered"
+  },
+  "domainSecDomainAge": {
+    "message": "Domain Age"
+  },
+  "domainSecRegistrant": {
+    "message": "Registrant"
+  },
+  "domainSecServerLocation": {
+    "message": "Server Location"
+  },
+  "domainSecServerIp": {
+    "message": "Server IP"
+  },
+  "domainSecRiskFactors": {
+    "message": "Risk Factors"
+  },
+  "domainSecUnavailable": {
+    "message": "Unavailable"
+  },
+  "domainSecNotFound": {
+    "message": "Not found"
+  },
+  "domainSecUnknown": {
+    "message": "Unknown"
+  },
+  "domainSecInvalidUrl": {
+    "message": "Invalid URL"
+  },
+  "domainSecAnalysisUnavailable": {
+    "message": "$1 — Analysis unavailable",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "domainSecJustAnalyzed": {
+    "message": "Just analyzed"
+  },
+  "domainSecCachedAgo": {
+    "message": "Cached $1 min ago",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
   }
 }

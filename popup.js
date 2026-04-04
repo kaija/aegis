@@ -176,7 +176,7 @@ async function showDomainSecurityInfo(tab, url) {
   try {
     domain = DomainAnalyzer.extractBaseDomain(new URL(url).hostname);
   } catch {
-    domainNameEl.textContent = 'Invalid URL';
+    domainNameEl.textContent = t('domainSecInvalidUrl');
     return;
   }
 
@@ -206,7 +206,7 @@ async function showDomainSecurityInfo(tab, url) {
 
   if (!entry) {
     scoreValueEl.textContent = '?';
-    domainNameEl.textContent = domain + ' — Analysis unavailable';
+    domainNameEl.textContent = t('domainSecAnalysisUnavailable', domain);
     return;
   }
 
@@ -231,12 +231,12 @@ async function showDomainSecurityInfo(tab, url) {
       domainAgeEl.style.color = '#e67e22';
     }
   } else {
-    regDateEl.textContent = entry.rdapError ? 'Unavailable' : 'Not found';
+    regDateEl.textContent = entry.rdapError ? t('domainSecUnavailable') : t('domainSecNotFound');
     domainAgeEl.textContent = '--';
   }
 
   // Registrant
-  registrantEl.textContent = entry.registrant || 'Unknown';
+  registrantEl.textContent = entry.registrant || t('domainSecUnknown');
 
   // Country
   if (entry.country) {
@@ -266,6 +266,6 @@ async function showDomainSecurityInfo(tab, url) {
   // Cache note
   if (entry.cachedAt) {
     const minsAgo = Math.round((Date.now() - entry.cachedAt) / 60000);
-    cacheNoteEl.textContent = minsAgo < 2 ? 'Just analyzed' : `Cached ${minsAgo} min ago`;
+    cacheNoteEl.textContent = minsAgo < 2 ? t('domainSecJustAnalyzed') : t('domainSecCachedAgo', minsAgo);
   }
 }

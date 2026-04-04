@@ -636,5 +636,59 @@
   },
   "analyticsClose": {
     "message": "關閉"
+  },
+
+  "_comment_domain_security": { "message": "--- 網域安全分析 ---" },
+
+  "domainSecScore": {
+    "message": "網域評分"
+  },
+  "domainSecAnalyzing": {
+    "message": "分析中..."
+  },
+  "domainSecRegistered": {
+    "message": "註冊日期"
+  },
+  "domainSecDomainAge": {
+    "message": "網域年齡"
+  },
+  "domainSecRegistrant": {
+    "message": "註冊者"
+  },
+  "domainSecServerLocation": {
+    "message": "伺服器位置"
+  },
+  "domainSecServerIp": {
+    "message": "伺服器 IP"
+  },
+  "domainSecRiskFactors": {
+    "message": "風險因素"
+  },
+  "domainSecUnavailable": {
+    "message": "無法取得"
+  },
+  "domainSecNotFound": {
+    "message": "未找到"
+  },
+  "domainSecUnknown": {
+    "message": "未知"
+  },
+  "domainSecInvalidUrl": {
+    "message": "無效的 URL"
+  },
+  "domainSecAnalysisUnavailable": {
+    "message": "$1 — 無法分析",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "domainSecJustAnalyzed": {
+    "message": "剛完成分析"
+  },
+  "domainSecCachedAgo": {
+    "message": "已快取 $1 分鐘前",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
   }
 }
