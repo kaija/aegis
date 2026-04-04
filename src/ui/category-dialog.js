@@ -88,10 +88,10 @@ const CategoryDialog = (() => {
     const headerText = document.createElement('div');
     const title = document.createElement('h3');
     title.className = 'aegis-dialog-title';
-    title.textContent = 'Add New Category';
+    title.textContent = t('catDialogAddTitle');
     const subtitle = document.createElement('p');
     subtitle.className = 'aegis-dialog-subtitle';
-    subtitle.textContent = 'Organize your emails with intelligent classification.';
+    subtitle.textContent = t('catDialogSubtitle');
     headerText.appendChild(title);
     headerText.appendChild(subtitle);
 
@@ -115,13 +115,13 @@ const CategoryDialog = (() => {
     // 1. Category Name
     const nameLabel = document.createElement('label');
     nameLabel.className = 'aegis-form-label';
-    nameLabel.textContent = 'Category Name';
+    nameLabel.textContent = t('catDialogNameLabel');
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.id = 'aegis-cat-name';
     nameInput.className = 'aegis-form-input aegis-cat-name-input';
-    nameInput.placeholder = 'e.g., Invoices, Client Feedback, Urgent';
+    nameInput.placeholder = t('catDialogNamePlaceholder');
 
     const nameGroup = document.createElement('div');
     nameGroup.className = 'aegis-form-group';
@@ -137,7 +137,7 @@ const CategoryDialog = (() => {
     // 2. Category Color
     const colorLabel = document.createElement('label');
     colorLabel.className = 'aegis-form-label';
-    colorLabel.textContent = 'Category Color';
+    colorLabel.textContent = t('catDialogColorLabel');
 
     const colorGrid = document.createElement('div');
     colorGrid.className = 'aegis-color-grid';
@@ -172,7 +172,7 @@ const CategoryDialog = (() => {
     // 3. Icon Selector
     const iconLabel = document.createElement('label');
     iconLabel.className = 'aegis-form-label';
-    iconLabel.textContent = 'Icon Selector';
+    iconLabel.textContent = t('catDialogIconLabel');
 
     const iconSearchContainer = document.createElement('div');
     iconSearchContainer.className = 'aegis-icon-search-container';
@@ -180,7 +180,7 @@ const CategoryDialog = (() => {
     const iconSearchInput = document.createElement('input');
     iconSearchInput.type = 'text';
     iconSearchInput.className = 'aegis-form-input aegis-icon-search';
-    iconSearchInput.placeholder = 'Search icons...';
+    iconSearchInput.placeholder = t('catDialogSearchIcons');
 
     const iconSearchIcon = document.createElement('div');
     iconSearchIcon.className = 'aegis-icon-search-icon';
@@ -232,7 +232,7 @@ const CategoryDialog = (() => {
     // 4. Smart Matching Keywords
     const keywordLabel = document.createElement('label');
     keywordLabel.className = 'aegis-form-label';
-    keywordLabel.textContent = 'Smart Matching Keywords';
+    keywordLabel.textContent = t('catDialogKeywordsLabel');
 
     const keywordContainer = document.createElement('div');
     keywordContainer.className = 'aegis-keyword-container';
@@ -241,7 +241,7 @@ const CategoryDialog = (() => {
     const keywordInput = document.createElement('input');
     keywordInput.type = 'text';
     keywordInput.className = 'aegis-keyword-inner-input';
-    keywordInput.placeholder = 'Type and press enter...';
+    keywordInput.placeholder = t('catDialogKeywordPlaceholder');
 
     keywordContainer.appendChild(keywordInput);
 
@@ -281,7 +281,7 @@ const CategoryDialog = (() => {
     const cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.className = 'aegis-dialog-btn aegis-dialog-btn-secondary';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = t('catDialogCancel');
     cancelBtn.addEventListener('click', hide);
 
     const deleteBtn = document.createElement('button');
@@ -291,7 +291,7 @@ const CategoryDialog = (() => {
     deleteBtn.style.color = '#ef4444';
     deleteBtn.style.background = 'transparent';
     deleteBtn.style.border = 'none';
-    deleteBtn.textContent = 'Delete';
+    deleteBtn.textContent = t('catDialogDelete');
     deleteBtn.addEventListener('click', () => {
       if (onDeleteCallback && currentCategoryId) {
         onDeleteCallback(currentCategoryId);
@@ -302,7 +302,7 @@ const CategoryDialog = (() => {
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'aegis-dialog-btn aegis-dialog-btn-primary';
-    saveBtn.textContent = 'Create Category';
+    saveBtn.textContent = t('catDialogCreate');
     saveBtn.addEventListener('click', handleFormSubmit);
 
     footer.appendChild(deleteBtn);
@@ -372,10 +372,10 @@ const CategoryDialog = (() => {
 
     // Update UI for mode
     const title = dialogElement.querySelector('.aegis-dialog-title');
-    title.textContent = mode === 'create' ? 'Add New Category' : 'Edit Category';
+    title.textContent = mode === 'create' ? t('catDialogAddTitle') : t('catDialogEditTitle');
 
     const saveBtn = dialogElement.querySelector('.aegis-dialog-btn-primary');
-    saveBtn.textContent = mode === 'create' ? 'Create Category' : 'Save Changes';
+    saveBtn.textContent = mode === 'create' ? t('catDialogCreate') : t('catDialogSave');
 
     const deleteBtn = dialogElement.querySelector('.aegis-dialog-btn-danger');
     if (deleteBtn) {
@@ -452,7 +452,7 @@ const CategoryDialog = (() => {
 
     const formData = getFormData();
     if (!formData.name) {
-      showFieldError('name', 'Category name is required');
+      showFieldError('name', t('catDialogNameRequired'));
       return;
     }
 

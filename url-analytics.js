@@ -3,6 +3,16 @@
  * Renders trend chart, prediction, and category pie chart using Canvas API
  */
 
+// ---- i18n DOM walker ----
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+});
+
 // ---- Storage helpers (direct, no module dependency) ----
 
 const STORAGE_KEY = 'aegis_url_history';

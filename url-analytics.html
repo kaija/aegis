@@ -13,22 +13,22 @@
     <header class="analytics-header">
       <div class="header-left">
         <img src="public/icons/icon32.png" alt="Aegis" width="24" height="24">
-        <h1>Browsing Analytics</h1>
+        <h1 data-i18n="analyticsTitle">Browsing Analytics</h1>
       </div>
       <div class="header-actions">
         <label class="toggle-feedback" title="Enable category feedback for uncategorized URLs">
           <input type="checkbox" id="feedbackToggle">
           <span class="toggle-slider"></span>
-          <span class="toggle-label">Feedback Mode</span>
+          <span class="toggle-label" data-i18n="analyticsFeedbackMode">Feedback Mode</span>
         </label>
-        <button class="btn-icon" id="syncCategoriesBtn" title="Sync URL Categories from Server">
+        <button class="btn-icon" id="syncCategoriesBtn" data-i18n-title="analyticsSyncCategories">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/>
             <polyline points="1 20 1 14 7 14"/>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
-        <button class="btn-icon" id="exportBtn" title="Export Data">
+        <button class="btn-icon" id="exportBtn" data-i18n-title="analyticsExportData">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -49,12 +49,12 @@
       <div class="prediction-main">
         <div class="prediction-current">
           <span class="prediction-number" id="currentViews">0</span>
-          <span class="prediction-label">Views Today</span>
+          <span class="prediction-label" data-i18n="analyticsViewsToday">Views Today</span>
         </div>
         <div class="prediction-divider"></div>
         <div class="prediction-estimate">
           <span class="prediction-number predicted" id="predictedViews">--</span>
-          <span class="prediction-label">Predicted EOD</span>
+          <span class="prediction-label" data-i18n="analyticsPredictedEod">Predicted EOD</span>
         </div>
       </div>
       <div class="prediction-meta" id="predictionMeta"></div>
@@ -64,8 +64,8 @@
     <div class="trend-charts-row">
       <section class="chart-section trend-section">
         <div class="section-header">
-          <h2>Daily Page Views</h2>
-          <span class="section-badge">Past 7 days + today</span>
+          <h2 data-i18n="analyticsDailyPageViews">Daily Page Views</h2>
+          <span class="section-badge" data-i18n="analyticsPast7Days">Past 7 days + today</span>
         </div>
         <div class="chart-wrapper">
           <canvas id="trendChart" width="600" height="220"></canvas>
@@ -74,8 +74,8 @@
 
       <section class="chart-section trend-section">
         <div class="section-header">
-          <h2>Daily Browsing Time</h2>
-          <span class="section-badge time-badge">Active Time</span>
+          <h2 data-i18n="analyticsDailyBrowsingTime">Daily Browsing Time</h2>
+          <span class="section-badge time-badge" data-i18n="analyticsActiveTime">Active Time</span>
         </div>
         <div class="chart-wrapper">
           <canvas id="timeTrendChart" width="600" height="220"></canvas>
@@ -87,7 +87,7 @@
     <div class="pie-charts-row">
       <section class="chart-section pie-section">
         <div class="section-header">
-          <h2>By Page Views</h2>
+          <h2 data-i18n="analyticsByPageViews">By Page Views</h2>
         </div>
         <div class="pie-wrapper">
           <canvas id="categoryPieChart" width="240" height="240"></canvas>
@@ -97,7 +97,7 @@
 
       <section class="chart-section pie-section">
         <div class="section-header">
-          <h2>By Visit Time</h2>
+          <h2 data-i18n="analyticsByVisitTime">By Visit Time</h2>
         </div>
         <div class="pie-wrapper">
           <canvas id="timePieChart" width="240" height="240"></canvas>
@@ -109,7 +109,7 @@
     <!-- Uncategorized URLs Section (visible when feedback mode ON) -->
     <section class="chart-section uncategorized-section" id="uncategorizedSection" style="display:none;">
       <div class="section-header">
-        <h2>Uncategorized URLs</h2>
+        <h2 data-i18n="analyticsUncategorizedUrls">Uncategorized URLs</h2>
         <span class="section-badge" id="uncategorizedCount">0</span>
       </div>
       <div class="uncategorized-list" id="uncategorizedList">
@@ -117,7 +117,7 @@
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          <p>All URLs are categorized</p>
+          <p data-i18n="analyticsAllCategorized">All URLs are categorized</p>
         </div>
       </div>
     </section>
@@ -125,15 +125,15 @@
     <!-- Category Feedback Dialog (hidden by default) -->
     <div class="feedback-dialog" id="feedbackDialog" style="display:none;">
       <div class="feedback-content">
-        <h3>Categorize URL</h3>
+        <h3 data-i18n="analyticsCategorizeUrl">Categorize URL</h3>
         <p class="feedback-url" id="feedbackUrl"></p>
         <p class="feedback-domain" id="feedbackDomain"></p>
         <select id="feedbackCategory" class="feedback-select">
-          <option value="">-- Select Category --</option>
+          <option value="" data-i18n="analyticsSelectCategory">-- Select Category --</option>
         </select>
         <div class="feedback-actions">
-          <button class="btn-secondary" id="feedbackCancel">Skip</button>
-          <button class="btn-primary" id="feedbackSave">Save</button>
+          <button class="btn-secondary" id="feedbackCancel" data-i18n="analyticsSkip">Skip</button>
+          <button class="btn-primary" id="feedbackSave" data-i18n="analyticsSave">Save</button>
         </div>
       </div>
     </div>
@@ -141,15 +141,15 @@
     <!-- Export Dialog -->
     <div class="export-dialog" id="exportDialog" style="display:none;">
       <div class="export-content">
-        <h3>Export Browsing Data</h3>
+        <h3 data-i18n="analyticsExportBrowsingData">Export Browsing Data</h3>
         <div class="export-options">
           <button class="export-option-btn" id="exportLabels">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
               <line x1="7" y1="7" x2="7.01" y2="7"/>
             </svg>
-            <span>User Labels (JSON)</span>
-            <small>Domain-to-category mappings you've set</small>
+            <span data-i18n="analyticsUserLabelsJson">User Labels (JSON)</span>
+            <small data-i18n="analyticsUserLabelsDesc">Domain-to-category mappings you've set</small>
           </button>
           <button class="export-option-btn" id="exportHistory">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -158,15 +158,16 @@
               <line x1="16" y1="13" x2="8" y2="13"/>
               <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
-            <span>Full History (CSV)</span>
-            <small>All page views from the past 30 days</small>
+            <span data-i18n="analyticsFullHistoryCsv">Full History (CSV)</span>
+            <small data-i18n="analyticsFullHistoryDesc">All page views from the past 30 days</small>
           </button>
         </div>
-        <button class="btn-secondary export-close" id="exportClose">Close</button>
+        <button class="btn-secondary export-close" id="exportClose" data-i18n="analyticsClose">Close</button>
       </div>
     </div>
   </div>
 
+  <script src="src/utils/i18n.js"></script>
   <script src="url-analytics.js"></script>
 </body>
 

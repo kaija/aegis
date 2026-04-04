@@ -73,12 +73,12 @@ class EmailPopup {
     // Safety ring SVG
     const circumference = 2 * Math.PI * 30; // r=30
     const dashArray = (safetyScore / 100) * circumference;
-    const safetyLevelText = safetyLevel === 'safe' ? '安全' : safetyLevel === 'caution' ? '注意' : '危險';
+    const safetyLevelText = safetyLevel === 'safe' ? t('safetyLevelSafe') : safetyLevel === 'caution' ? t('safetyLevelCaution') : t('safetyLevelDanger');
 
     // Process issues to add keyword details
     const processedIssues = issues.map(issue => {
       // Check if this is the suspicious keywords issue
-      const match = issue.match(/內容含 (\d+) 個可疑關鍵字/);
+      const match = issue.match(/內容含 (\d+) 個可疑關鍵字/) || issue.match(/Content contains (\d+) suspicious keywords/);
       if (match && suspiciousKeywords && suspiciousKeywords.length > 0) {
         // Add keywords with color coding
         const keywordTags = suspiciousKeywords.map((kw, idx) => {
@@ -94,7 +94,7 @@ class EmailPopup {
     // Issues HTML
     const issuesHtml = processedIssues && processedIssues.length > 0 ? `
       <div class="aegis-issues-list">
-        <div class="aegis-issues-title">⚠️ 安全警示</div>
+        <div class="aegis-issues-title">⚠️ ${t('safetyWarnings')}</div>
         ${processedIssues.map(issue => `<div class="aegis-issue-item">• ${issue}</div>`).join('')}
       </div>
     ` : '';
@@ -103,7 +103,7 @@ class EmailPopup {
     const linksHtml = linkResults && linkResults.length > 0 ? `
       <div class="aegis-links-section">
         <div class="aegis-links-title">
-          🔗 連結分析 (${linkResults.length})
+          🔗 ${t('linkAnalysis', linkResults.length)}
           <span class="aegis-links-toggle">▼</span>
         </div>
         <div class="aegis-links-body">
@@ -111,16 +111,16 @@ class EmailPopup {
       let riskClass, riskLabel;
       if (lr.isWhitelisted) {
         riskClass = 'whitelisted';
-        riskLabel = `✓ ${lr.whitelistService || '白名單'}`;
+        riskLabel = '✓ ' + (lr.whitelistService ? t('riskWhitelisted', lr.whitelistService) : t('riskWhitelistFallback'));
       } else if (lr.isOffWhitelist) {
         riskClass = 'off-whitelist';
-        riskLabel = '⚠ 非預期網域';
+        riskLabel = '⚠ ' + t('riskOffWhitelist');
       } else if (lr.isSuspicious) {
         riskClass = 'risky';
-        riskLabel = '⚠ 可疑';
+        riskLabel = '⚠ ' + t('riskSuspicious');
       } else {
         riskClass = 'safe';
-        riskLabel = '✓ 正常';
+        riskLabel = '✓ ' + t('riskSafe');
       }
       return `
             <div class="aegis-link-item">
@@ -141,7 +141,7 @@ class EmailPopup {
 
     popup.innerHTML = `
       <div class="aegis-popup-header">
-        <span class="aegis-popup-title">🛡 Aegis 分析</span>
+        <span class="aegis-popup-title">🛡 ${t('popupTitle')}</span>
         <button class="aegis-popup-close">✕</button>
       </div>
       <div class="aegis-safety-ring">

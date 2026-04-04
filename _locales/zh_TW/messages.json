@@ -1,0 +1,640 @@
+{
+  "appName": {
+    "message": "Aegis"
+  },
+  "appDesc": {
+    "message": "智慧郵件分類、安全分析與瀏覽分析"
+  },
+
+  "_comment_panel": { "message": "--- 分析面板 ---" },
+
+  "panelTitle": {
+    "message": "Aegis 郵件分析"
+  },
+  "filterUnread": {
+    "message": "未讀"
+  },
+  "filterAll": {
+    "message": "全部"
+  },
+  "loadingAiClassifying": {
+    "message": "AI 正在認真閱讀與分類..."
+  },
+  "loadingPleaseWait": {
+    "message": "請稍候片刻"
+  },
+  "loadingFooter": {
+    "message": "載入中..."
+  },
+  "noUnreadEmails": {
+    "message": "沒有找到未讀郵件"
+  },
+  "footerZeroEmails": {
+    "message": "共 0 封未讀郵件"
+  },
+  "loadingRemainingEmails": {
+    "message": "AI 繼續分析剩餘郵件中..."
+  },
+  "panelFooterStats": {
+    "message": "共 $1 封未讀郵件，$2 個分類",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" },
+      "2": { "content": "$2", "example": "3" }
+    }
+  },
+  "selectAll": {
+    "message": "全選"
+  },
+  "moveAllToLabel": {
+    "message": "全部移至「$1」標籤",
+    "placeholders": {
+      "1": { "content": "$1", "example": "工作" }
+    }
+  },
+  "outlookNotSupported": {
+    "message": "Outlook 暫不支援此功能"
+  },
+  "moveToOtherLabel": {
+    "message": "移至其他標籤 ▼"
+  },
+  "deleteBtn": {
+    "message": "刪除"
+  },
+  "selectEmailsToDelete": {
+    "message": "請先選擇要刪除的郵件"
+  },
+  "deleteError": {
+    "message": "郵件刪除操作異常，請檢查 $1 已正常完成刪除流程。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moving": {
+    "message": "移動中..."
+  },
+  "moveError": {
+    "message": "移動失敗。請再次確認 $1 中已有「$2」標籤。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" },
+      "2": { "content": "$2", "example": "工作" }
+    }
+  },
+  "selectEmailsToMove": {
+    "message": "請先選擇要移動的郵件"
+  },
+  "noLabelsFound": {
+    "message": "未找到標籤/資料夾，請確認 $1 側欄已載入",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moveOperationError": {
+    "message": "郵件移動操作異常，請檢查 $1 已正常完成流程。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "platformFallback": {
+    "message": "平台"
+  },
+
+  "_comment_popup_analysis": { "message": "--- 郵件安全分析彈窗 ---" },
+
+  "safetyLevelSafe": {
+    "message": "安全"
+  },
+  "safetyLevelCaution": {
+    "message": "注意"
+  },
+  "safetyLevelDanger": {
+    "message": "危險"
+  },
+  "safetyWarnings": {
+    "message": "安全警示"
+  },
+  "linkAnalysis": {
+    "message": "連結分析 ($1)",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "riskWhitelisted": {
+    "message": "$1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Google" }
+    }
+  },
+  "riskWhitelistFallback": {
+    "message": "白名單"
+  },
+  "riskOffWhitelist": {
+    "message": "非預期網域"
+  },
+  "riskSuspicious": {
+    "message": "可疑"
+  },
+  "riskSafe": {
+    "message": "正常"
+  },
+  "popupTitle": {
+    "message": "Aegis 分析"
+  },
+  "suspiciousKeywordsIssue": {
+    "message": "內容含 $1 個可疑關鍵字",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" }
+    }
+  },
+
+  "_comment_ext_popup": { "message": "--- 擴充功能彈窗 ---" },
+
+  "popupUrlAnalytics": {
+    "message": "URL 分析"
+  },
+  "popupSettings": {
+    "message": "設定"
+  },
+  "popupRunClassification": {
+    "message": "執行分類"
+  },
+  "popupCurrentPlatform": {
+    "message": "目前平台"
+  },
+  "popupAnalysisMode": {
+    "message": "分析模式"
+  },
+  "popupModeAi": {
+    "message": "AI 模式"
+  },
+  "popupModeNano": {
+    "message": "Nano AI"
+  },
+  "popupModeLocal": {
+    "message": "本地模式"
+  },
+  "popupStatClassified": {
+    "message": "已分類"
+  },
+  "popupStatScanned": {
+    "message": "已掃描"
+  },
+  "popupSecure": {
+    "message": "安全"
+  },
+  "popupClassifying": {
+    "message": "分類中..."
+  },
+  "popupErrorInjecting": {
+    "message": "注入失敗"
+  },
+  "popupPlatformGmail": {
+    "message": "Gmail"
+  },
+  "popupPlatformOutlook": {
+    "message": "Outlook"
+  },
+  "popupPlatformNotSupported": {
+    "message": "不支援"
+  },
+
+  "_comment_options": { "message": "--- 設定頁面 ---" },
+
+  "optAnalysisEngine": {
+    "message": "分析引擎"
+  },
+  "optLocalRules": {
+    "message": "本地規則"
+  },
+  "optLocalRulesDesc": {
+    "message": "所有處理皆在您的裝置上完成。快速、隱私，且無需網路連線。"
+  },
+  "optAiMode": {
+    "message": "AI 模式"
+  },
+  "optRecommended": {
+    "message": "推薦"
+  },
+  "optAiModeDesc": {
+    "message": "使用大型語言模型進行進階神經網路分析，提供更精準的分類與威脅偵測。"
+  },
+  "optNanoAi": {
+    "message": "Nano AI"
+  },
+  "optNanoAiDesc": {
+    "message": "使用 Chrome Gemini Nano 的裝置端 LLM。無需 API 金鑰，完全離線可用。"
+  },
+  "optNanoFlagsRequired": {
+    "message": "需啟用 Chrome flags 才能使用 Nano AI"
+  },
+  "optNanoFlagsInstructions": {
+    "message": "Gemini Nano 需要啟用兩個 Chrome flags。開啟下方連結，設為「Enabled」，然後重新啟動 Chrome。"
+  },
+  "optNanoFlagModel": {
+    "message": "啟用裝置端模型下載"
+  },
+  "optNanoFlagPromptApi": {
+    "message": "啟用 Prompt API"
+  },
+  "optNanoFlagsNote": {
+    "message": "啟用兩個 flags 並重新啟動後，回到此頁面選擇 Nano AI。"
+  },
+  "optDownloadModel": {
+    "message": "下載模型"
+  },
+  "optModelConfig": {
+    "message": "模型設定"
+  },
+  "optAiModeInfo": {
+    "message": "AI 模式將使用您現有的自訂 Gmail 標籤，自動智慧分類您的郵件。"
+  },
+  "optApiBaseUrl": {
+    "message": "API 基礎 URL"
+  },
+  "optApiKey": {
+    "message": "API 金鑰"
+  },
+  "optSelectedModel": {
+    "message": "選擇模型"
+  },
+  "optTestConnection": {
+    "message": "測試連線"
+  },
+  "optSmartCategories": {
+    "message": "智慧分類"
+  },
+  "optSmartCategoriesDesc": {
+    "message": "為您的收件匣定義分類規則與關鍵字"
+  },
+  "optAddCategory": {
+    "message": "新增分類"
+  },
+  "optAnonymousFeedback": {
+    "message": "匿名資料回饋"
+  },
+  "optAnonymousFeedbackDesc": {
+    "message": "分享匿名分類資料（僅分類標籤與網域名稱，不含任何郵件內容或個人資訊）以幫助改進 Aegis。"
+  },
+  "optEnableFeedback": {
+    "message": "啟用匿名資料回饋"
+  },
+  "optSaveSettings": {
+    "message": "儲存設定"
+  },
+  "optKeywordsAutoSaved": {
+    "message": "關鍵字會自動儲存"
+  },
+  "optActiveKeywords": {
+    "message": "$1 個有效關鍵字",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "optAddKeyword": {
+    "message": "+ 新增關鍵字"
+  },
+  "optTypeKeyword": {
+    "message": "輸入關鍵字..."
+  },
+  "optSaveKeywordsFailed": {
+    "message": "儲存關鍵字失敗"
+  },
+  "optApiKeyRequired": {
+    "message": "請先輸入 API Key"
+  },
+  "optTestingConnection": {
+    "message": "測試連線中..."
+  },
+  "optBackgroundError": {
+    "message": "背景連線錯誤"
+  },
+  "optApiSuccess": {
+    "message": "API 成功回傳！請查看下方原始資料："
+  },
+  "optUnknownError": {
+    "message": "不明錯誤"
+  },
+  "optFetchingModels": {
+    "message": "取得模型中..."
+  },
+  "optModelsFetched": {
+    "message": "成功取得 $1 個模型",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optModelsLoaded": {
+    "message": "已載入 $1 個模型",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optSettingsSaved": {
+    "message": "設定已儲存"
+  },
+  "optWhitelistServices": {
+    "message": "$1 個服務",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optWhitelistShortUrls": {
+    "message": "$1 個短網址服務",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" }
+    }
+  },
+  "optWhitelistLastUpdated": {
+    "message": "上次更新：$1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "2024/03/15 10:30" }
+    }
+  },
+  "optWhitelistUrlRequired": {
+    "message": "請先填寫白名單 URL"
+  },
+  "optDownloading": {
+    "message": "下載中..."
+  },
+  "optWhitelistUpdateSuccess": {
+    "message": "更新成功（$1 個服務）",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optDownloadFailed": {
+    "message": "下載失敗"
+  },
+  "optCategoryAdded": {
+    "message": "分類已新增"
+  },
+  "optCategoryNotFound": {
+    "message": "找不到分類"
+  },
+  "optCategoryUpdated": {
+    "message": "分類已更新"
+  },
+  "optCategoryDeleted": {
+    "message": "分類已刪除"
+  },
+  "optDeleteCategoryConfirm": {
+    "message": "確定要刪除「$1」分類嗎？",
+    "placeholders": {
+      "1": { "content": "$1", "example": "工作" }
+    }
+  },
+  "optDeleteCategoryKeywords": {
+    "message": "此分類包含 $1 個關鍵字，刪除後將無法復原。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "8" }
+    }
+  },
+  "optLastCategoryWarning": {
+    "message": "這是最後一個分類，刪除後郵件分類功能將無法運作。"
+  },
+  "optDeleteCategoryTitle": {
+    "message": "刪除分類"
+  },
+  "optCancel": {
+    "message": "取消"
+  },
+  "optConfirm": {
+    "message": "確定"
+  },
+  "optWhitelistSettings": {
+    "message": "白名單設定"
+  },
+  "optWhitelistUpdate": {
+    "message": "更新"
+  },
+  "optDebugMode": {
+    "message": "Debug 模式"
+  },
+  "optCopiedToClipboard": {
+    "message": "已複製到剪貼簿：$1\n\n請貼到 Chrome 網址列。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "chrome://flags/#..." }
+    }
+  },
+  "optNanoReady": {
+    "message": "Gemini Nano 已就緒"
+  },
+  "optNanoNeedsDownload": {
+    "message": "Gemini Nano 需要下載"
+  },
+  "optNanoDownloading": {
+    "message": "Gemini Nano 下載中..."
+  },
+  "optNanoNoApi": {
+    "message": "Prompt API 不可用。請啟用所需的 Chrome flags 並重新啟動 Chrome。"
+  },
+  "optNanoUnavailable": {
+    "message": "Gemini Nano 不可用。請啟用所需的 Chrome flags 並重新啟動 Chrome，或確認您的裝置符合硬體需求。"
+  },
+  "optNanoCheckFailed": {
+    "message": "無法檢查 Gemini Nano 可用性。"
+  },
+  "optNanoDownloadingProgress": {
+    "message": "正在下載 Gemini Nano..."
+  },
+  "optNanoDownloadFailed": {
+    "message": "下載失敗：$1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "網路錯誤" }
+    }
+  },
+
+  "_comment_category_dialog": { "message": "--- 分類對話框 ---" },
+
+  "catDialogAddTitle": {
+    "message": "新增分類"
+  },
+  "catDialogEditTitle": {
+    "message": "編輯分類"
+  },
+  "catDialogSubtitle": {
+    "message": "透過智慧分類整理您的郵件。"
+  },
+  "catDialogNameLabel": {
+    "message": "分類名稱"
+  },
+  "catDialogNamePlaceholder": {
+    "message": "例如：發票、客戶回饋、緊急"
+  },
+  "catDialogColorLabel": {
+    "message": "分類顏色"
+  },
+  "catDialogIconLabel": {
+    "message": "圖示選擇"
+  },
+  "catDialogSearchIcons": {
+    "message": "搜尋圖示..."
+  },
+  "catDialogKeywordsLabel": {
+    "message": "智慧比對關鍵字"
+  },
+  "catDialogKeywordPlaceholder": {
+    "message": "輸入後按 Enter..."
+  },
+  "catDialogCancel": {
+    "message": "取消"
+  },
+  "catDialogDelete": {
+    "message": "刪除"
+  },
+  "catDialogCreate": {
+    "message": "建立分類"
+  },
+  "catDialogSave": {
+    "message": "儲存變更"
+  },
+  "catDialogNameRequired": {
+    "message": "請輸入分類名稱"
+  },
+
+  "_comment_eula": { "message": "--- EULA 對話框 ---" },
+
+  "eulaTitle": {
+    "message": "使用者授權合約"
+  },
+  "eulaIntro": {
+    "message": "使用 Aegis 擴充功能前，請仔細閱讀以下使用者授權合約。"
+  },
+  "eulaAgree": {
+    "message": "使用此擴充功能即表示您同意以下條款："
+  },
+  "eulaClause1": {
+    "message": "1. 授權許可。您獲得一份非獨佔、不可轉讓的授權，可將 Aegis Chrome 擴充功能用於個人非商業用途。"
+  },
+  "eulaClause2": {
+    "message": "2. 資料收集。本擴充功能可能收集匿名分類等級資料（如郵件分類標籤與網域名稱），以改善分類準確度。我們絕不會收集個人郵件內容、主旨、完整電子郵件地址或附件資料。"
+  },
+  "eulaClause3": {
+    "message": "3. 隱私。您的隱私對我們很重要。除非您選擇啟用匿名資料回饋，否則所有資料處理均在您的瀏覽器本機進行。您可隨時從設定頁面停用資料回饋。"
+  },
+  "eulaClause4": {
+    "message": "4. 免責聲明。本擴充功能按「現狀」提供，不附帶任何明示或默示的保證。"
+  },
+  "eulaClause5": {
+    "message": "5. 責任限制。在任何情況下，開發者均不對使用本擴充功能所產生的任何損害負責。"
+  },
+  "eulaClause6": {
+    "message": "6. 條款修改。我們保留隨時修改這些條款的權利。繼續使用本擴充功能即表示接受修改後的條款。"
+  },
+  "eulaNotice": {
+    "message": "接受後，匿名分類資料回饋將預設啟用。您可隨時在設定中停用。"
+  },
+  "eulaDecline": {
+    "message": "拒絕"
+  },
+  "eulaAccept": {
+    "message": "接受"
+  },
+
+  "_comment_content": { "message": "--- 內容腳本 ---" },
+
+  "aiAnalyzing": {
+    "message": "AI 分析中..."
+  },
+  "whitelistNotSet": {
+    "message": "未設定白名單 URL"
+  },
+
+  "_comment_categories": { "message": "--- 預設分類名稱 ---" },
+
+  "catWork": {
+    "message": "工作"
+  },
+  "catShopping": {
+    "message": "購物"
+  },
+  "catFinance": {
+    "message": "財務"
+  },
+  "catSocial": {
+    "message": "社交"
+  },
+  "catPromotions": {
+    "message": "促銷"
+  },
+  "catSecurity": {
+    "message": "安全"
+  },
+  "catNotifications": {
+    "message": "通知"
+  },
+
+  "_comment_analytics": { "message": "--- URL 分析 ---" },
+
+  "analyticsTitle": {
+    "message": "瀏覽分析"
+  },
+  "analyticsFeedbackMode": {
+    "message": "回饋模式"
+  },
+  "analyticsSyncCategories": {
+    "message": "從伺服器同步 URL 分類"
+  },
+  "analyticsExportData": {
+    "message": "匯出資料"
+  },
+  "analyticsViewsToday": {
+    "message": "今日瀏覽"
+  },
+  "analyticsPredictedEod": {
+    "message": "預估全日"
+  },
+  "analyticsDailyPageViews": {
+    "message": "每日頁面瀏覽"
+  },
+  "analyticsPast7Days": {
+    "message": "過去 7 天 + 今天"
+  },
+  "analyticsDailyBrowsingTime": {
+    "message": "每日瀏覽時間"
+  },
+  "analyticsActiveTime": {
+    "message": "活躍時間"
+  },
+  "analyticsByPageViews": {
+    "message": "依頁面瀏覽"
+  },
+  "analyticsByVisitTime": {
+    "message": "依瀏覽時間"
+  },
+  "analyticsUncategorizedUrls": {
+    "message": "未分類 URL"
+  },
+  "analyticsAllCategorized": {
+    "message": "所有 URL 已分類"
+  },
+  "analyticsCategorizeUrl": {
+    "message": "分類 URL"
+  },
+  "analyticsSelectCategory": {
+    "message": "-- 選擇分類 --"
+  },
+  "analyticsSkip": {
+    "message": "略過"
+  },
+  "analyticsSave": {
+    "message": "儲存"
+  },
+  "analyticsExportBrowsingData": {
+    "message": "匯出瀏覽資料"
+  },
+  "analyticsUserLabelsJson": {
+    "message": "使用者標籤 (JSON)"
+  },
+  "analyticsUserLabelsDesc": {
+    "message": "您設定的網域對應分類"
+  },
+  "analyticsFullHistoryCsv": {
+    "message": "完整歷史 (CSV)"
+  },
+  "analyticsFullHistoryDesc": {
+    "message": "過去 30 天的所有頁面瀏覽紀錄"
+  },
+  "analyticsClose": {
+    "message": "關閉"
+  }
+}

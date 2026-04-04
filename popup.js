@@ -6,6 +6,7 @@ async function ensureContentScript(tab) {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: [
+      'src/utils/i18n.js',
       'src/analysis/whitelist-manager.js',
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',
@@ -27,6 +28,14 @@ async function ensureContentScript(tab) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Apply i18n translations to static HTML elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+
   const analyzeBtn = document.getElementById('analyzeBtn');
   const settingsBtn = document.getElementById('settingsBtn');
   const platformStatus = document.getElementById('platformStatus');
@@ -59,15 +68,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOutlook = url.includes('outlook.live.com') || url.includes('outlook.office.com') || url.includes('outlook.office365.com');
 
   if (isGmail) {
-    platformStatus.textContent = 'Gmail';
+    platformStatus.textContent = t('popupPlatformGmail');
     platformStatus.style.color = 'var(--primary)';
     analyzeBtn.disabled = false;
   } else if (isOutlook) {
-    platformStatus.textContent = 'Outlook';
+    platformStatus.textContent = t('popupPlatformOutlook');
     platformStatus.style.color = '#0078d4'; // Outlook Blue
     analyzeBtn.disabled = false;
   } else {
-    platformStatus.textContent = 'Not Supported';
+    platformStatus.textContent = t('popupPlatformNotSupported');
     platformStatus.style.color = 'var(--text-muted)';
     analyzeBtn.disabled = true;
   }
@@ -75,15 +84,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Show current mode
   chrome.storage.sync.get(['analysisMode'], (result) => {
     if (result.analysisMode === 'ai') {
-      modeBadge.textContent = 'AI-Powered';
+      modeBadge.textContent = t('popupModeAi');
       modeDot.className = 'status-dot';
       modeDot.style.background = 'var(--green)';
     } else if (result.analysisMode === 'nano') {
-      modeBadge.textContent = 'Nano AI';
+      modeBadge.textContent = t('popupModeNano');
       modeDot.className = 'status-dot';
       modeDot.style.background = 'var(--green)';
     } else {
-      modeBadge.textContent = 'Local Mode';
+      modeBadge.textContent = t('popupModeLocal');
       modeDot.className = 'status-dot inactive';
       modeDot.style.background = 'var(--text-muted)';
     }
@@ -102,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
         <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
       </svg>
-      <span>CLASSIFYING...</span>
+      <span>${t('popupClassifying')}</span>
     `;
 
     try {
@@ -122,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        <span>ERROR INJECTING</span>
+        <span>${t('popupErrorInjecting')}</span>
       `;
     }
   });

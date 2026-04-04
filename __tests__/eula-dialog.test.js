@@ -55,7 +55,7 @@ describe('EulaDialog', () => {
 
       const title = document.getElementById('aegis-eula-title');
       expect(title).toBeTruthy();
-      expect(title.textContent).toBe('End User License Agreement');
+      expect(title.textContent).toBe('eulaTitle');
       expect(title.tagName).toBe('H2');
     });
 
@@ -73,8 +73,7 @@ describe('EulaDialog', () => {
 
       const notice = document.querySelector('.aegis-eula-notice');
       expect(notice).toBeTruthy();
-      expect(notice.textContent).toContain('anonymous category data feedback will be enabled by default');
-      expect(notice.textContent).toContain('Settings');
+      expect(notice.textContent).toBe('eulaNotice');
     });
 
     test('should contain Accept and Decline buttons', () => {
@@ -84,8 +83,8 @@ describe('EulaDialog', () => {
       const declineBtn = document.querySelector('.aegis-eula-btn-decline');
       expect(acceptBtn).toBeTruthy();
       expect(declineBtn).toBeTruthy();
-      expect(acceptBtn.textContent).toBe('Accept');
-      expect(declineBtn.textContent).toBe('Decline');
+      expect(acceptBtn.textContent).toBe('eulaAccept');
+      expect(declineBtn.textContent).toBe('eulaDecline');
     });
 
     test('should contain actions container', () => {
