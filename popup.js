@@ -66,19 +66,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const url = tab && tab.url ? tab.url : '';
   const isGmail = url.includes('mail.google.com');
   const isOutlook = url.includes('outlook.live.com') || url.includes('outlook.office.com') || url.includes('outlook.office365.com');
+  const isEmailPlatform = isGmail || isOutlook;
 
-  if (isGmail) {
-    platformStatus.textContent = t('popupPlatformGmail');
-    platformStatus.style.color = 'var(--primary)';
-    analyzeBtn.disabled = false;
-  } else if (isOutlook) {
-    platformStatus.textContent = t('popupPlatformOutlook');
-    platformStatus.style.color = '#0078d4'; // Outlook Blue
-    analyzeBtn.disabled = false;
+  const emailPanel = document.getElementById('emailAnalysisPanel');
+  const domainPanel = document.getElementById('domainSecurityPanel');
+
+  if (isEmailPlatform) {
+    emailPanel.style.display = '';
+    domainPanel.style.display = 'none';
+
+    if (isGmail) {
+      platformStatus.textContent = t('popupPlatformGmail');
+      platformStatus.style.color = 'var(--primary)';
+      analyzeBtn.disabled = false;
+    } else {
+      platformStatus.textContent = t('popupPlatformOutlook');
+      platformStatus.style.color = '#0078d4';
+      analyzeBtn.disabled = false;
+    }
   } else {
-    platformStatus.textContent = t('popupPlatformNotSupported');
-    platformStatus.style.color = 'var(--text-muted)';
-    analyzeBtn.disabled = true;
+    emailPanel.style.display = 'none';
+    domainPanel.style.display = '';
+    showDomainSecurityInfo(tab, url);
   }
 
   // Show current mode
@@ -149,3 +158,114 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
+async function showDomainSecurityInfo(tab, url) {
+  const domainNameEl = document.getElementById('domainNameDisplay');
+  const scoreValueEl = document.getElementById('domainScoreValue');
+  const scoreCardEl = document.getElementById('domainScoreCard');
+  const regDateEl = document.getElementById('domainRegDate');
+  const domainAgeEl = document.getElementById('domainAge');
+  const registrantEl = document.getElementById('domainRegistrant');
+  const countryEl = document.getElementById('domainCountry');
+  const serverIpEl = document.getElementById('domainServerIp');
+  const riskFactorsEl = document.getElementById('domainRiskFactors');
+  const riskListEl = document.getElementById('domainRiskList');
+  const cacheNoteEl = document.getElementById('domainCacheNote');
+
+  let domain;
+  try {
+    domain = DomainAnalyzer.extractBaseDomain(new URL(url).hostname);
+  } catch {
+    domainNameEl.textContent = t('domainSecInvalidUrl');
+    return;
+  }
+
+  if (!domain) {
+    domainNameEl.textContent = 'N/A';
+    scoreValueEl.textContent = '--';
+    return;
+  }
+
+  domainNameEl.textContent = domain;
+  scoreValueEl.textContent = '...';
+
+  // Try cache first
+  let entry = null;
+  try {
+    const cachedResponse = await chrome.runtime.sendMessage({ type: 'GET_DOMAIN_CACHE', domain });
+    entry = cachedResponse && cachedResponse.entry;
+  } catch { /* ignore */ }
+
+  if (!entry) {
+    // Trigger full analysis
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'DOMAIN_ANALYZE', url, tabId: tab.id });
+      entry = response && response.entry;
+    } catch { /* ignore */ }
+  }
+
+  if (!entry) {
+    scoreValueEl.textContent = '?';
+    domainNameEl.textContent = t('domainSecAnalysisUnavailable', domain);
+    return;
+  }
+
+  const COLOR_MAP = { safe: '#1a7f37', caution: '#9a6700', danger: '#cf222e' };
+  const scoreColor = COLOR_MAP[entry.level] || '#5f6368';
+
+  scoreValueEl.textContent = String(entry.score);
+  scoreValueEl.style.color = scoreColor;
+  scoreCardEl.style.borderColor = scoreColor;
+
+  // Registration date and age
+  if (entry.registrationDate) {
+    regDateEl.textContent = DomainAnalyzer.formatDate(entry.registrationDate);
+    const ageDays = DomainAnalyzer.getAgeDays(entry.registrationDate);
+    domainAgeEl.textContent = ageDays !== null ? DomainAnalyzer.formatAge(ageDays) : '--';
+    const ageInfo = DomainAnalyzer.scoreByAge(ageDays);
+    if (ageInfo.label === 'high') {
+      domainAgeEl.style.color = '#cf222e';
+    } else if (ageInfo.label === 'medium') {
+      domainAgeEl.style.color = '#9a6700';
+    } else if (ageInfo.label === 'low') {
+      domainAgeEl.style.color = '#e67e22';
+    }
+  } else {
+    regDateEl.textContent = entry.rdapError ? t('domainSecUnavailable') : t('domainSecNotFound');
+    domainAgeEl.textContent = '--';
+  }
+
+  // Registrant
+  registrantEl.textContent = entry.registrant || t('domainSecUnknown');
+
+  // Country
+  if (entry.country) {
+    const isHighRisk = DomainAnalyzer.HIGH_RISK_COUNTRIES.includes(entry.countryCode);
+    countryEl.textContent = entry.country;
+    if (isHighRisk) {
+      countryEl.style.color = '#cf222e';
+    }
+  } else {
+    countryEl.textContent = '--';
+  }
+
+  // Server IP
+  serverIpEl.textContent = entry.serverIp || '--';
+
+  // Risk factors
+  if (entry.scoreDetails && entry.scoreDetails.length > 0) {
+    riskFactorsEl.style.display = '';
+    riskListEl.innerHTML = '';
+    for (const detail of entry.scoreDetails) {
+      const li = document.createElement('li');
+      li.textContent = `${detail.reason} (-${detail.deduction})`;
+      riskListEl.appendChild(li);
+    }
+  }
+
+  // Cache note
+  if (entry.cachedAt) {
+    const minsAgo = Math.round((Date.now() - entry.cachedAt) / 60000);
+    cacheNoteEl.textContent = minsAgo < 2 ? t('domainSecJustAnalyzed') : t('domainSecCachedAgo', minsAgo);
+  }
+}

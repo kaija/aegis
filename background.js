@@ -140,6 +140,261 @@ async function categorizeUrlByDomain(url, categoriesData) {
   }
 }
 
+// ---- Domain Security Analysis ----
+
+const DOMAIN_CACHE_KEY = 'aegis_domain_cache';
+const DOMAIN_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+async function getDomainCache() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([DOMAIN_CACHE_KEY], (result) => {
+      resolve(result[DOMAIN_CACHE_KEY] || {});
+    });
+  });
+}
+
+async function setDomainCache(cache) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ [DOMAIN_CACHE_KEY]: cache }, resolve);
+  });
+}
+
+function evictExpiredDomainCache(cache) {
+  const now = Date.now();
+  for (const domain of Object.keys(cache)) {
+    if (now - (cache[domain].cachedAt || 0) > DOMAIN_CACHE_TTL_MS) {
+      delete cache[domain];
+    }
+  }
+  return cache;
+}
+
+async function fetchRdapData(domain) {
+  try {
+    const res = await fetch(`https://rdap.org/domain/${domain}`, {
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok) {
+      return { registrationDate: null, registrant: null, rdapError: true, rdapNoDate: false };
+    }
+    const data = await res.json();
+
+    let registrationDate = null;
+    if (Array.isArray(data.events)) {
+      const regEvent = data.events.find(e => e.eventAction === 'registration');
+      if (regEvent && regEvent.eventDate) {
+        registrationDate = regEvent.eventDate;
+      }
+    }
+
+    let registrant = null;
+    if (Array.isArray(data.entities)) {
+      const regEntity = data.entities.find(e =>
+        Array.isArray(e.roles) && e.roles.includes('registrant')
+      );
+      if (regEntity && Array.isArray(regEntity.vcardArray)) {
+        const vcard = regEntity.vcardArray[1] || [];
+        const fnEntry = vcard.find(prop => prop[0] === 'fn');
+        if (fnEntry) registrant = fnEntry[3] || null;
+        if (registrant && /redacted|privacy|protected/i.test(registrant)) {
+          registrant = 'Redacted for Privacy';
+        }
+      }
+    }
+
+    return {
+      registrationDate,
+      registrant,
+      rdapError: false,
+      rdapNoDate: registrationDate === null
+    };
+  } catch (e) {
+    console.warn('[Aegis] RDAP fetch failed for', domain, ':', e.message);
+    return { registrationDate: null, registrant: null, rdapError: true, rdapNoDate: false };
+  }
+}
+
+async function resolveDomainIp(domain) {
+  try {
+    const res = await fetch(
+      `https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=A`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const aRecord = (data.Answer || []).find(r => r.type === 1);
+    return aRecord ? aRecord.data : null;
+  } catch (e) {
+    console.warn('[Aegis] DNS resolution failed for', domain, ':', e.message);
+    return null;
+  }
+}
+
+async function fetchIpGeodata(ip) {
+  if (!ip) return { country: null, countryCode: null };
+  try {
+    const res = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,countryCode`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!res.ok) return { country: null, countryCode: null };
+    const data = await res.json();
+    if (data.status !== 'success') return { country: null, countryCode: null };
+    return { country: data.country || null, countryCode: data.countryCode || null };
+  } catch (e) {
+    console.warn('[Aegis] ip-api.com lookup failed for', ip, ':', e.message);
+    return { country: null, countryCode: null };
+  }
+}
+
+// Private scoring helpers (duplicated from domain-analyzer.js for service worker context)
+const _HIGH_RISK_COUNTRIES = [
+  'CN', 'RU', 'KP', 'IR', 'NG', 'UA', 'RO', 'BG', 'VN', 'PK',
+  'ID', 'BR', 'EG', 'GH', 'IN', 'TZ', 'KE', 'MA', 'BY', 'MD'
+];
+
+const _SCORE_DEDUCTIONS = {
+  AGE_HIGH_RISK: 30,
+  AGE_MEDIUM_RISK: 20,
+  AGE_LOW_RISK: 10,
+  HIGH_RISK_COUNTRY: 15,
+  RDAP_UNAVAILABLE: 5,
+  NO_REG_DATE: 10,
+};
+
+function _extractBaseDomainBg(hostname) {
+  if (!hostname) return '';
+  const parts = hostname.toLowerCase().split('.');
+  if (parts.length < 2) return hostname.toLowerCase();
+  if (parts.length >= 3 && parts[parts.length - 2].length <= 3 &&
+      ['co', 'com', 'net', 'org', 'gov', 'edu', 'ac'].includes(parts[parts.length - 2])) {
+    return parts.slice(-3).join('.');
+  }
+  return parts.slice(-2).join('.');
+}
+
+function _calculateDomainScore({ registrationDate, countryCode, rdapError, rdapNoDate }) {
+  let score = 100;
+  const scoreDetails = [];
+
+  if (rdapError) {
+    score -= _SCORE_DEDUCTIONS.RDAP_UNAVAILABLE;
+    scoreDetails.push({ reason: 'RDAP lookup unavailable', deduction: _SCORE_DEDUCTIONS.RDAP_UNAVAILABLE });
+  } else if (rdapNoDate) {
+    score -= _SCORE_DEDUCTIONS.NO_REG_DATE;
+    scoreDetails.push({ reason: 'No registration date found', deduction: _SCORE_DEDUCTIONS.NO_REG_DATE });
+  }
+
+  if (registrationDate) {
+    try {
+      const regDate = new Date(registrationDate);
+      if (!isNaN(regDate.getTime())) {
+        const ageDays = Math.floor((Date.now() - regDate.getTime()) / (1000 * 60 * 60 * 24));
+        let deduction = 0, label = 'safe';
+        if (ageDays < 30) { deduction = _SCORE_DEDUCTIONS.AGE_HIGH_RISK; label = 'high'; }
+        else if (ageDays < 90) { deduction = _SCORE_DEDUCTIONS.AGE_MEDIUM_RISK; label = 'medium'; }
+        else if (ageDays < 180) { deduction = _SCORE_DEDUCTIONS.AGE_LOW_RISK; label = 'low'; }
+        if (deduction > 0) {
+          score -= deduction;
+          scoreDetails.push({ reason: `Domain age: ${ageDays} days (${label} risk)`, deduction });
+        }
+      }
+    } catch { /* ignore parse error */ }
+  }
+
+  if (countryCode && _HIGH_RISK_COUNTRIES.includes(countryCode.toUpperCase())) {
+    score -= _SCORE_DEDUCTIONS.HIGH_RISK_COUNTRY;
+    scoreDetails.push({ reason: `Server hosted in high-risk region (${countryCode})`, deduction: _SCORE_DEDUCTIONS.HIGH_RISK_COUNTRY });
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  let level;
+  if (score >= 80) level = 'safe';
+  else if (score >= 50) level = 'caution';
+  else level = 'danger';
+
+  return { score, level, scoreDetails };
+}
+
+async function updateDomainBadge(tabId, score) {
+  if (typeof score !== 'number') return;
+  let color;
+  if (score >= 80) color = '#1a7f37';
+  else if (score >= 50) color = '#9a6700';
+  else color = '#cf222e';
+  try {
+    await chrome.action.setBadgeBackgroundColor({ color, tabId });
+    await chrome.action.setBadgeText({ text: String(score), tabId });
+  } catch (e) {
+    console.warn('[Aegis] Badge update failed:', e.message);
+  }
+}
+
+async function clearDomainBadge(tabId) {
+  try {
+    await chrome.action.setBadgeText({ text: '', tabId });
+  } catch { /* tab may have closed */ }
+}
+
+async function analyzeDomain(url, tabId) {
+  if (!url || url.startsWith('chrome') || url.startsWith('about:') || url.startsWith('data:')) {
+    return null;
+  }
+
+  let hostname;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return null;
+  }
+
+  if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname) || hostname.endsWith('.local')) {
+    return null;
+  }
+
+  const baseDomain = _extractBaseDomainBg(hostname);
+
+  const cache = await getDomainCache();
+  evictExpiredDomainCache(cache);
+
+  if (cache[baseDomain]) {
+    await updateDomainBadge(tabId, cache[baseDomain].score);
+    return cache[baseDomain];
+  }
+
+  const rdapData = await fetchRdapData(baseDomain);
+  const serverIp = await resolveDomainIp(baseDomain);
+  const geoData = await fetchIpGeodata(serverIp);
+
+  const scoreResult = _calculateDomainScore({
+    registrationDate: rdapData.registrationDate,
+    countryCode: geoData.countryCode,
+    rdapError: rdapData.rdapError,
+    rdapNoDate: rdapData.rdapNoDate,
+  });
+
+  const entry = {
+    domain: baseDomain,
+    registrationDate: rdapData.registrationDate,
+    registrant: rdapData.registrant,
+    serverIp,
+    country: geoData.country,
+    countryCode: geoData.countryCode,
+    score: scoreResult.score,
+    level: scoreResult.level,
+    scoreDetails: scoreResult.scoreDetails,
+    rdapError: rdapData.rdapError,
+    cachedAt: Date.now(),
+  };
+
+  cache[baseDomain] = entry;
+  await setDomainCache(cache);
+  await updateDomainBadge(tabId, entry.score);
+
+  return entry;
+}
+
 // ---- URL Tracking via webNavigation ----
 
 const URL_HISTORY_KEY = 'aegis_url_history';
@@ -214,6 +469,32 @@ if (chrome.webNavigation) {
           await injectFeedbackWidget(tab);
         }
       }
+    } catch {
+      // tab may have closed
+    }
+  });
+
+  // Domain security analysis: runs on every completed top-level navigation
+  chrome.webNavigation.onCompleted.addListener(async (details) => {
+    if (details.frameId !== 0) return;
+    try {
+      const tab = await chrome.tabs.get(details.tabId);
+      if (!tab || !tab.url) return;
+
+      const url = tab.url;
+      if (
+        url.includes('mail.google.com') ||
+        url.includes('outlook.live.com') ||
+        url.includes('outlook.office.com') ||
+        url.includes('outlook.office365.com')
+      ) {
+        await clearDomainBadge(details.tabId);
+        return;
+      }
+
+      analyzeDomain(url, details.tabId).catch(e => {
+        console.warn('[Aegis] Domain analysis error:', e.message);
+      });
     } catch {
       // tab may have closed
     }
@@ -512,6 +793,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'aegis-url-categories-sync') {
     syncUrlCategories();
   }
+  if (alarm.name === 'aegis-domain-cache-cleanup') {
+    getDomainCache().then(cache => {
+      setDomainCache(evictExpiredDomainCache(cache));
+    });
+  }
 });
 
 async function cleanupOldUrlHistory() {
@@ -592,6 +878,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Schedule weekly URL categories sync (every 7 days)
   chrome.alarms.create('aegis-url-categories-sync', { periodInMinutes: 10080 });
+
+  // Schedule daily domain cache cleanup
+  chrome.alarms.create('aegis-domain-cache-cleanup', { periodInMinutes: 1440 });
 
   // Initial URL categories sync on install/update
   syncUrlCategories();
@@ -1089,6 +1378,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
         });
       });
+    });
+    return true;
+  }
+
+  if (message.type === 'DOMAIN_ANALYZE') {
+    const { url, tabId } = message;
+    analyzeDomain(url, tabId)
+      .then(entry => sendResponse({ entry }))
+      .catch(e => sendResponse({ entry: null, error: e.message }));
+    return true;
+  }
+
+  if (message.type === 'GET_DOMAIN_CACHE') {
+    const { domain } = message;
+    getDomainCache().then(cache => {
+      const entry = cache[domain] || null;
+      if (entry && Date.now() - entry.cachedAt > DOMAIN_CACHE_TTL_MS) {
+        sendResponse({ entry: null });
+      } else {
+        sendResponse({ entry });
+      }
     });
     return true;
   }

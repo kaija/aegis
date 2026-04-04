@@ -1,0 +1,694 @@
+{
+  "appName": {
+    "message": "Aegis"
+  },
+  "appDesc": {
+    "message": "スマートメール分類、セキュリティ分析、ブラウジング分析"
+  },
+
+  "_comment_panel": { "message": "--- 分析パネル ---" },
+
+  "panelTitle": {
+    "message": "Aegis メール分析"
+  },
+  "filterUnread": {
+    "message": "未読"
+  },
+  "filterAll": {
+    "message": "すべて"
+  },
+  "loadingAiClassifying": {
+    "message": "AIが読み取り・分類しています..."
+  },
+  "loadingPleaseWait": {
+    "message": "しばらくお待ちください"
+  },
+  "loadingFooter": {
+    "message": "読み込み中..."
+  },
+  "noUnreadEmails": {
+    "message": "未読メールが見つかりません"
+  },
+  "footerZeroEmails": {
+    "message": "未読メール 0 件"
+  },
+  "loadingRemainingEmails": {
+    "message": "AIが残りのメールを分類しています..."
+  },
+  "panelFooterStats": {
+    "message": "未読メール $1 件、$2 カテゴリ",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" },
+      "2": { "content": "$2", "example": "3" }
+    }
+  },
+  "selectAll": {
+    "message": "すべて選択"
+  },
+  "moveAllToLabel": {
+    "message": "すべて「$1」に移動",
+    "placeholders": {
+      "1": { "content": "$1", "example": "仕事" }
+    }
+  },
+  "outlookNotSupported": {
+    "message": "Outlook はまだこの機能に対応していません"
+  },
+  "moveToOtherLabel": {
+    "message": "ラベルに移動..."
+  },
+  "deleteBtn": {
+    "message": "削除"
+  },
+  "selectEmailsToDelete": {
+    "message": "削除するメールを先に選択してください"
+  },
+  "deleteError": {
+    "message": "メールの削除に失敗しました。$1 で操作が完了したか確認してください。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moving": {
+    "message": "移動中..."
+  },
+  "moveError": {
+    "message": "移動に失敗しました。$2 に「$1」ラベルが存在するか確認してください。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "仕事" },
+      "2": { "content": "$2", "example": "Gmail" }
+    }
+  },
+  "selectEmailsToMove": {
+    "message": "移動するメールを先に選択してください"
+  },
+  "noLabelsFound": {
+    "message": "ラベル/フォルダが見つかりません。$1 のサイドバーが読み込まれていることを確認してください。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moveOperationError": {
+    "message": "メールの移動に失敗しました。$1 で操作が完了したか確認してください。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "platformFallback": {
+    "message": "プラットフォーム"
+  },
+
+  "_comment_popup_analysis": { "message": "--- メール安全分析ポップアップ ---" },
+
+  "safetyLevelSafe": {
+    "message": "安全"
+  },
+  "safetyLevelCaution": {
+    "message": "注意"
+  },
+  "safetyLevelDanger": {
+    "message": "危険"
+  },
+  "safetyWarnings": {
+    "message": "安全性の警告"
+  },
+  "linkAnalysis": {
+    "message": "リンク分析 ($1)",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "riskWhitelisted": {
+    "message": "$1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Google" }
+    }
+  },
+  "riskWhitelistFallback": {
+    "message": "ホワイトリスト済み"
+  },
+  "riskOffWhitelist": {
+    "message": "予期しないドメイン"
+  },
+  "riskSuspicious": {
+    "message": "不審"
+  },
+  "riskSafe": {
+    "message": "正常"
+  },
+  "popupTitle": {
+    "message": "Aegis 分析"
+  },
+  "suspiciousKeywordsIssue": {
+    "message": "コンテンツに $1 件の不審なキーワードが含まれています",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" }
+    }
+  },
+
+  "_comment_ext_popup": { "message": "--- 拡張機能ポップアップ ---" },
+
+  "popupUrlAnalytics": {
+    "message": "URL 分析"
+  },
+  "popupSettings": {
+    "message": "設定"
+  },
+  "popupRunClassification": {
+    "message": "分類を実行"
+  },
+  "popupCurrentPlatform": {
+    "message": "現在のプラットフォーム"
+  },
+  "popupAnalysisMode": {
+    "message": "分析モード"
+  },
+  "popupModeAi": {
+    "message": "AI モード"
+  },
+  "popupModeNano": {
+    "message": "Nano AI"
+  },
+  "popupModeLocal": {
+    "message": "ローカルモード"
+  },
+  "popupStatClassified": {
+    "message": "分類済み"
+  },
+  "popupStatScanned": {
+    "message": "スキャン済み"
+  },
+  "popupSecure": {
+    "message": "安全"
+  },
+  "popupClassifying": {
+    "message": "分類中..."
+  },
+  "popupErrorInjecting": {
+    "message": "注入エラー"
+  },
+  "popupPlatformGmail": {
+    "message": "Gmail"
+  },
+  "popupPlatformOutlook": {
+    "message": "Outlook"
+  },
+  "popupPlatformNotSupported": {
+    "message": "非対応"
+  },
+
+  "_comment_options": { "message": "--- 設定ページ ---" },
+
+  "optAnalysisEngine": {
+    "message": "分析エンジン"
+  },
+  "optLocalRules": {
+    "message": "ローカルルール"
+  },
+  "optLocalRulesDesc": {
+    "message": "すべての処理はデバイス上で行われます。高速でプライベート、インターネット接続なしで動作します。"
+  },
+  "optAiMode": {
+    "message": "AI モード"
+  },
+  "optRecommended": {
+    "message": "おすすめ"
+  },
+  "optAiModeDesc": {
+    "message": "大規模言語モデルによる高度なニューラル分析で、優れた分類精度と脅威検出を提供します。"
+  },
+  "optNanoAi": {
+    "message": "Nano AI"
+  },
+  "optNanoAiDesc": {
+    "message": "Chrome の Gemini Nano によるオンデバイス LLM。API キー不要、完全オフライン対応。"
+  },
+  "optNanoFlagsRequired": {
+    "message": "Nano AI を有効にするには Chrome フラグが必要です"
+  },
+  "optNanoFlagsInstructions": {
+    "message": "Gemini Nano には 2 つの Chrome フラグを有効にする必要があります。各リンクを開き「Enabled」に設定してから、Chrome を再起動してください。"
+  },
+  "optNanoFlagModel": {
+    "message": "オンデバイスモデルのダウンロードを有効化"
+  },
+  "optNanoFlagPromptApi": {
+    "message": "Prompt API を有効化"
+  },
+  "optNanoFlagsNote": {
+    "message": "両方のフラグを有効にして再起動した後、ここに戻って Nano AI を選択してください。"
+  },
+  "optDownloadModel": {
+    "message": "モデルをダウンロード"
+  },
+  "optModelConfig": {
+    "message": "モデル設定"
+  },
+  "optAiModeInfo": {
+    "message": "AI モードは既存のカスタム Gmail ラベルを使用して、メールを自動的にスマート分類します。"
+  },
+  "optApiBaseUrl": {
+    "message": "API ベース URL"
+  },
+  "optApiKey": {
+    "message": "API キー"
+  },
+  "optSelectedModel": {
+    "message": "選択モデル"
+  },
+  "optTestConnection": {
+    "message": "接続テスト"
+  },
+  "optSmartCategories": {
+    "message": "スマートカテゴリ"
+  },
+  "optSmartCategoriesDesc": {
+    "message": "受信トレイの分類ルールとキーワードを定義"
+  },
+  "optAddCategory": {
+    "message": "カテゴリを追加"
+  },
+  "optAnonymousFeedback": {
+    "message": "匿名データフィードバック"
+  },
+  "optAnonymousFeedbackDesc": {
+    "message": "匿名のカテゴリデータ（カテゴリラベルとドメインのみ — メール内容や個人情報は含みません）を共有して Aegis の改善にご協力ください。"
+  },
+  "optEnableFeedback": {
+    "message": "匿名データフィードバックを有効にする"
+  },
+  "optSaveSettings": {
+    "message": "設定を保存"
+  },
+  "optKeywordsAutoSaved": {
+    "message": "キーワードは自動保存されます"
+  },
+  "optActiveKeywords": {
+    "message": "有効なキーワード $1 件",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "optAddKeyword": {
+    "message": "+ キーワードを追加"
+  },
+  "optTypeKeyword": {
+    "message": "キーワードを入力..."
+  },
+  "optSaveKeywordsFailed": {
+    "message": "キーワードの保存に失敗しました"
+  },
+  "optApiKeyRequired": {
+    "message": "先に API キーを入力してください"
+  },
+  "optTestingConnection": {
+    "message": "接続テスト中..."
+  },
+  "optBackgroundError": {
+    "message": "バックグラウンド接続エラー"
+  },
+  "optApiSuccess": {
+    "message": "API が正常に応答しました！以下の生データをご確認ください："
+  },
+  "optUnknownError": {
+    "message": "不明なエラー"
+  },
+  "optFetchingModels": {
+    "message": "モデルを取得中..."
+  },
+  "optModelsFetched": {
+    "message": "$1 個のモデルを取得しました",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optModelsLoaded": {
+    "message": "$1 個のモデルを読み込みました",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optSettingsSaved": {
+    "message": "設定を保存しました"
+  },
+  "optWhitelistServices": {
+    "message": "$1 件のサービス",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optWhitelistShortUrls": {
+    "message": "$1 件の短縮 URL サービス",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" }
+    }
+  },
+  "optWhitelistLastUpdated": {
+    "message": "最終更新: $1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "2024/03/15 10:30" }
+    }
+  },
+  "optWhitelistUrlRequired": {
+    "message": "ホワイトリスト URL を先に入力してください"
+  },
+  "optDownloading": {
+    "message": "ダウンロード中..."
+  },
+  "optWhitelistUpdateSuccess": {
+    "message": "更新成功（$1 件のサービス）",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optDownloadFailed": {
+    "message": "ダウンロード失敗"
+  },
+  "optCategoryAdded": {
+    "message": "カテゴリを追加しました"
+  },
+  "optCategoryNotFound": {
+    "message": "カテゴリが見つかりません"
+  },
+  "optCategoryUpdated": {
+    "message": "カテゴリを更新しました"
+  },
+  "optCategoryDeleted": {
+    "message": "カテゴリを削除しました"
+  },
+  "optDeleteCategoryConfirm": {
+    "message": "「$1」カテゴリを削除してよろしいですか？",
+    "placeholders": {
+      "1": { "content": "$1", "example": "仕事" }
+    }
+  },
+  "optDeleteCategoryKeywords": {
+    "message": "このカテゴリには $1 件のキーワードが含まれています。この操作は元に戻せません。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "8" }
+    }
+  },
+  "optLastCategoryWarning": {
+    "message": "これは最後のカテゴリです。削除するとメール分類機能が無効になります。"
+  },
+  "optDeleteCategoryTitle": {
+    "message": "カテゴリを削除"
+  },
+  "optCancel": {
+    "message": "キャンセル"
+  },
+  "optConfirm": {
+    "message": "確認"
+  },
+  "optWhitelistSettings": {
+    "message": "ホワイトリスト設定"
+  },
+  "optWhitelistUpdate": {
+    "message": "更新"
+  },
+  "optDebugMode": {
+    "message": "デバッグモード"
+  },
+  "optCopiedToClipboard": {
+    "message": "クリップボードにコピーしました: $1\n\nChrome のアドレスバーに貼り付けてください。",
+    "placeholders": {
+      "1": { "content": "$1", "example": "chrome://flags/#..." }
+    }
+  },
+  "optNanoReady": {
+    "message": "Gemini Nano は準備完了です"
+  },
+  "optNanoNeedsDownload": {
+    "message": "Gemini Nano のダウンロードが必要です"
+  },
+  "optNanoDownloading": {
+    "message": "Gemini Nano をダウンロード中..."
+  },
+  "optNanoNoApi": {
+    "message": "Prompt API が利用できません。必要な Chrome フラグを有効にして Chrome を再起動してください。"
+  },
+  "optNanoUnavailable": {
+    "message": "Gemini Nano が利用できません。必要な Chrome フラグを有効にして Chrome を再起動するか、デバイスがハードウェア要件を満たしているか確認してください。"
+  },
+  "optNanoCheckFailed": {
+    "message": "Gemini Nano の利用可否を確認できませんでした。"
+  },
+  "optNanoDownloadingProgress": {
+    "message": "Gemini Nano をダウンロード中..."
+  },
+  "optNanoDownloadFailed": {
+    "message": "ダウンロード失敗: $1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "ネットワークエラー" }
+    }
+  },
+
+  "_comment_category_dialog": { "message": "--- カテゴリダイアログ ---" },
+
+  "catDialogAddTitle": {
+    "message": "新しいカテゴリを追加"
+  },
+  "catDialogEditTitle": {
+    "message": "カテゴリを編集"
+  },
+  "catDialogSubtitle": {
+    "message": "インテリジェントな分類でメールを整理しましょう。"
+  },
+  "catDialogNameLabel": {
+    "message": "カテゴリ名"
+  },
+  "catDialogNamePlaceholder": {
+    "message": "例: 請求書、顧客フィードバック、緊急"
+  },
+  "catDialogColorLabel": {
+    "message": "カテゴリカラー"
+  },
+  "catDialogIconLabel": {
+    "message": "アイコン選択"
+  },
+  "catDialogSearchIcons": {
+    "message": "アイコンを検索..."
+  },
+  "catDialogKeywordsLabel": {
+    "message": "スマートマッチングキーワード"
+  },
+  "catDialogKeywordPlaceholder": {
+    "message": "入力して Enter を押してください..."
+  },
+  "catDialogCancel": {
+    "message": "キャンセル"
+  },
+  "catDialogDelete": {
+    "message": "削除"
+  },
+  "catDialogCreate": {
+    "message": "カテゴリを作成"
+  },
+  "catDialogSave": {
+    "message": "変更を保存"
+  },
+  "catDialogNameRequired": {
+    "message": "カテゴリ名は必須です"
+  },
+
+  "_comment_eula": { "message": "--- EULA ダイアログ ---" },
+
+  "eulaTitle": {
+    "message": "エンドユーザーライセンス契約"
+  },
+  "eulaIntro": {
+    "message": "Aegis 拡張機能を使用する前に、以下のエンドユーザーライセンス契約をよくお読みください。"
+  },
+  "eulaAgree": {
+    "message": "この拡張機能を使用することにより、以下の条項に同意したものとみなされます："
+  },
+  "eulaClause1": {
+    "message": "1. ライセンスの付与。Aegis Chrome 拡張機能を個人的な非商用目的で使用するための非独占的、譲渡不可のライセンスが付与されます。"
+  },
+  "eulaClause2": {
+    "message": "2. データ収集。本拡張機能は、分類精度の向上のため、匿名のカテゴリレベルデータ（メールカテゴリラベルやドメイン名など）を収集する場合があります。個人のメール内容、件名、完全なメールアドレス、添付ファイルデータが収集されることはありません。"
+  },
+  "eulaClause3": {
+    "message": "3. プライバシー。お客様のプライバシーは重要です。匿名データフィードバックにオプトインしない限り、すべてのデータ処理はブラウザ内でローカルに行われます。データフィードバックは設定ページからいつでも無効にできます。"
+  },
+  "eulaClause4": {
+    "message": "4. 無保証。本拡張機能は、明示的または黙示的を問わず、いかなる種類の保証もなく「現状のまま」提供されます。"
+  },
+  "eulaClause5": {
+    "message": "5. 責任の制限。いかなる場合も、開発者は本拡張機能の使用から生じるいかなる損害についても責任を負いません。"
+  },
+  "eulaClause6": {
+    "message": "6. 変更。当社はいつでもこれらの条項を変更する権利を留保します。本拡張機能の継続使用は、変更された条項の承諾とみなされます。"
+  },
+  "eulaNotice": {
+    "message": "同意すると、匿名カテゴリデータフィードバックがデフォルトで有効になります。設定からいつでも無効にできます。"
+  },
+  "eulaDecline": {
+    "message": "拒否"
+  },
+  "eulaAccept": {
+    "message": "同意"
+  },
+
+  "_comment_content": { "message": "--- コンテンツスクリプト ---" },
+
+  "aiAnalyzing": {
+    "message": "AI 分析中..."
+  },
+  "whitelistNotSet": {
+    "message": "ホワイトリスト URL が設定されていません"
+  },
+
+  "_comment_categories": { "message": "--- デフォルトカテゴリ名 ---" },
+
+  "catWork": {
+    "message": "仕事"
+  },
+  "catShopping": {
+    "message": "ショッピング"
+  },
+  "catFinance": {
+    "message": "財務"
+  },
+  "catSocial": {
+    "message": "ソーシャル"
+  },
+  "catPromotions": {
+    "message": "プロモーション"
+  },
+  "catSecurity": {
+    "message": "セキュリティ"
+  },
+  "catNotifications": {
+    "message": "通知"
+  },
+
+  "_comment_analytics": { "message": "--- URL 分析 ---" },
+
+  "analyticsTitle": {
+    "message": "ブラウジング分析"
+  },
+  "analyticsFeedbackMode": {
+    "message": "フィードバックモード"
+  },
+  "analyticsSyncCategories": {
+    "message": "サーバーから URL カテゴリを同期"
+  },
+  "analyticsExportData": {
+    "message": "データをエクスポート"
+  },
+  "analyticsViewsToday": {
+    "message": "今日の閲覧数"
+  },
+  "analyticsPredictedEod": {
+    "message": "終日予測"
+  },
+  "analyticsDailyPageViews": {
+    "message": "日別ページビュー"
+  },
+  "analyticsPast7Days": {
+    "message": "過去7日間 + 今日"
+  },
+  "analyticsDailyBrowsingTime": {
+    "message": "日別ブラウジング時間"
+  },
+  "analyticsActiveTime": {
+    "message": "アクティブ時間"
+  },
+  "analyticsByPageViews": {
+    "message": "ページビュー順"
+  },
+  "analyticsByVisitTime": {
+    "message": "閲覧時間順"
+  },
+  "analyticsUncategorizedUrls": {
+    "message": "未分類の URL"
+  },
+  "analyticsAllCategorized": {
+    "message": "すべての URL は分類済みです"
+  },
+  "analyticsCategorizeUrl": {
+    "message": "URL を分類"
+  },
+  "analyticsSelectCategory": {
+    "message": "-- カテゴリを選択 --"
+  },
+  "analyticsSkip": {
+    "message": "スキップ"
+  },
+  "analyticsSave": {
+    "message": "保存"
+  },
+  "analyticsExportBrowsingData": {
+    "message": "ブラウジングデータをエクスポート"
+  },
+  "analyticsUserLabelsJson": {
+    "message": "ユーザーラベル (JSON)"
+  },
+  "analyticsUserLabelsDesc": {
+    "message": "設定したドメインとカテゴリの対応"
+  },
+  "analyticsFullHistoryCsv": {
+    "message": "完全な履歴 (CSV)"
+  },
+  "analyticsFullHistoryDesc": {
+    "message": "過去30日間のすべてのページビュー"
+  },
+  "analyticsClose": {
+    "message": "閉じる"
+  },
+
+  "_comment_domain_security": { "message": "--- ドメインセキュリティ分析 ---" },
+
+  "domainSecScore": {
+    "message": "ドメインスコア"
+  },
+  "domainSecAnalyzing": {
+    "message": "分析中..."
+  },
+  "domainSecRegistered": {
+    "message": "登録日"
+  },
+  "domainSecDomainAge": {
+    "message": "ドメイン年齢"
+  },
+  "domainSecRegistrant": {
+    "message": "登録者"
+  },
+  "domainSecServerLocation": {
+    "message": "サーバー所在地"
+  },
+  "domainSecServerIp": {
+    "message": "サーバー IP"
+  },
+  "domainSecRiskFactors": {
+    "message": "リスク要因"
+  },
+  "domainSecUnavailable": {
+    "message": "取得不可"
+  },
+  "domainSecNotFound": {
+    "message": "見つかりません"
+  },
+  "domainSecUnknown": {
+    "message": "不明"
+  },
+  "domainSecInvalidUrl": {
+    "message": "無効な URL"
+  },
+  "domainSecAnalysisUnavailable": {
+    "message": "$1 — 分析できません",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "domainSecJustAnalyzed": {
+    "message": "分析完了"
+  },
+  "domainSecCachedAgo": {
+    "message": "$1 分前にキャッシュ",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  }
+}
