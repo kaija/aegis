@@ -6,6 +6,7 @@ async function ensureContentScript(tab) {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: [
+      'src/utils/i18n.js',
       'src/analysis/whitelist-manager.js',
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',

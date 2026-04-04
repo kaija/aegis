@@ -1,0 +1,640 @@
+{
+  "appName": {
+    "message": "Aegis"
+  },
+  "appDesc": {
+    "message": "Smart email categorization, security analysis, and browsing analytics"
+  },
+
+  "_comment_panel": { "message": "--- Analysis Panel ---" },
+
+  "panelTitle": {
+    "message": "Aegis Email Analysis"
+  },
+  "filterUnread": {
+    "message": "Unread"
+  },
+  "filterAll": {
+    "message": "All"
+  },
+  "loadingAiClassifying": {
+    "message": "AI is reading and classifying..."
+  },
+  "loadingPleaseWait": {
+    "message": "Please wait a moment"
+  },
+  "loadingFooter": {
+    "message": "Loading..."
+  },
+  "noUnreadEmails": {
+    "message": "No unread emails found"
+  },
+  "footerZeroEmails": {
+    "message": "0 unread emails"
+  },
+  "loadingRemainingEmails": {
+    "message": "AI continuing to classify remaining emails..."
+  },
+  "panelFooterStats": {
+    "message": "$1 unread emails, $2 categories",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" },
+      "2": { "content": "$2", "example": "3" }
+    }
+  },
+  "selectAll": {
+    "message": "Select All"
+  },
+  "moveAllToLabel": {
+    "message": "Move all to \"$1\"",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Work" }
+    }
+  },
+  "outlookNotSupported": {
+    "message": "Outlook does not support this feature yet"
+  },
+  "moveToOtherLabel": {
+    "message": "Move to label..."
+  },
+  "deleteBtn": {
+    "message": "Delete"
+  },
+  "selectEmailsToDelete": {
+    "message": "Please select emails to delete first"
+  },
+  "deleteError": {
+    "message": "Email deletion failed. Please check that $1 completed the operation.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moving": {
+    "message": "Moving..."
+  },
+  "moveError": {
+    "message": "Move failed. Please confirm that the \"$1\" label exists in $2.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Work" },
+      "2": { "content": "$2", "example": "Gmail" }
+    }
+  },
+  "selectEmailsToMove": {
+    "message": "Please select emails to move first"
+  },
+  "noLabelsFound": {
+    "message": "No labels/folders found. Please ensure the $1 sidebar is loaded.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "moveOperationError": {
+    "message": "Email move failed. Please check that $1 completed the operation.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Gmail" }
+    }
+  },
+  "platformFallback": {
+    "message": "Platform"
+  },
+
+  "_comment_popup_analysis": { "message": "--- Email Popup (Safety Analysis) ---" },
+
+  "safetyLevelSafe": {
+    "message": "Safe"
+  },
+  "safetyLevelCaution": {
+    "message": "Caution"
+  },
+  "safetyLevelDanger": {
+    "message": "Danger"
+  },
+  "safetyWarnings": {
+    "message": "Safety Warnings"
+  },
+  "linkAnalysis": {
+    "message": "Link Analysis ($1)",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "riskWhitelisted": {
+    "message": "$1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Google" }
+    }
+  },
+  "riskWhitelistFallback": {
+    "message": "Whitelisted"
+  },
+  "riskOffWhitelist": {
+    "message": "Unexpected domain"
+  },
+  "riskSuspicious": {
+    "message": "Suspicious"
+  },
+  "riskSafe": {
+    "message": "Normal"
+  },
+  "popupTitle": {
+    "message": "Aegis Analysis"
+  },
+  "suspiciousKeywordsIssue": {
+    "message": "Content contains $1 suspicious keywords",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" }
+    }
+  },
+
+  "_comment_ext_popup": { "message": "--- Extension Popup ---" },
+
+  "popupUrlAnalytics": {
+    "message": "URL Analytics"
+  },
+  "popupSettings": {
+    "message": "Settings"
+  },
+  "popupRunClassification": {
+    "message": "RUN CLASSIFICATION"
+  },
+  "popupCurrentPlatform": {
+    "message": "Current Platform"
+  },
+  "popupAnalysisMode": {
+    "message": "Analysis Mode"
+  },
+  "popupModeAi": {
+    "message": "AI-Powered"
+  },
+  "popupModeNano": {
+    "message": "Nano AI"
+  },
+  "popupModeLocal": {
+    "message": "Local Mode"
+  },
+  "popupStatClassified": {
+    "message": "CLASSIFIED"
+  },
+  "popupStatScanned": {
+    "message": "SCANNED"
+  },
+  "popupSecure": {
+    "message": "SECURE"
+  },
+  "popupClassifying": {
+    "message": "CLASSIFYING..."
+  },
+  "popupErrorInjecting": {
+    "message": "ERROR INJECTING"
+  },
+  "popupPlatformGmail": {
+    "message": "Gmail"
+  },
+  "popupPlatformOutlook": {
+    "message": "Outlook"
+  },
+  "popupPlatformNotSupported": {
+    "message": "Not Supported"
+  },
+
+  "_comment_options": { "message": "--- Options Page ---" },
+
+  "optAnalysisEngine": {
+    "message": "Analysis Engine"
+  },
+  "optLocalRules": {
+    "message": "Local Rules"
+  },
+  "optLocalRulesDesc": {
+    "message": "Processing happens entirely on your device. Fast, private, and works without an internet connection."
+  },
+  "optAiMode": {
+    "message": "AI Mode"
+  },
+  "optRecommended": {
+    "message": "RECOMMENDED"
+  },
+  "optAiModeDesc": {
+    "message": "Advanced neural analysis using large language models for superior classification accuracy and threat detection."
+  },
+  "optNanoAi": {
+    "message": "Nano AI"
+  },
+  "optNanoAiDesc": {
+    "message": "On-device LLM powered by Chrome's Gemini Nano. No API key needed, fully offline capable."
+  },
+  "optNanoFlagsRequired": {
+    "message": "Chrome flags required to enable Nano AI"
+  },
+  "optNanoFlagsInstructions": {
+    "message": "Gemini Nano requires two Chrome flags to be enabled. Open each link below, set to Enabled, then relaunch Chrome."
+  },
+  "optNanoFlagModel": {
+    "message": "Enables on-device model download"
+  },
+  "optNanoFlagPromptApi": {
+    "message": "Enables the Prompt API"
+  },
+  "optNanoFlagsNote": {
+    "message": "After enabling both flags and relaunching, return here and select Nano AI."
+  },
+  "optDownloadModel": {
+    "message": "Download Model"
+  },
+  "optModelConfig": {
+    "message": "Model Configuration"
+  },
+  "optAiModeInfo": {
+    "message": "AI Mode will smartly categorize your emails using your existing custom Gmail labels automatically."
+  },
+  "optApiBaseUrl": {
+    "message": "API BASE URL"
+  },
+  "optApiKey": {
+    "message": "API KEY"
+  },
+  "optSelectedModel": {
+    "message": "SELECTED MODEL"
+  },
+  "optTestConnection": {
+    "message": "TEST CONNECTION"
+  },
+  "optSmartCategories": {
+    "message": "Smart Categories"
+  },
+  "optSmartCategoriesDesc": {
+    "message": "Define classification rules and keywords for your inbox"
+  },
+  "optAddCategory": {
+    "message": "Add Category"
+  },
+  "optAnonymousFeedback": {
+    "message": "Anonymous Data Feedback"
+  },
+  "optAnonymousFeedbackDesc": {
+    "message": "Help improve Aegis by sharing anonymous category data (category labels and domains only — no email content or personal information)."
+  },
+  "optEnableFeedback": {
+    "message": "Enable anonymous data feedback"
+  },
+  "optSaveSettings": {
+    "message": "Save Settings"
+  },
+  "optKeywordsAutoSaved": {
+    "message": "Keywords are saved automatically"
+  },
+  "optActiveKeywords": {
+    "message": "$1 active keywords",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "optAddKeyword": {
+    "message": "+ Add keyword"
+  },
+  "optTypeKeyword": {
+    "message": "Type keyword..."
+  },
+  "optSaveKeywordsFailed": {
+    "message": "Failed to save keywords"
+  },
+  "optApiKeyRequired": {
+    "message": "Please enter an API Key first"
+  },
+  "optTestingConnection": {
+    "message": "Testing connection..."
+  },
+  "optBackgroundError": {
+    "message": "Background connection error"
+  },
+  "optApiSuccess": {
+    "message": "API responded successfully! See raw data below:"
+  },
+  "optUnknownError": {
+    "message": "Unknown error"
+  },
+  "optFetchingModels": {
+    "message": "Fetching models..."
+  },
+  "optModelsFetched": {
+    "message": "Successfully fetched $1 models",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optModelsLoaded": {
+    "message": "Loaded $1 models",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12" }
+    }
+  },
+  "optSettingsSaved": {
+    "message": "Settings saved"
+  },
+  "optWhitelistServices": {
+    "message": "$1 services",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optWhitelistShortUrls": {
+    "message": "$1 short URL services",
+    "placeholders": {
+      "1": { "content": "$1", "example": "15" }
+    }
+  },
+  "optWhitelistLastUpdated": {
+    "message": "Last updated: $1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "2024/03/15 10:30" }
+    }
+  },
+  "optWhitelistUrlRequired": {
+    "message": "Please fill in the whitelist URL first"
+  },
+  "optDownloading": {
+    "message": "Downloading..."
+  },
+  "optWhitelistUpdateSuccess": {
+    "message": "Update successful ($1 services)",
+    "placeholders": {
+      "1": { "content": "$1", "example": "60" }
+    }
+  },
+  "optDownloadFailed": {
+    "message": "Download failed"
+  },
+  "optCategoryAdded": {
+    "message": "Category added"
+  },
+  "optCategoryNotFound": {
+    "message": "Category not found"
+  },
+  "optCategoryUpdated": {
+    "message": "Category updated"
+  },
+  "optCategoryDeleted": {
+    "message": "Category deleted"
+  },
+  "optDeleteCategoryConfirm": {
+    "message": "Are you sure you want to delete the \"$1\" category?",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Work" }
+    }
+  },
+  "optDeleteCategoryKeywords": {
+    "message": "This category contains $1 keywords. This action cannot be undone.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "8" }
+    }
+  },
+  "optLastCategoryWarning": {
+    "message": "This is the last category. Deleting it will disable email classification."
+  },
+  "optDeleteCategoryTitle": {
+    "message": "Delete Category"
+  },
+  "optCancel": {
+    "message": "Cancel"
+  },
+  "optConfirm": {
+    "message": "Confirm"
+  },
+  "optWhitelistSettings": {
+    "message": "Whitelist Settings"
+  },
+  "optWhitelistUpdate": {
+    "message": "Update"
+  },
+  "optDebugMode": {
+    "message": "Debug Mode"
+  },
+  "optCopiedToClipboard": {
+    "message": "Copied to clipboard: $1\n\nPaste this into your Chrome address bar.",
+    "placeholders": {
+      "1": { "content": "$1", "example": "chrome://flags/#..." }
+    }
+  },
+  "optNanoReady": {
+    "message": "Gemini Nano is ready"
+  },
+  "optNanoNeedsDownload": {
+    "message": "Gemini Nano needs to be downloaded"
+  },
+  "optNanoDownloading": {
+    "message": "Gemini Nano is downloading..."
+  },
+  "optNanoNoApi": {
+    "message": "Prompt API is not available. Please enable the required Chrome flags and relaunch Chrome."
+  },
+  "optNanoUnavailable": {
+    "message": "Gemini Nano is not available. Please enable the required Chrome flags and relaunch Chrome, or check that your device meets the hardware requirements."
+  },
+  "optNanoCheckFailed": {
+    "message": "Failed to check Gemini Nano availability."
+  },
+  "optNanoDownloadingProgress": {
+    "message": "Downloading Gemini Nano..."
+  },
+  "optNanoDownloadFailed": {
+    "message": "Download failed: $1",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Network error" }
+    }
+  },
+
+  "_comment_category_dialog": { "message": "--- Category Dialog ---" },
+
+  "catDialogAddTitle": {
+    "message": "Add New Category"
+  },
+  "catDialogEditTitle": {
+    "message": "Edit Category"
+  },
+  "catDialogSubtitle": {
+    "message": "Organize your emails with intelligent classification."
+  },
+  "catDialogNameLabel": {
+    "message": "Category Name"
+  },
+  "catDialogNamePlaceholder": {
+    "message": "e.g., Invoices, Client Feedback, Urgent"
+  },
+  "catDialogColorLabel": {
+    "message": "Category Color"
+  },
+  "catDialogIconLabel": {
+    "message": "Icon Selector"
+  },
+  "catDialogSearchIcons": {
+    "message": "Search icons..."
+  },
+  "catDialogKeywordsLabel": {
+    "message": "Smart Matching Keywords"
+  },
+  "catDialogKeywordPlaceholder": {
+    "message": "Type and press enter..."
+  },
+  "catDialogCancel": {
+    "message": "Cancel"
+  },
+  "catDialogDelete": {
+    "message": "Delete"
+  },
+  "catDialogCreate": {
+    "message": "Create Category"
+  },
+  "catDialogSave": {
+    "message": "Save Changes"
+  },
+  "catDialogNameRequired": {
+    "message": "Category name is required"
+  },
+
+  "_comment_eula": { "message": "--- EULA Dialog ---" },
+
+  "eulaTitle": {
+    "message": "End User License Agreement"
+  },
+  "eulaIntro": {
+    "message": "Please read the following End User License Agreement carefully before using the Aegis extension."
+  },
+  "eulaAgree": {
+    "message": "By using this extension, you agree to the following terms:"
+  },
+  "eulaClause1": {
+    "message": "1. License Grant. You are granted a non-exclusive, non-transferable license to use the Aegis Chrome Extension for personal, non-commercial purposes."
+  },
+  "eulaClause2": {
+    "message": "2. Data Collection. The extension may collect anonymous category-level data (such as email category labels and domain names) to improve classification accuracy. No personal email content, subject lines, full email addresses, or attachment data is ever collected."
+  },
+  "eulaClause3": {
+    "message": "3. Privacy. Your privacy is important to us. All data processing occurs locally in your browser unless you have opted in to anonymous data feedback. You may disable data feedback at any time from the Settings page."
+  },
+  "eulaClause4": {
+    "message": "4. No Warranty. This extension is provided \"as is\" without warranty of any kind, express or implied."
+  },
+  "eulaClause5": {
+    "message": "5. Limitation of Liability. In no event shall the developers be liable for any damages arising from the use of this extension."
+  },
+  "eulaClause6": {
+    "message": "6. Modifications. We reserve the right to modify these terms at any time. Continued use of the extension constitutes acceptance of modified terms."
+  },
+  "eulaNotice": {
+    "message": "By accepting, anonymous category data feedback will be enabled by default. You can disable this in Settings at any time."
+  },
+  "eulaDecline": {
+    "message": "Decline"
+  },
+  "eulaAccept": {
+    "message": "Accept"
+  },
+
+  "_comment_content": { "message": "--- Content Script ---" },
+
+  "aiAnalyzing": {
+    "message": "AI analyzing..."
+  },
+  "whitelistNotSet": {
+    "message": "Whitelist URL not set"
+  },
+
+  "_comment_categories": { "message": "--- Default Category Names ---" },
+
+  "catWork": {
+    "message": "Work"
+  },
+  "catShopping": {
+    "message": "Shopping"
+  },
+  "catFinance": {
+    "message": "Finance"
+  },
+  "catSocial": {
+    "message": "Social"
+  },
+  "catPromotions": {
+    "message": "Promotions"
+  },
+  "catSecurity": {
+    "message": "Security"
+  },
+  "catNotifications": {
+    "message": "Notifications"
+  },
+
+  "_comment_analytics": { "message": "--- URL Analytics ---" },
+
+  "analyticsTitle": {
+    "message": "Browsing Analytics"
+  },
+  "analyticsFeedbackMode": {
+    "message": "Feedback Mode"
+  },
+  "analyticsSyncCategories": {
+    "message": "Sync URL Categories from Server"
+  },
+  "analyticsExportData": {
+    "message": "Export Data"
+  },
+  "analyticsViewsToday": {
+    "message": "Views Today"
+  },
+  "analyticsPredictedEod": {
+    "message": "Predicted EOD"
+  },
+  "analyticsDailyPageViews": {
+    "message": "Daily Page Views"
+  },
+  "analyticsPast7Days": {
+    "message": "Past 7 days + today"
+  },
+  "analyticsDailyBrowsingTime": {
+    "message": "Daily Browsing Time"
+  },
+  "analyticsActiveTime": {
+    "message": "Active Time"
+  },
+  "analyticsByPageViews": {
+    "message": "By Page Views"
+  },
+  "analyticsByVisitTime": {
+    "message": "By Visit Time"
+  },
+  "analyticsUncategorizedUrls": {
+    "message": "Uncategorized URLs"
+  },
+  "analyticsAllCategorized": {
+    "message": "All URLs are categorized"
+  },
+  "analyticsCategorizeUrl": {
+    "message": "Categorize URL"
+  },
+  "analyticsSelectCategory": {
+    "message": "-- Select Category --"
+  },
+  "analyticsSkip": {
+    "message": "Skip"
+  },
+  "analyticsSave": {
+    "message": "Save"
+  },
+  "analyticsExportBrowsingData": {
+    "message": "Export Browsing Data"
+  },
+  "analyticsUserLabelsJson": {
+    "message": "User Labels (JSON)"
+  },
+  "analyticsUserLabelsDesc": {
+    "message": "Domain-to-category mappings you've set"
+  },
+  "analyticsFullHistoryCsv": {
+    "message": "Full History (CSV)"
+  },
+  "analyticsFullHistoryDesc": {
+    "message": "All page views from the past 30 days"
+  },
+  "analyticsClose": {
+    "message": "Close"
+  }
+}
