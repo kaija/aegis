@@ -13,6 +13,10 @@ provider:
   name: aws
   runtime: nodejs24.x
   region: ap-northeast-1
+  logs:
+    httpApi:
+      format: >-
+        {"requestId":"$context.requestId","ip":"$context.identity.sourceIp","method":"$context.httpMethod","path":"$context.path","status":"$context.status","latency":"$context.responseLatency","userAgent":"$context.identity.userAgent","error":"$context.error.message","integrationError":"$context.integrationErrorMessage"}
   environment:
     URL_FEEDBACK_TABLE: !Ref UrlFeedbackTable
     WHITELIST_TABLE: !Ref WhitelistTable
@@ -142,6 +146,26 @@ resources:
         KeySchema:
           - AttributeName: senderDomain
             KeyType: HASH
+
+    # S3 Bucket for API Gateway access logs
+    ApiAccessLogBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${sls:stage}-api-access-logs
+        LifecycleConfiguration:
+          Rules:
+            - Id: ExpireLogs
+              Status: Enabled
+              ExpirationInDays: 90
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
 
     # ACM Certificate for custom domain
     AegisCertificate:
