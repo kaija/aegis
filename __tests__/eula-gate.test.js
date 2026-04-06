@@ -93,6 +93,19 @@ describe('EULA gate in content.js', () => {
       analyzeEmailDetail: jest.fn().mockReturnValue({})
     };
 
+    // --- Mock AegisTracker ---
+    window.AegisTracker = {
+      init: jest.fn().mockResolvedValue(undefined),
+      sendEvent: jest.fn().mockResolvedValue(undefined),
+      trackInstall: jest.fn().mockResolvedValue(undefined),
+      trackClassification: jest.fn().mockResolvedValue(undefined),
+      trackSecurityScan: jest.fn().mockResolvedValue(undefined),
+      trackDomainAnalysis: jest.fn().mockResolvedValue(undefined),
+      trackUrlPageView: jest.fn().mockResolvedValue(undefined),
+      trackCategoryAction: jest.fn().mockResolvedValue(undefined),
+      trackSettingsChange: jest.fn().mockResolvedValue(undefined),
+    };
+
     // Mock window.location
     Object.defineProperty(window, 'location', {
       value: { href: 'https://mail.google.com/mail/u/0/#inbox', hash: '#inbox' },
@@ -319,6 +332,19 @@ describe('Feature: eula-data-feedback, Property 1: EULA gate controls initializa
     window.EmailAnalyzer = {
       categorizeByKeywords: jest.fn().mockReturnValue({ id: 'tag', name: 'Other' }),
       analyzeEmailDetail: jest.fn().mockReturnValue({})
+    };
+
+    // --- Mock AegisTracker ---
+    window.AegisTracker = {
+      init: jest.fn().mockResolvedValue(undefined),
+      sendEvent: jest.fn().mockResolvedValue(undefined),
+      trackInstall: jest.fn().mockResolvedValue(undefined),
+      trackClassification: jest.fn().mockResolvedValue(undefined),
+      trackSecurityScan: jest.fn().mockResolvedValue(undefined),
+      trackDomainAnalysis: jest.fn().mockResolvedValue(undefined),
+      trackUrlPageView: jest.fn().mockResolvedValue(undefined),
+      trackCategoryAction: jest.fn().mockResolvedValue(undefined),
+      trackSettingsChange: jest.fn().mockResolvedValue(undefined),
     };
 
     // Mock window.location

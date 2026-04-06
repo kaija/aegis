@@ -7,6 +7,7 @@ async function ensureContentScript(tab) {
     target: { tabId: tab.id },
     files: [
       'src/utils/i18n.js',
+      'src/analytics/tracker.js',
       'src/analysis/whitelist-manager.js',
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',

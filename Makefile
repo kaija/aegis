@@ -6,40 +6,52 @@ CRX_FILE       := $(OUT_DIR)/$(EXTENSION_NAME)-$(VERSION).crx
 KEY_FILE       := $(EXTENSION_NAME).pem
 
 CHROME := $(shell \
-	command -v google-chrome 2>/dev/null || \
-	command -v google-chrome-stable 2>/dev/null || \
-	echo "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+command -v google-chrome 2>/dev/null || \
+command -v google-chrome-stable 2>/dev/null || \
+echo "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
-# Files to include in the package (exclude dev/system files)
-PACK_EXCLUDE := \
-	--exclude="*.pem" \
-	--exclude="*.DS_Store" \
-	--exclude=".git/*" \
-	--exclude=".claude/*" \
-	--exclude=".kiro/*" \
-	--exclude=".vscode/*" \
-	--exclude="__tests__/*" \
-	--exclude="node_modules/*" \
-	--exclude="coverage/*" \
-	--exclude="scripts/*" \
-	--exclude="dist/*" \
-	--exclude="backend/*" \
-	--exclude="*.md" \
-	--exclude="TEST-*.txt" \
-	--exclude="TEST-*.md" \
-	--exclude="CLAUDE.md" \
-	--exclude="Makefile" \
-	--exclude="*.map" \
-	--exclude="*.csv" \
-	--exclude="package.json" \
-	--exclude="package-lock.json" \
-	--exclude="jest.config.js" \
-	--exclude=".gitignore" \
-	--exclude="mock-chrome.js" \
-	--exclude="aegis-*.json" \
-	--exclude="aegis-*.csv"
+# Files to exclude from rsync (dev/system files)
+RSYNC_EXCLUDE := \
+--exclude="*.pem" \
+--exclude=".DS_Store" \
+--exclude=".git" \
+--exclude=".git/" \
+--exclude=".claude" \
+--exclude=".claude/" \
+--exclude=".kiro" \
+--exclude=".kiro/" \
+--exclude=".vscode" \
+--exclude=".vscode/" \
+--exclude="__tests__" \
+--exclude="__tests__/" \
+--exclude="node_modules" \
+--exclude="node_modules/" \
+--exclude="coverage" \
+--exclude="coverage/" \
+--exclude="dist" \
+--exclude="dist/" \
+--exclude="scripts" \
+--exclude="scripts/" \
+--exclude="backend" \
+--exclude="backend/" \
+--exclude="*.md" \
+--exclude="TEST-*.txt" \
+--exclude="TEST-*.md" \
+--exclude="CLAUDE.md" \
+--exclude="Makefile" \
+--exclude="*.map" \
+--exclude="*.csv" \
+--exclude="package.json" \
+--exclude="package-lock.json" \
+--exclude="jest.config.js" \
+--exclude=".gitignore" \
+--exclude="mock-chrome.js" \
+--exclude="aegis-*.json" \
+--exclude="aegis-*.csv" \
+--exclude=".env" \
+--exclude=".env.local"
 
-.PHONY: all zip crx dev clean help
+.PHONY: all zip crx dev clean help inject-secrets info
 
 all: zip ## Default: build zip package
 
@@ -47,72 +59,48 @@ all: zip ## Default: build zip package
 
 dev: ## Copy extension files to dist/ for local unpacked loading
 	@rm -rf $(OUT_DIR)
-	@rsync -a \
-		--exclude="*.pem" \
-		--exclude=".DS_Store" \
-		--exclude=".git" \
-		--exclude=".git/" \
-		--exclude=".claude" \
-		--exclude=".claude/" \
-		--exclude=".kiro" \
-		--exclude=".kiro/" \
-		--exclude="__tests__" \
-		--exclude="__tests__/" \
-		--exclude="node_modules" \
-		--exclude="node_modules/" \
-		--exclude="coverage" \
-		--exclude="coverage/" \
-		--exclude="dist" \
-		--exclude="dist/" \
-		--exclude="scripts" \
-		--exclude="scripts/" \
-		--exclude="backend" \
-		--exclude="backend/" \
-		--exclude="*.md" \
-		--exclude="TEST-*.txt" \
-		--exclude="TEST-*.md" \
-		--exclude="CLAUDE.md" \
-		--exclude="Makefile" \
-		--exclude="*.map" \
-		--exclude="*.csv" \
-		--exclude="package.json" \
-		--exclude="package-lock.json" \
-		--exclude="jest.config.js" \
-		--exclude=".gitignore" \
-		--exclude="mock-chrome.js" \
-		--exclude="aegis-*.json" \
-		--exclude="aegis-*.csv" \
-		. $(OUT_DIR)/
+	@rsync -a $(RSYNC_EXCLUDE) . $(OUT_DIR)/
+	@$(MAKE) --no-print-directory inject-secrets
 	@echo "Ready: load $(OUT_DIR)/ as unpacked extension in Chrome"
 
-zip: $(ZIP_FILE) ## Pack extension as .zip (for Chrome Web Store)
+inject-secrets: ## Inject build-time secrets from .env into dist/
+	@if [ -f .env ]; then \
+	. ./.env && \
+	if [ -n "$$GA_API_SECRET" ] && [ -f $(OUT_DIR)/src/analytics/tracker.js ]; then \
+	sed -i '' "s/__GA_API_SECRET__/$$GA_API_SECRET/g" $(OUT_DIR)/src/analytics/tracker.js 2>/dev/null || \
+	sed -i "s/__GA_API_SECRET__/$$GA_API_SECRET/g" $(OUT_DIR)/src/analytics/tracker.js; \
+	echo "  ✓ Injected GA_API_SECRET"; \
+	fi; \
+	else \
+	echo "  ⚠ .env not found — GA tracking will be disabled"; \
+	fi
 
-$(ZIP_FILE): $(OUT_DIR) manifest.json
+zip: dev ## Pack extension as .zip (for Chrome Web Store)
 	@echo "Packing $(ZIP_FILE)..."
-	@zip -r -9 "$(ZIP_FILE)" . \
-		$(PACK_EXCLUDE) \
-		-x "$(OUT_DIR)/*"
-	@echo "Done: $(ZIP_FILE) ($$(du -sh $(ZIP_FILE) | cut -f1))"
+	@cd $(OUT_DIR) && zip -r -9 "../$(ZIP_FILE)" . \
+	-x "$(EXTENSION_NAME)-*.zip" \
+	-x "$(EXTENSION_NAME)-*.crx"
+	@echo "Done: $(ZIP_FILE)"
 
 crx: $(OUT_DIR) ## Pack extension as .crx (self-distribution)
 	@echo "Packing $(CRX_FILE)..."
 	@if [ -f "$(KEY_FILE)" ]; then \
-		"$(CHROME)" \
-			--pack-extension="$(CURDIR)" \
-			--pack-extension-key="$(CURDIR)/$(KEY_FILE)" \
-			--no-message-box 2>/dev/null; \
+	"$(CHROME)" \
+	--pack-extension="$(CURDIR)" \
+	--pack-extension-key="$(CURDIR)/$(KEY_FILE)" \
+	--no-message-box 2>/dev/null; \
 	else \
-		echo "No key file found — Chrome will generate $(KEY_FILE)"; \
-		"$(CHROME)" \
-			--pack-extension="$(CURDIR)" \
-			--no-message-box 2>/dev/null; \
+	echo "No key file found — Chrome will generate $(KEY_FILE)"; \
+	"$(CHROME)" \
+	--pack-extension="$(CURDIR)" \
+	--no-message-box 2>/dev/null; \
 	fi
 	@if [ -f "../$(notdir $(CURDIR)).crx" ]; then \
-		mv "../$(notdir $(CURDIR)).crx" "$(CRX_FILE)"; \
-		echo "Done: $(CRX_FILE)"; \
+	mv "../$(notdir $(CURDIR)).crx" "$(CRX_FILE)"; \
+	echo "Done: $(CRX_FILE)"; \
 	elif [ -f "../$(notdir $(CURDIR)).pem" ] && [ ! -f "$(KEY_FILE)" ]; then \
-		mv "../$(notdir $(CURDIR)).pem" "$(KEY_FILE)"; \
-		echo "Generated key: $(KEY_FILE) — run 'make crx' again to produce .crx"; \
+	mv "../$(notdir $(CURDIR)).pem" "$(KEY_FILE)"; \
+	echo "Generated key: $(KEY_FILE) — run 'make crx' again to produce .crx"; \
 	fi
 
 ## ── Utilities ───────────────────────────────────────────────────────────────
@@ -133,7 +121,6 @@ info: ## Show extension info
 help: ## Show this help
 	@echo "Usage: make [target]"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Output files go to: $(OUT_DIR)/"

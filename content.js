@@ -31,6 +31,9 @@
   initializeExtension();
 
   async function initializeExtension() {
+    // Initialize GA4 tracker
+    AegisTracker.init().catch(e => console.warn('[Aegis] Tracker init:', e));
+
     // Initialize platform
     let platform;
     const url = window.location.href;
@@ -286,6 +289,7 @@
           renderCurrentState(false);
           const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
           updateStats(classifiedCount, 0);
+          AegisTracker.trackClassification('ai', emails.length, classifiedCount);
 
         } else if (settings.analysisMode === 'nano') {
           // Nano AI mode — sequential batch processing with progressive rendering
@@ -325,6 +329,7 @@
               renderCurrentState(false);
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
+              AegisTracker.trackClassification('nano-fallback', emails.length, classifiedCount);
             } else {
               // Chunk emails into batches of NANO_BATCH_SIZE
               const chunks = [];
@@ -355,12 +360,14 @@
 
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
+              AegisTracker.trackClassification('nano', emails.length, classifiedCount);
             }
           } catch (err) {
             console.warn('[Aegis] Nano batch analysis error, falling back to local:', err);
             renderCurrentState(false);
             const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
             updateStats(classifiedCount, 0);
+            AegisTracker.trackClassification('nano-error', emails.length, classifiedCount);
           }
         } else {
           // Local analysis only
@@ -371,6 +378,7 @@
           renderCurrentState(false);
           const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
           updateStats(classifiedCount, 0);
+          AegisTracker.trackClassification('local', emails.length, classifiedCount);
         }
       } catch (err) {
         console.error('[Aegis] Analysis error:', err);
@@ -499,6 +507,7 @@
         console.log('[Aegis] Analysis complete. Showing popup. safetyScore:', analysis.safetyScore, 'category:', analysis.category?.name);
         emailPopup.show(analysis);
         updateStats(0, 1);
+        AegisTracker.trackSecurityScan(analysis.safetyScore, analysis.safetyLevel);
 
         // Submit email domain feedback (fire-and-forget, never blocks the user)
         if (emailData.senderEmail && emailData.senderEmail.includes('@')) {

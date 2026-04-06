@@ -1,3 +1,12 @@
+// ---- GA4 Analytics Tracker ----
+if (typeof importScripts === 'function') {
+  try { importScripts('src/analytics/tracker.js'); } catch (e) { console.warn('[Aegis] Tracker load failed:', e); }
+}
+// Fallback no-op tracker when module is not loaded (e.g. test environment)
+if (typeof AegisTracker === 'undefined') {
+  var AegisTracker = { init() { return Promise.resolve(); }, sendEvent() {}, trackInstall() {}, trackClassification() {}, trackSecurityScan() {}, trackDomainAnalysis() {}, trackUrlPageView() {}, trackCategoryAction() {}, trackSettingsChange() {} };
+}
+
 // ---- Aegis API feedback ----
 
 const AEGIS_API_BASE_URL = 'https://aegis.penrose.services';
@@ -392,6 +401,9 @@ async function analyzeDomain(url, tabId) {
   await setDomainCache(cache);
   await updateDomainBadge(tabId, entry.score);
 
+  // Track domain analysis event
+  AegisTracker.trackDomainAnalysis(baseDomain, entry.score, entry.level);
+
   return entry;
 }
 
@@ -443,7 +455,10 @@ async function trackUrlView(url, title) {
         timestamp: Date.now()
       });
       dayData.totalCount = dayData.views.length;
-      chrome.storage.local.set({ [storageKey]: dayData }, () => resolve(categoryId));
+      chrome.storage.local.set({ [storageKey]: dayData }, () => {
+        AegisTracker.trackUrlPageView(categoryId);
+        resolve(categoryId);
+      });
     });
   });
 }
@@ -854,6 +869,10 @@ const DEFAULT_SETTINGS = {
 };
 
 chrome.runtime.onInstalled.addListener(async () => {
+  // Initialize GA4 tracker and fire install event
+  await AegisTracker.init();
+  AegisTracker.trackInstall(_getExtensionVersion());
+
   const existing = await chrome.storage.sync.get(null);
   const merged = {};
 
@@ -1228,6 +1247,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'SAVE_SETTINGS') {
     chrome.storage.sync.set(message.settings, () => {
+      // Track settings changes
+      if (message.settings.analysisMode) {
+        AegisTracker.trackSettingsChange('analysisMode', message.settings.analysisMode);
+      }
       sendResponse({ ok: true });
     });
     return true;
