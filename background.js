@@ -412,6 +412,20 @@ async function analyzeDomain(url, tabId) {
 const URL_HISTORY_KEY = 'aegis_url_history';
 const URL_TRACKER_SETTINGS_KEY = 'aegis_url_tracker_settings';
 
+/**
+ * Detect if a hostname is a local/non-web address (localhost, IP, .local, etc.)
+ */
+function _isLocalAccess(hostname) {
+  if (!hostname) return false;
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return true;  // IPv4
+  if (hostname.startsWith('[') || hostname.includes(':')) return true;  // IPv6
+  if (hostname.endsWith('.local') || hostname.endsWith('.localhost')) return true;
+  // Single-word hostnames (no dots) are typically local network names
+  if (!hostname.includes('.')) return true;
+  return false;
+}
+
 function getDateKeyBg(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -440,7 +454,9 @@ async function trackUrlView(url, title) {
     if (!excl.includes('://') && (hostname === excl || hostname.endsWith('.' + excl))) return;
   }
 
-  const categoryId = (await categorizeUrlByDomain(url, categoriesData)) || 'uncategorized';
+  const categoryId = _isLocalAccess(hostname)
+    ? 'local-access'
+    : ((await categorizeUrlByDomain(url, categoriesData)) || 'uncategorized');
   const dateKey = getDateKeyBg(new Date());
   const storageKey = `${URL_HISTORY_KEY}_${dateKey}`;
 
@@ -602,12 +618,16 @@ async function _flushSession() {
 
   // Resolve category if not yet done
   if (!_activeSession.category || _activeSession.category === 'null') {
-    const categoriesData = await loadUrlCategories();
-    if (!_activeSession) return; // session may have been cleared during await
-    if (categoriesData) {
-      _activeSession.category = (await categorizeUrlByDomain(_activeSession.url, categoriesData)) || 'uncategorized';
+    if (_isLocalAccess(_activeSession.domain)) {
+      _activeSession.category = 'local-access';
     } else {
-      _activeSession.category = 'uncategorized';
+      const categoriesData = await loadUrlCategories();
+      if (!_activeSession) return; // session may have been cleared during await
+      if (categoriesData) {
+        _activeSession.category = (await categorizeUrlByDomain(_activeSession.url, categoriesData)) || 'uncategorized';
+      } else {
+        _activeSession.category = 'uncategorized';
+      }
     }
   }
 
@@ -845,6 +865,54 @@ async function cleanupOldUrlHistory() {
   });
 }
 
+// ---- Migration: reclassify localhost/IP time data as 'local-access' ----
+
+async function _migrateLocalAccessTimeData() {
+  chrome.storage.local.get(null, (all) => {
+    const updates = {};
+    for (const key of Object.keys(all)) {
+      if (!key.startsWith('aegis_url_time_')) continue;
+      const dayData = all[key];
+      if (!dayData || !dayData.domains) continue;
+
+      let changed = false;
+      for (const [domain, info] of Object.entries(dayData.domains)) {
+        if (_isLocalAccess(domain) && info.category !== 'local-access') {
+          const oldCat = info.category || 'uncategorized';
+          const ms = info.ms || 0;
+
+          // Move ms from old category to local-access
+          if (dayData.categories && dayData.categories[oldCat]) {
+            dayData.categories[oldCat] -= ms;
+            if (dayData.categories[oldCat] <= 0) delete dayData.categories[oldCat];
+          }
+          if (!dayData.categories) dayData.categories = {};
+          dayData.categories['local-access'] = (dayData.categories['local-access'] || 0) + ms;
+
+          info.category = 'local-access';
+          changed = true;
+        }
+      }
+
+      // Also clean up 'null' category key
+      if (dayData.categories && dayData.categories['null']) {
+        const nullMs = dayData.categories['null'];
+        delete dayData.categories['null'];
+        dayData.categories['uncategorized'] = (dayData.categories['uncategorized'] || 0) + nullMs;
+        changed = true;
+      }
+
+      if (changed) updates[key] = dayData;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      chrome.storage.local.set(updates, () => {
+        console.log('[Aegis] Migrated', Object.keys(updates).length, 'days of time data for local-access');
+      });
+    }
+  });
+}
+
 // ---- Default settings ----
 
 const DEFAULT_SETTINGS = {
@@ -907,6 +975,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Initial URL categories sync on install/update
   syncUrlCategories();
+
+  // One-time migration: reclassify localhost/IP time data as 'local-access'
+  _migrateLocalAccessTimeData();
 });
 
 function buildUserMessage(emailData) {

@@ -234,7 +234,7 @@
       "bgColor": "#ede7f6",
       "domains": [
         "chat.openai.com", "platform.openai.com", "openai.com",
-        "claude.ai", "console.anthropic.com", "anthropic.com",
+        "claude.ai", "code.claude.com", "console.anthropic.com", "anthropic.com",
         "gemini.google.com", "aistudio.google.com",
         "ai.google.dev",
         "copilot.microsoft.com", "copilot.github.com",
@@ -261,7 +261,8 @@
         "v0.dev",
         "phind.com", "you.com",
         "deepseek.com", "chat.deepseek.com",
-        "qwen.ai"
+        "qwen.ai",
+        "claudemarketplace.com"
       ]
     },
     {

@@ -103,10 +103,10 @@ async function getCategoryBreakdown(days) {
     const cat = categories.find(c => c.id === catId);
     breakdown.push({
       categoryId: catId,
-      name: cat ? cat.name : (catId === 'uncategorized' ? 'Uncategorized' : catId),
-      emoji: cat ? cat.emoji : '?',
-      color: cat ? cat.color : '#9e9e9e',
-      bgColor: cat ? cat.bgColor : '#f5f5f5',
+      name: cat ? cat.name : (catId === 'uncategorized' ? 'Uncategorized' : catId === 'local-access' ? 'Local Access' : catId),
+      emoji: cat ? cat.emoji : (catId === 'local-access' ? '🖥️' : '?'),
+      color: cat ? cat.color : (catId === 'local-access' ? '#6d4c41' : '#9e9e9e'),
+      bgColor: cat ? cat.bgColor : (catId === 'local-access' ? '#efebe9' : '#f5f5f5'),
       count
     });
   }
@@ -253,11 +253,13 @@ function getDailyTimeFromData(timeData) {
 function getTimeCategoryBreakdown(timeData) {
   const catTotals = {};
   for (const dayData of Object.values(timeData)) {
-    if (!dayData.categories) continue;
-    for (const [rawCatId, ms] of Object.entries(dayData.categories)) {
-      // Treat null/undefined/empty keys as uncategorized
-      const catId = (!rawCatId || rawCatId === 'null' || rawCatId === 'undefined') ? 'uncategorized' : rawCatId;
-      catTotals[catId] = (catTotals[catId] || 0) + ms;
+    // Rebuild from domain-level data (authoritative) instead of stale category totals
+    if (dayData.domains) {
+      for (const info of Object.values(dayData.domains)) {
+        const rawCatId = info.category;
+        const catId = (!rawCatId || rawCatId === 'null' || rawCatId === 'undefined') ? 'uncategorized' : rawCatId;
+        catTotals[catId] = (catTotals[catId] || 0) + (info.ms || 0);
+      }
     }
   }
 
@@ -267,10 +269,10 @@ function getTimeCategoryBreakdown(timeData) {
     const cat = categories.find(c => c.id === catId);
     breakdown.push({
       categoryId: catId,
-      name: cat ? cat.name : (catId === 'uncategorized' ? 'Uncategorized' : catId),
-      emoji: cat ? cat.emoji : '?',
-      color: cat ? cat.color : '#9e9e9e',
-      bgColor: cat ? cat.bgColor : '#f5f5f5',
+      name: cat ? cat.name : (catId === 'uncategorized' ? 'Uncategorized' : catId === 'local-access' ? 'Local Access' : catId),
+      emoji: cat ? cat.emoji : (catId === 'local-access' ? '🖥️' : '?'),
+      color: cat ? cat.color : (catId === 'local-access' ? '#6d4c41' : '#9e9e9e'),
+      bgColor: cat ? cat.bgColor : (catId === 'local-access' ? '#efebe9' : '#f5f5f5'),
       ms
     });
   }
