@@ -47,9 +47,10 @@ const NanoAnalyzer = (() => {
           expectedInputLanguages: ['en', 'zh', 'ja'],
           expectedOutputLanguages: ['en']
         });
-        // Normalize: newer Chrome returns 'available', older returned 'readily'
+        // Normalize Chrome status values
         if (status === 'readily') return 'available';
-        return status;
+        if (status === 'after-download') return 'downloadable';
+        return status || 'unavailable';
       }
       // Chrome 131-137: self.ai.languageModel
       if (typeof self.ai !== 'undefined' && self.ai && self.ai.languageModel) {

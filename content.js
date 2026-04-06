@@ -324,7 +324,7 @@
 
           try {
             const availability = await NanoAnalyzer.checkAvailability();
-            if (availability !== 'available') {
+            if (availability !== 'available' && availability !== 'downloadable') {
               console.warn('[Aegis] Gemini Nano not available (' + availability + '), falling back to local analysis');
               renderCurrentState(false);
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
@@ -338,6 +338,7 @@
               }
 
               const labelNames = labels.map(l => l.name);
+              let nanoSuccessCount = 0;
 
               // Process each batch sequentially with progressive rendering
               for (let ci = 0; ci < chunks.length; ci++) {
@@ -350,6 +351,9 @@
                   }));
 
                   const nanoResult = await NanoAnalyzer.batchAnalyze(batchData, labelNames);
+                  if (nanoResult && nanoResult.results && nanoResult.results.length > 0) {
+                    nanoSuccessCount += nanoResult.results.length;
+                  }
                   applyNanoResults(nanoResult, emails, chunks[ci].startIndex);
                 } catch (err) {
                   console.warn('[Aegis] Nano batch', ci, 'failed:', err);
@@ -358,9 +362,16 @@
                 renderCurrentState(ci < chunks.length - 1); // true = still loading, false = final
               }
 
+              // If Nano produced zero results, warn the user
+              if (nanoSuccessCount === 0 && emails.length > 0) {
+                console.warn('[Aegis] Nano AI returned no results — model may need re-downloading. Showing keyword fallback.');
+                const headerStats = document.querySelector('.aegis-header-stats');
+                if (headerStats) headerStats.innerHTML = '⚠️ <span>Nano AI unavailable — using keyword rules</span>';
+              }
+
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
-              AegisTracker.trackClassification('nano', emails.length, classifiedCount);
+              AegisTracker.trackClassification(nanoSuccessCount > 0 ? 'nano' : 'nano-fallback', emails.length, classifiedCount);
             }
           } catch (err) {
             console.warn('[Aegis] Nano batch analysis error, falling back to local:', err);

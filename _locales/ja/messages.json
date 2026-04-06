@@ -238,6 +238,12 @@
   "optNanoFlagsNote": {
     "message": "両方のフラグを有効にして再起動した後、ここに戻って Nano AI を選択してください。"
   },
+  "optNanoTroubleshoot": {
+    "message": "トラブルシューティング："
+  },
+  "optNanoResetModel": {
+    "message": "でモデルの状態を確認し、必要に応じて再ダウンロードしてください。"
+  },
   "optDownloadModel": {
     "message": "モデルをダウンロード"
   },
@@ -428,7 +434,7 @@
     "message": "Prompt API が利用できません。必要な Chrome フラグを有効にして Chrome を再起動してください。"
   },
   "optNanoUnavailable": {
-    "message": "Gemini Nano が利用できません。必要な Chrome フラグを有効にして Chrome を再起動するか、デバイスがハードウェア要件を満たしているか確認してください。"
+    "message": "Gemini Nano が利用できません。モデルがクラッシュした場合は chrome://on-device-internals でリセットしてください。それ以外の場合は Chrome フラグを有効にして再起動してください。"
   },
   "optNanoCheckFailed": {
     "message": "Gemini Nano の利用可否を確認できませんでした。"

@@ -1098,27 +1098,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'CHECK_NANO_AVAILABILITY') {
-    // The only reliable way to check if Chrome flags are enabled is to try
-    // LanguageModel.create(). availability() returns 'available' even when
-    // flags are disabled if the model was previously downloaded.
+    // Use availability() to check status without triggering a download.
+    // create() is only used when the user explicitly triggers download.
     try {
       if (!('LanguageModel' in self)) {
         sendResponse({ status: 'no-api' });
         return true;
       }
-      // Step 1: Try creating a session — this is the real flags check
+      LanguageModel.availability({
+        expectedInputLanguages: ['en', 'zh', 'ja'],
+        expectedOutputLanguages: ['en']
+      }).then(status => {
+        // Normalize: 'readily' (older Chrome) → 'available'
+        const normalized = status === 'readily' ? 'available' : status;
+        // Map Chrome's 'after-download' to our 'downloadable'
+        const mapped = normalized === 'after-download' ? 'downloadable' : normalized;
+        sendResponse({ status: mapped || 'unavailable' });
+      }).catch(() => {
+        sendResponse({ status: 'unavailable' });
+      });
+    } catch (e) {
+      sendResponse({ status: 'error', error: e.message });
+    }
+    return true;
+  }
+
+  if (message.type === 'PROBE_NANO_CREATE') {
+    // Actually try LanguageModel.create() to verify the model is downloaded
+    try {
+      if (!('LanguageModel' in self)) {
+        sendResponse({ ok: false });
+        return true;
+      }
       LanguageModel.create({
         expectedInputLanguages: ['en'],
         expectedOutputLanguages: ['en']
       }).then(session => {
         session.destroy();
-        sendResponse({ status: 'available' });
+        sendResponse({ ok: true });
       }).catch(() => {
-        // create() failed — flags are likely disabled
-        sendResponse({ status: 'unavailable' });
+        sendResponse({ ok: false });
       });
     } catch (e) {
-      sendResponse({ status: 'error', error: e.message });
+      sendResponse({ ok: false });
     }
     return true;
   }

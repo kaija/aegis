@@ -238,6 +238,12 @@
   "optNanoFlagsNote": {
     "message": "After enabling both flags and relaunching, return here and select Nano AI."
   },
+  "optNanoTroubleshoot": {
+    "message": "Troubleshooting:"
+  },
+  "optNanoResetModel": {
+    "message": "to check model status and re-download if needed."
+  },
   "optDownloadModel": {
     "message": "Download Model"
   },
@@ -428,7 +434,7 @@
     "message": "Prompt API is not available. Please enable the required Chrome flags and relaunch Chrome."
   },
   "optNanoUnavailable": {
-    "message": "Gemini Nano is not available. Please enable the required Chrome flags and relaunch Chrome, or check that your device meets the hardware requirements."
+    "message": "Gemini Nano is not available. If the model crashed, visit chrome://on-device-internals to reset it. Otherwise, enable the required Chrome flags and relaunch Chrome."
   },
   "optNanoCheckFailed": {
     "message": "Failed to check Gemini Nano availability."

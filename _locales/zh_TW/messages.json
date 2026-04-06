@@ -238,6 +238,12 @@
   "optNanoFlagsNote": {
     "message": "啟用兩個 flags 並重新啟動後，回到此頁面選擇 Nano AI。"
   },
+  "optNanoTroubleshoot": {
+    "message": "疑難排解："
+  },
+  "optNanoResetModel": {
+    "message": "檢查模型狀態，如需要可重新下載。"
+  },
   "optDownloadModel": {
     "message": "下載模型"
   },
@@ -428,7 +434,7 @@
     "message": "Prompt API 不可用。請啟用所需的 Chrome flags 並重新啟動 Chrome。"
   },
   "optNanoUnavailable": {
-    "message": "Gemini Nano 不可用。請啟用所需的 Chrome flags 並重新啟動 Chrome，或確認您的裝置符合硬體需求。"
+    "message": "Gemini Nano 不可用。如果模型崩潰，請前往 chrome://on-device-internals 重置。否則請啟用所需的 Chrome flags 並重新啟動 Chrome。"
   },
   "optNanoCheckFailed": {
     "message": "無法檢查 Gemini Nano 可用性。"

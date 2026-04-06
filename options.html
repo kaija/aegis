@@ -69,7 +69,7 @@
           </div>
         </label>
       </div>
-      <div id="nanoFlagsGuide" class="nano-flags-guide" style="display:none;">
+      <div id="nanoFlagsGuide" class="nano-flags-guide">
           <div class="nano-flags-icon">⚠️</div>
           <div class="nano-flags-body">
             <strong data-i18n="optNanoFlagsRequired">Chrome flags required to enable Nano AI</strong>
@@ -85,6 +85,12 @@
               </li>
             </ol>
             <p class="nano-flags-note" data-i18n="optNanoFlagsNote">After enabling both flags and relaunching, return here and select Nano AI.</p>
+            <p class="nano-flags-note" style="margin-top: 8px;">
+              <strong data-i18n="optNanoTroubleshoot">Troubleshooting:</strong>
+              If the model crashed, open
+              <a href="javascript:void(0)" class="nano-flag-link" data-flag="chrome://on-device-internals"><code>chrome://on-device-internals</code></a>
+              <span data-i18n="optNanoResetModel">to check model status and re-download if needed.</span>
+            </p>
           </div>
         </div>
 

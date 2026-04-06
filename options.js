@@ -77,12 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('aiSettingsSection').style.display = 'block';
         document.getElementById('categoriesSection').style.display = 'none';
         nanoStatusSection.style.display = 'none';
-        nanoFlagsGuide.style.display = 'none';
       } else {
         document.getElementById('aiSettingsSection').style.display = 'none';
         document.getElementById('categoriesSection').style.display = 'block';
         nanoStatusSection.style.display = 'none';
-        nanoFlagsGuide.style.display = 'none';
       }
     });
   });
@@ -721,12 +719,12 @@ async function checkNanoFlagsAndDisable() {
     status = 'no-api';
   }
 
-  if (status === 'available') {
-    // API works — enable the card
+  if (status === 'available' || status === 'downloadable' || status === 'downloading') {
+    // API works or model needs download — enable the card
     if (nanoCard) nanoCard.classList.remove('ae-card-disabled');
     if (nanoRadio) nanoRadio.disabled = false;
   } else {
-    // API not working — gray out
+    // API not available (no-api, unavailable) — gray out
     if (nanoCard) {
       nanoCard.classList.add('ae-card-disabled');
       if (nanoRadio) {
@@ -736,12 +734,15 @@ async function checkNanoFlagsAndDisable() {
           const localRadio = document.querySelector('input[name="analysisMode"][value="local"]');
           if (localRadio) {
             localRadio.checked = true;
-            localRadio.dispatchEvent(new Event('change'));
           }
         }
       }
     }
+    document.getElementById('nanoStatusSection').style.display = 'block';
+    updateNanoStatus('red', status === 'no-api' ? t('optNanoNoApi') : t('optNanoUnavailable'));
   }
+  // Always show the flags guide so users can see how to enable/troubleshoot Nano
+  document.getElementById('nanoFlagsGuide').style.display = 'flex';
 }
 
 async function checkNanoAvailability() {
@@ -754,6 +755,7 @@ async function checkNanoAvailability() {
 
   let status = 'no-api';
 
+  // Step 1: Quick check via availability()
   try {
     const result = await Promise.race([
       new Promise(resolve => {
@@ -772,6 +774,29 @@ async function checkNanoAvailability() {
     status = 'no-api';
   }
 
+  // Step 2: If availability says 'available', verify with create() probe
+  // (availability() can return stale 'available' after model deletion)
+  if (status === 'available') {
+    updateNanoStatus('amber', 'Verifying model...');
+    try {
+      const probeResult = await Promise.race([
+        new Promise(resolve => {
+          chrome.runtime.sendMessage({ type: 'PROBE_NANO_CREATE' }, (res) => {
+            if (chrome.runtime.lastError || !res) resolve({ ok: false });
+            else resolve(res);
+          });
+        }),
+        new Promise(resolve => setTimeout(() => resolve({ ok: false, timeout: true }), 8000))
+      ]);
+      if (!probeResult.ok) {
+        // create() failed — model is missing, needs re-download
+        status = 'downloadable';
+      }
+    } catch {
+      status = 'downloadable';
+    }
+  }
+
   switch (status) {
     case 'available':
       updateNanoStatus('green', t('optNanoReady'));
@@ -786,12 +811,15 @@ async function checkNanoAvailability() {
       break;
     case 'no-api':
       updateNanoStatus('red', t('optNanoNoApi'));
+      document.getElementById('nanoFlagsGuide').style.display = 'flex';
       break;
     case 'unavailable':
       updateNanoStatus('red', t('optNanoUnavailable'));
+      document.getElementById('nanoFlagsGuide').style.display = 'flex';
       break;
     default:
       updateNanoStatus('red', t('optNanoCheckFailed'));
+      document.getElementById('nanoFlagsGuide').style.display = 'flex';
       break;
   }
 }

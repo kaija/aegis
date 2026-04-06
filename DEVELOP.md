@@ -448,7 +448,22 @@ make info   # 顯示版本、Chrome 路徑等資訊
 3. 「載入未封裝項目」→ 選 `dist/`
 4. 修改程式碼後：`make dev` → extensions 頁面按 🔄 重新整理
 
-**版本號：** 修改 `manifest.json` 的 `version` 欄位，`make zip` / `make info` 會自動讀取。
+**版本號：** 修改以下兩處，`make zip` / `make info` 會自動讀取：
+
+1. `manifest.json` → `"version"` 欄位
+2. `popup.html` → `<div class="footer-version" id="versionText">v{X.Y.Z}</div>`
+
+```bash
+# 範例：升版到 1.6.0
+# 1. manifest.json
+"version": "1.6.0"
+
+# 2. popup.html
+<div class="footer-version" id="versionText">v1.6.0</div>
+```
+
+> popup.js 會在執行時從 `chrome.runtime.getManifest().version` 動態覆寫 `#versionText`，
+> 但 popup.html 的靜態值作為 fallback，兩處應保持一致。
 
 ---
 

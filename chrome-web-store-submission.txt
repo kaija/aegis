@@ -1,0 +1,131 @@
+============================================================
+Chrome Web Store Submission — Aegis
+============================================================
+
+
+== What's New!!! (English) ==
+
+v1.5.0
+*Multi-Language Support* - Aegis now speaks your language! Full support for English, Traditional Chinese, and Japanese — switches automatically based on your browser language.
+*Domain Analyzer* - Browse with confidence! Aegis instantly checks every website you visit and shows a trust score right on the icon. Is this site legit? How old is the domain? Where's the server? Now you'll know before you click.
+
+Special thanks to Ed for contributing to this release!
+
+v1.3.0
+*Gemini Nano AI Local Model Supported* - Enable Gemini Nano local AI model. Enjoy free AI and keep your data in privacy.
+
+
+== 最新消息!!! (繁體中文) ==
+
+v1.5.0
+*多語系支援* - Aegis 現在會說您的語言！完整支援英文、繁體中文和日文，根據瀏覽器語言自動切換。
+*網域安全分析* - 安心瀏覽每一個網站！Aegis 即時檢查您造訪的每個網站，並在圖示上顯示信任評分。這個網站可靠嗎？網域註冊多久了？伺服器在哪裡？點一下就知道。
+
+特別感謝 Ed 對本次更新的貢獻！
+
+v1.3.0
+*Gemini Nano AI 本地模型支援* - 啟用 Gemini Nano 本地 AI 模型，免費享受 AI 分類功能，資料完全不離開您的裝置。
+
+
+== 最新情報!!! (日本語) ==
+
+v1.5.0
+*多言語対応* - Aegis があなたの言語で使えるようになりました！英語・繁体字中国語・日本語に完全対応、ブラウザの言語設定に合わせて自動切り替え。
+*ドメインアナライザー* - 安心してブラウジング！訪問するすべてのサイトを即座にチェックし、アイコンに信頼スコアを表示。このサイトは安全？ドメインはいつ登録された？サーバーはどこ？クリックするだけですべてがわかります。
+
+Ed のご貢献に特別な感謝を！
+
+v1.3.0
+*Gemini Nano AI ローカルモデル対応* - Gemini Nano ローカル AI モデルを有効にして、無料で AI 分類を体験。データは完全にあなたのデバイス内で保護されます。
+
+
+== Store Description (English) ==
+
+Aegis — Your All-in-One Email & Browsing Shield
+
+Tired of phishing emails and sketchy websites? Aegis protects you on two fronts: it guards your inbox and watches over every site you visit.
+
+Smart Email Organizer — Open Gmail and Aegis instantly sorts your inbox into categories like Work, Shopping, Finance, and more. No more drowning in unread emails. Choose built-in rules for speed, or plug in your favorite AI model for even smarter sorting. Create your own categories with custom colors, icons, and keywords.
+
+Email Safety Scanner — Click on any email and Aegis gives it a safety score from 0 to 100. It spots phishing tricks, flags suspicious links, and checks sender reputation — all in real time, all on your device. Your emails never leave your browser.
+
+Domain Trust Checker — Visit any website and Aegis shows a color-coded trust score right on the extension icon: green means safe, amber means caution, red means danger. Click for the full story — when was this domain registered? Who owns it? Where's the server located? Brand-new domains and servers in risky regions get flagged automatically so you can browse with peace of mind.
+
+Browsing Insights — See where your time goes online. Aegis categorizes your browsing across 20+ categories and shows beautiful charts of your daily habits, trends, and screen time. Export your data anytime.
+
+Privacy First — Everything runs locally in your browser. No accounts, no cloud processing, no data collection. Your emails and browsing history stay yours.
+
+
+== Store Description (繁體中文) ==
+
+Aegis — 您的全方位郵件與瀏覽防護盾
+
+受夠了釣魚郵件和可疑網站？Aegis 從兩個方面保護您：守護您的收件匣，同時監控您造訪的每個網站。
+
+智慧郵件分類 — 打開 Gmail，Aegis 立即將您的收件匣整理成工作、購物、財務等分類。不再被未讀郵件淹沒。使用內建規則快速分類，或連接您喜歡的 AI 模型進行更智慧的排序。還能自訂分類的顏色、圖示和關鍵字。
+
+郵件安全掃描 — 點擊任何郵件，Aegis 會給出 0 到 100 的安全評分。即時偵測釣魚手法、標記可疑連結、檢查寄件者信譽 — 全部在您的裝置上完成，郵件內容絕不外傳。
+
+網域信任檢查 — 造訪任何網站，Aegis 會在擴充功能圖示上顯示顏色標示的信任評分：綠色代表安全、黃色代表注意、紅色代表危險。點擊查看完整資訊 — 這個網域何時註冊？擁有者是誰？伺服器在哪裡？新註冊的網域和位於高風險地區的伺服器會自動被標記，讓您安心瀏覽。
+
+瀏覽分析 — 了解您的上網時間花在哪裡。Aegis 將您的瀏覽紀錄分為 20 多個類別，以精美圖表呈現每日習慣、趨勢和螢幕使用時間。隨時匯出您的資料。
+
+隱私優先 — 所有功能都在瀏覽器本機運行。無需帳號、無雲端處理、無資料收集。您的郵件和瀏覽紀錄完全屬於您。
+
+
+== Store Description (日本語) ==
+
+Aegis — メールとブラウジングを守るオールインワンシールド
+
+フィッシングメールや怪しいサイトにうんざりしていませんか？Aegis は二つの面からあなたを守ります：受信トレイを保護し、訪問するすべてのサイトを監視します。
+
+スマートメール整理 — Gmail を開くと、Aegis が受信トレイを仕事、ショッピング、財務などのカテゴリに自動分類。未読メールに埋もれる日々はもう終わりです。内蔵ルールでスピーディーに、またはお好みの AI モデルを接続してさらに賢く分類。カスタムカラー、アイコン、キーワードで独自のカテゴリも作成できます。
+
+メール安全スキャナー — メールをクリックすると、Aegis が 0〜100 の安全スコアを表示。フィッシングの手口を検出し、不審なリンクを警告し、送信者の信頼性をチェック — すべてリアルタイムで、すべてあなたのデバイス上で完結。メールの内容がブラウザの外に出ることはありません。
+
+ドメイン信頼チェッカー — ウェブサイトを訪問すると、拡張機能のアイコンに色分けされた信頼スコアが表示：緑は安全、黄色は注意、赤は危険。クリックで詳細を確認 — このドメインはいつ登録された？所有者は誰？サーバーはどこにある？新しく登録されたドメインやリスクの高い地域のサーバーは自動的にフラグが立てられるので、安心してブラウジングできます。
+
+ブラウジング分析 — オンライン時間の使い方を可視化。Aegis がブラウジングを 20 以上のカテゴリに分類し、美しいチャートで毎日の習慣、トレンド、スクリーンタイムを表示します。データはいつでもエクスポート可能。
+
+プライバシー最優先 — すべてブラウザ内でローカルに動作。アカウント不要、クラウド処理なし、データ収集なし。あなたのメールと閲覧履歴は完全にあなたのものです。
+
+
+== Single Purpose Description ==
+
+Aegis helps users organize their Gmail inbox, detect email security threats, analyze website domain safety, and understand their browsing habits — all from a single extension. It categorizes emails using keyword rules or AI, scores email safety with phishing detection, evaluates domain trustworthiness via registration age and server geolocation, and tracks browsing activity across 20+ website categories with visual analytics.
+
+
+== Permission Justifications ==
+
+--- storage ---
+Used to persist user settings (analysis mode, AI configuration, custom categories), EULA acceptance state, browsing history data, URL category mappings, and anonymous feedback preferences across sessions and devices via chrome.storage.sync and chrome.storage.local.
+
+--- activeTab ---
+Used to access the currently active tab's URL and title for URL categorization and browsing analytics tracking. This allows the extension to determine which website category the user is visiting without requiring broad host permissions for every page.
+
+--- scripting ---
+Used to inject the URL feedback widget into web pages when a user visits an uncategorized URL and has feedback mode enabled. The widget allows users to assign a category to the current site, improving the community URL category database.
+
+--- alarms ---
+Used to schedule periodic background tasks: weekly whitelist refresh, weekly URL category list sync from the server, daily cleanup of browsing history older than 30 days, and periodic flush of active browsing time tracking data (every 15 seconds).
+
+--- webNavigation ---
+Used to detect when a user completes navigating to a new page (top-level frame only). This triggers URL categorization, browsing time tracking for the analytics dashboard, domain security analysis (RDAP registration lookup and server geolocation scoring), and determines whether to show the feedback widget on uncategorized sites.
+
+--- idle ---
+Used to detect when the user is idle or has locked their screen, so the extension can pause active browsing time tracking. This ensures the analytics dashboard accurately reflects actual screen time rather than counting idle periods.
+
+--- tabs ---
+Used to get the URL and title of the active tab when tab focus changes or a tab updates. This is required for accurate browsing time tracking — the extension needs to know which tab is active to attribute time to the correct website category.
+
+--- Host permissions (<all_urls>) ---
+Required for multiple purposes: (1) content scripts inject into Gmail pages (mail.google.com) to provide email categorization and security analysis UI, (2) the webNavigation API needs host access to track page navigations across all sites for the browsing analytics feature, and (3) the domain security analyzer fetches registration data from rdap.org, resolves DNS via dns.google, and queries server geolocation from ip-api.com to score domain trustworthiness. The extension also makes API calls to its own backend (aegis.penrose.services) for syncing URL category lists and submitting anonymous feedback.
+
+
+== Remote Code Declaration ==
+
+Are you using remote code?
+Yes
+
+--- Reason ---
+The extension connects to an OpenAI-compatible API endpoint (user-configured, default: api.openai.com) to perform AI-powered email categorization when the user enables AI mode in settings. The API key and endpoint URL are provided by the user in the extension settings page. The extension sends email metadata (subject, sender) to the configured API and receives a JSON classification response. No remote JavaScript code is loaded or executed — only REST API calls are made for data processing. Additionally, the extension fetches JSON data from its own backend API (aegis.penrose.services) to sync URL category lists and service whitelists. The domain security analyzer queries three external APIs for domain intelligence: rdap.org (WHOIS/RDAP registration data), dns.google (DNS-over-HTTPS resolution), and ip-api.com (IP geolocation). All responses are pure JSON data used for scoring — no executable code is loaded from these services. Results are cached locally for 7 days to minimize API calls.
