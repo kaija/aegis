@@ -4,6 +4,7 @@ class AnalysisPanel {
   constructor(platform) {
     this.platform = platform;
     this.panel = null;
+    this._fallbackMessage = null;
   }
 
   show(groups, labels, options = {}) {
@@ -49,6 +50,12 @@ class AnalysisPanel {
         <div class="aegis-spinner" id="aegis-spinner"></div>
         <button class="aegis-close-btn" id="aegis-panel-close">✕</button>
       </div>
+      <div id="aegis-progress-container" style="display:none;padding:5px 12px 6px;border-bottom:1px solid #e0e0e0;background:#f8f9fa;">
+        <div style="height:3px;background:#e0e0e0;border-radius:2px;margin-bottom:4px;">
+          <div id="aegis-progress-fill" style="height:100%;background:#1a73e8;border-radius:2px;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+        <div id="aegis-progress-label" style="font-size:11px;color:#5f6368;text-align:center;"></div>
+      </div>
       <div class="aegis-panel-body" id="aegis-panel-body"></div>
       <div class="aegis-panel-footer" id="aegis-panel-footer"></div>
     `;
@@ -77,6 +84,47 @@ class AnalysisPanel {
     return panel;
   }
 
+  showNotification(message, type = 'info', action = null) {
+    this._showNotification(message, type, action);
+  }
+
+  updateBatchProgress(completed, total) {
+    if (!this.panel) return;
+    const container = this.panel.querySelector('#aegis-progress-container');
+    const fill = this.panel.querySelector('#aegis-progress-fill');
+    const label = this.panel.querySelector('#aegis-progress-label');
+    if (!container) return;
+    if (completed === null || !total) {
+      container.style.display = 'none';
+      return;
+    }
+    const pct = Math.min(Math.round((completed / total) * 100), 100);
+    container.style.display = 'block';
+    if (fill) fill.style.width = pct + '%';
+    if (label) label.textContent = t('progressClassifying', completed, total);
+  }
+
+  showFallbackBanner(message) {
+    this._fallbackMessage = message;
+    if (this.panel && document.contains(this.panel)) {
+      const body = this.panel.querySelector('#aegis-panel-body');
+      if (body) {
+        const existing = body.querySelector('.aegis-fallback-banner');
+        if (existing) existing.remove();
+        this._applyFallbackBanner(body);
+      }
+    }
+  }
+
+  _applyFallbackBanner(bodyEl) {
+    if (!this._fallbackMessage || !bodyEl) return;
+    const banner = document.createElement('div');
+    banner.className = 'aegis-fallback-banner';
+    banner.style.cssText = 'background:#fff8e1;border-left:3px solid #f9ab00;color:#7d4e00;padding:7px 12px;font-size:12px;margin:6px 8px 2px;border-radius:4px;';
+    banner.textContent = this._fallbackMessage;
+    bodyEl.insertBefore(banner, bodyEl.firstChild);
+  }
+
   _render(groups, labels, isLoading = false) {
     const body = this.panel.querySelector('#aegis-panel-body');
     const footer = this.panel.querySelector('#aegis-panel-footer');
@@ -103,6 +151,7 @@ class AnalysisPanel {
         `;
         footer.textContent = t('footerZeroEmails');
       }
+      this._applyFallbackBanner(body);
       return;
     }
 
@@ -125,6 +174,7 @@ class AnalysisPanel {
     }
 
     footer.textContent = t('panelFooterStats', totalEmails, groups.size);
+    this._applyFallbackBanner(body);
   }
 
   _createCategoryGroup(category, emails, labels) {
@@ -206,23 +256,25 @@ class AnalysisPanel {
 
       const rows = selectedItems.map(item => item._emailRow).filter(Boolean);
 
-      let success = true;
-      if (rows.length > 0 && this.platform) {
-        success = await this.platform.deleteEmails(rows).catch(() => false);
-      }
-
-      if (success !== false) { // deletion was confirmed or there was nothing to delete
-        selectedItems.forEach(item => item.remove());
-
-        // Update count
-        const remaining = list.querySelectorAll('.aegis-email-item').length;
-        header.querySelector('.aegis-category-count').textContent = remaining;
-
-        if (remaining === 0) group.remove();
-      } else {
-        const platformName = this.platform ? this.platform.getName() : t('platformFallback');
-        this._showNotification(t('deleteError', platformName), 'error');
-      }
+      const doDelete = async () => {
+        let success = true;
+        if (rows.length > 0 && this.platform) {
+          success = await this.platform.deleteEmails(rows).catch(() => false);
+        }
+        if (success !== false) {
+          selectedItems.forEach(item => item.remove());
+          const remaining = list.querySelectorAll('.aegis-email-item').length;
+          header.querySelector('.aegis-category-count').textContent = remaining;
+          if (remaining === 0) group.remove();
+        } else {
+          const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+          this._showNotification(t('deleteError', platformName), 'error', {
+            label: t('retryBtn'),
+            callback: doDelete
+          });
+        }
+      };
+      await doDelete();
     });
 
     // Wire up move all to category label button
@@ -251,26 +303,29 @@ class AnalysisPanel {
         moveAllBtn.textContent = t('moving');
         moveAllBtn.disabled = true;
 
-        // 3. Perform move
-        let success = true;
-        try {
-          success = await this.platform.moveToLabel(rows, targetLabelText);
-        } catch (e) {
-          success = false;
-        }
-
-        if (success !== false) {
-          selectedItems.forEach(item => item.remove());
-          const remaining = list.querySelectorAll('.aegis-email-item').length;
-          header.querySelector('.aegis-category-count').textContent = remaining;
-          if (remaining === 0) group.remove();
-        } else {
-          const platformName = this.platform ? this.platform.getName() : t('platformFallback');
-          this._showNotification(t('moveError', targetLabelText, platformName), 'error');
-        }
-
-        moveAllBtn.textContent = t('moveAllToLabel', category.name);
-        moveAllBtn.disabled = false;
+        const doMoveAll = async () => {
+          let success = true;
+          try {
+            success = await this.platform.moveToLabel(rows, targetLabelText);
+          } catch (e) {
+            success = false;
+          }
+          if (success !== false) {
+            selectedItems.forEach(item => item.remove());
+            const remaining = list.querySelectorAll('.aegis-email-item').length;
+            header.querySelector('.aegis-category-count').textContent = remaining;
+            if (remaining === 0) group.remove();
+          } else {
+            const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+            this._showNotification(t('moveError', targetLabelText, platformName), 'error', {
+              label: t('retryBtn'),
+              callback: doMoveAll
+            });
+          }
+          moveAllBtn.textContent = t('moveAllToLabel', category.name);
+          moveAllBtn.disabled = false;
+        };
+        await doMoveAll();
       });
     }
 
@@ -310,20 +365,25 @@ class AnalysisPanel {
       item.textContent = label.name;
       item.addEventListener('click', async () => {
         picker.remove();
-        let success = true;
-        if (rows.length > 0 && this.platform) {
-          success = await this.platform.moveToLabel(rows, label.name).catch(() => false);
-        }
-
-        if (success !== false) {
-          selectedItems.forEach(item => item.remove());
-          const remaining = list.querySelectorAll('.aegis-email-item').length;
-          header.querySelector('.aegis-category-count').textContent = remaining;
-          if (remaining === 0) group.remove();
-        } else {
-          const platformName = this.platform ? this.platform.getName() : t('platformFallback');
-          this._showNotification(t('moveOperationError', platformName), 'error');
-        }
+        const doMove = async () => {
+          let success = true;
+          if (rows.length > 0 && this.platform) {
+            success = await this.platform.moveToLabel(rows, label.name).catch(() => false);
+          }
+          if (success !== false) {
+            selectedItems.forEach(item => item.remove());
+            const remaining = list.querySelectorAll('.aegis-email-item').length;
+            header.querySelector('.aegis-category-count').textContent = remaining;
+            if (remaining === 0) group.remove();
+          } else {
+            const platformName = this.platform ? this.platform.getName() : t('platformFallback');
+            this._showNotification(t('moveOperationError', platformName), 'error', {
+              label: t('retryBtn'),
+              callback: doMove
+            });
+          }
+        };
+        await doMove();
       });
       picker.appendChild(item);
     });
@@ -340,7 +400,7 @@ class AnalysisPanel {
     }, 10);
   }
 
-  _showNotification(message, type = 'info') {
+  _showNotification(message, type = 'info', action = null) {
     // Remove existing
     document.querySelectorAll('.aegis-notification').forEach(el => el.remove());
 
@@ -355,6 +415,21 @@ class AnalysisPanel {
       <div class="aegis-notification-icon">${icon}</div>
       <div class="aegis-notification-text">${this._escapeHtml(message).replace(/\\n/g, '<br>')}</div>
     `;
+
+    if (action) {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'background:transparent;border:1px solid currentColor;border-radius:3px;padding:2px 8px;font-size:11px;cursor:pointer;margin-left:8px;color:inherit;white-space:nowrap;flex-shrink:0;';
+      btn.textContent = action.label;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notif.classList.remove('aegis-notification-show');
+        setTimeout(() => notif.remove(), 300);
+        action.callback();
+      });
+      notif.appendChild(btn);
+      notif.style.display = 'flex';
+      notif.style.alignItems = 'center';
+    }
 
     document.body.appendChild(notif);
 

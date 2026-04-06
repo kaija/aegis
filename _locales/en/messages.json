@@ -541,6 +541,34 @@
   "aiAnalyzing": {
     "message": "AI analyzing..."
   },
+  "nanoUnavailableFallback": {
+    "message": "Gemini Nano unavailable — results are based on keyword rules"
+  },
+  "nanoPartialFallback": {
+    "message": "Some emails couldn't be classified with AI — using keyword rules as fallback"
+  },
+  "nanoErrorFallback": {
+    "message": "AI error occurred — results are based on keyword rules"
+  },
+  "aiBatchPartialError": {
+    "message": "Some AI batches failed — a few emails may use keyword rules as fallback"
+  },
+  "fallbackModeKeyword": {
+    "message": "⚠ Keyword fallback mode — AI classification unavailable"
+  },
+  "progressClassifying": {
+    "message": "AI classifying: $1 / $2 emails",
+    "placeholders": {
+      "1": { "content": "$1", "example": "10" },
+      "2": { "content": "$2", "example": "47" }
+    }
+  },
+  "retryBtn": {
+    "message": "Try Again"
+  },
+  "networkOfflineFallback": {
+    "message": "Network unavailable — switching to keyword rules"
+  },
   "whitelistNotSet": {
     "message": "Whitelist URL not set"
   },

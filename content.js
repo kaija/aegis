@@ -285,6 +285,18 @@
             }
           });
 
+          // Warn if any batches failed, with specific message for network errors
+          const failedResults = results.filter(r => r && r.error);
+          if (failedResults.length > 0) {
+            const isNetworkOffline = failedResults.some(r => r.error === 'network_offline');
+            if (isNetworkOffline) {
+              analysisPanel.showNotification(t('networkOfflineFallback'), 'warning');
+              analysisPanel.showFallbackBanner(t('fallbackModeKeyword'));
+            } else {
+              analysisPanel.showNotification(t('aiBatchPartialError'), 'warning');
+            }
+          }
+
           // Final render after all chunks
           renderCurrentState(false);
           const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
@@ -327,6 +339,8 @@
             if (availability !== 'available' && availability !== 'downloadable') {
               console.warn('[Aegis] Gemini Nano not available (' + availability + '), falling back to local analysis');
               renderCurrentState(false);
+              analysisPanel.showNotification(t('nanoUnavailableFallback'), 'warning');
+              analysisPanel.showFallbackBanner(t('fallbackModeKeyword'));
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
               updateStats(classifiedCount, 0);
               AegisTracker.trackClassification('nano-fallback', emails.length, classifiedCount);
@@ -339,6 +353,7 @@
 
               const labelNames = labels.map(l => l.name);
               let nanoSuccessCount = 0;
+              let nanoFailedBatches = 0;
 
               // Process each batch sequentially with progressive rendering
               for (let ci = 0; ci < chunks.length; ci++) {
@@ -357,9 +372,18 @@
                   applyNanoResults(nanoResult, emails, chunks[ci].startIndex);
                 } catch (err) {
                   console.warn('[Aegis] Nano batch', ci, 'failed:', err);
+                  nanoFailedBatches++;
                   // Continue to next batch
                 }
+                const completedEmails = Math.min((ci + 1) * NANO_BATCH_SIZE, emails.length);
+                analysisPanel.updateBatchProgress(completedEmails, emails.length);
                 renderCurrentState(ci < chunks.length - 1); // true = still loading, false = final
+              }
+              analysisPanel.updateBatchProgress(null, 0);
+
+              // If some batches failed but others succeeded, show partial failure warning
+              if (nanoFailedBatches > 0 && nanoSuccessCount > 0) {
+                analysisPanel.showNotification(t('nanoPartialFallback'), 'warning');
               }
 
               // If Nano produced zero results, warn the user
@@ -367,6 +391,7 @@
                 console.warn('[Aegis] Nano AI returned no results — model may need re-downloading. Showing keyword fallback.');
                 const headerStats = document.querySelector('.aegis-header-stats');
                 if (headerStats) headerStats.innerHTML = '⚠️ <span>Nano AI unavailable — using keyword rules</span>';
+                analysisPanel.showFallbackBanner(t('fallbackModeKeyword'));
               }
 
               const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
@@ -376,6 +401,8 @@
           } catch (err) {
             console.warn('[Aegis] Nano batch analysis error, falling back to local:', err);
             renderCurrentState(false);
+            analysisPanel.showNotification(t('nanoErrorFallback'), 'warning');
+            analysisPanel.showFallbackBanner(t('fallbackModeKeyword'));
             const classifiedCount = emails.filter(e => e.category && e.category.id !== 'tag').length;
             updateStats(classifiedCount, 0);
             AegisTracker.trackClassification('nano-error', emails.length, classifiedCount);
