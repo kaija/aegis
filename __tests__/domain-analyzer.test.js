@@ -309,3 +309,74 @@ describe('DomainAnalyzer - formatAge', () => {
     expect(DomainAnalyzer.formatAge(-1)).toBe('--');
   });
 });
+
+describe('DomainAnalyzer - isTrackableUrl', () => {
+  test('should accept http URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('http://example.com')).toBe(true);
+  });
+
+  test('should accept https URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('https://example.com/path')).toBe(true);
+  });
+
+  test('should reject chrome:// URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('chrome://extensions')).toBe(false);
+  });
+
+  test('should reject chrome-extension:// URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('chrome-extension://abcdef/popup.html')).toBe(false);
+  });
+
+  test('should reject file:// URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('file:///home/user/doc.html')).toBe(false);
+  });
+
+  test('should reject about: URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('about:blank')).toBe(false);
+  });
+
+  test('should reject data: URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('data:text/html,<h1>hi</h1>')).toBe(false);
+  });
+
+  test('should reject ftp:// URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('ftp://files.example.com')).toBe(false);
+  });
+
+  test('should reject localhost', () => {
+    expect(DomainAnalyzer.isTrackableUrl('http://localhost')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('http://localhost:3000')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('https://localhost/app')).toBe(false);
+  });
+
+  test('should reject 127.0.0.1', () => {
+    expect(DomainAnalyzer.isTrackableUrl('http://127.0.0.1')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('http://127.0.0.1:8080')).toBe(false);
+  });
+
+  test('should reject IPv4 addresses', () => {
+    expect(DomainAnalyzer.isTrackableUrl('http://192.168.1.1')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('https://10.0.0.1:443/path')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('http://172.16.0.1')).toBe(false);
+  });
+
+  test('should reject IPv6 addresses', () => {
+    expect(DomainAnalyzer.isTrackableUrl('http://[::1]')).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('http://[2001:db8::1]')).toBe(false);
+  });
+
+  test('should reject null/undefined/empty', () => {
+    expect(DomainAnalyzer.isTrackableUrl(null)).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl(undefined)).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl('')).toBe(false);
+  });
+
+  test('should reject non-string input', () => {
+    expect(DomainAnalyzer.isTrackableUrl(123)).toBe(false);
+    expect(DomainAnalyzer.isTrackableUrl({})).toBe(false);
+  });
+
+  test('should reject malformed URLs', () => {
+    expect(DomainAnalyzer.isTrackableUrl('not-a-url')).toBe(false);
+  });
+});

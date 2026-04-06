@@ -17,6 +17,24 @@ const DomainAnalyzer = (() => {
     NO_REG_DATE: 10,
   };
 
+  /**
+   * Check if a URL is a trackable web URL (http/https, not localhost/IP)
+   */
+  function isTrackableUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      const u = new URL(url);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+      const hostname = u.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') return false;
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+      if (hostname.startsWith('[') || hostname.includes(':')) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function extractBaseDomain(hostname) {
     if (!hostname) return '';
     const parts = hostname.toLowerCase().split('.');
@@ -146,6 +164,7 @@ const DomainAnalyzer = (() => {
     formatDate,
     formatAge,
     extractBaseDomain,
+    isTrackableUrl,
     HIGH_RISK_COUNTRIES,
     SCORE_DEDUCTIONS,
   };

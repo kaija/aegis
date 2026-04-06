@@ -588,12 +588,15 @@ async function _flushSession() {
   // Resolve category if not yet done
   if (!_activeSession.category || _activeSession.category === 'null') {
     const categoriesData = await loadUrlCategories();
+    if (!_activeSession) return; // session may have been cleared during await
     if (categoriesData) {
       _activeSession.category = (await categorizeUrlByDomain(_activeSession.url, categoriesData)) || 'uncategorized';
     } else {
       _activeSession.category = 'uncategorized';
     }
   }
+
+  if (!_activeSession) return; // session may have been cleared during await
 
   const dateKey = getDateKeyBg(new Date());
   const storageKey = `${URL_TIME_KEY}_${dateKey}`;
@@ -603,6 +606,7 @@ async function _flushSession() {
       const dayTime = result[storageKey] || { domains: {}, categories: {}, totalMs: 0 };
 
       // Accumulate by domain
+      if (!_activeSession) { resolve(); return; } // guard inside callback
       if (!dayTime.domains[_activeSession.domain]) {
         dayTime.domains[_activeSession.domain] = { ms: 0, category: _activeSession.category };
       }

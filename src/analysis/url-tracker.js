@@ -80,9 +80,32 @@ const UrlTracker = (() => {
   }
 
   /**
+   * Check if a URL uses a trackable web protocol (http/https only)
+   * and is not localhost or a raw IP address.
+   */
+  function _isWebUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      const u = new URL(url);
+      // Only allow http and https protocols
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+      const hostname = u.hostname;
+      // Exclude localhost
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') return false;
+      // Exclude IP addresses (IPv4 and IPv6)
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+      if (hostname.startsWith('[') || hostname.includes(':')) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Extract base domain from a URL
    */
   function _extractDomain(url) {
+    if (!_isWebUrl(url)) return null;
     try {
       const u = new URL(url);
       return u.hostname.replace(/^www\./, '');
@@ -96,6 +119,8 @@ const UrlTracker = (() => {
    */
   function _isExcluded(url) {
     if (!url) return true;
+    // Skip non-web URLs (chrome://, file://, localhost, IPs, etc.)
+    if (!_isWebUrl(url)) return true;
     if (!_excludedDomains) return false;
 
     // Check protocol-based exclusions
@@ -448,7 +473,8 @@ const UrlTracker = (() => {
     getSettings,
     updateSettings,
     getCategories,
-    cleanup
+    cleanup,
+    _isWebUrl
   };
 })();
 
