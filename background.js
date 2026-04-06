@@ -1,11 +1,58 @@
-// ---- GA4 Analytics Tracker ----
-if (typeof importScripts === 'function') {
-  try { importScripts('src/analytics/tracker.js'); } catch (e) { console.warn('[Aegis] Tracker load failed:', e); }
-}
-// Fallback no-op tracker when module is not loaded (e.g. test environment)
-if (typeof AegisTracker === 'undefined') {
-  var AegisTracker = { init() { return Promise.resolve(); }, sendEvent() {}, trackInstall() {}, trackClassification() {}, trackSecurityScan() {}, trackDomainAnalysis() {}, trackUrlPageView() {}, trackCategoryAction() {}, trackSettingsChange() {} };
-}
+// ---- GA4 Analytics Tracker (inline for service worker compatibility) ----
+var AegisTracker = (() => {
+  const MEASUREMENT_ID = 'G-QR7JYT0RCX';
+  const API_SECRET = '__GA_API_SECRET__'; // Replaced at build time by Makefile
+  const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
+  const CLIENT_ID_KEY = 'aegis_ga_client_id';
+  const SESSION_ID_KEY = 'aegis_ga_session_id';
+  const SESSION_START_KEY = 'aegis_ga_session_start';
+  const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+  let _clientId = null, _sessionId = null, _sessionStart = null, _apiSecret = API_SECRET;
+
+  async function init() {
+    try {
+      const data = await new Promise(r => chrome.storage.local.get([CLIENT_ID_KEY, SESSION_ID_KEY, SESSION_START_KEY], r));
+      _clientId = data[CLIENT_ID_KEY] || _genId();
+      if (!data[CLIENT_ID_KEY]) await new Promise(r => chrome.storage.local.set({ [CLIENT_ID_KEY]: _clientId }, r));
+      const now = Date.now();
+      _sessionStart = data[SESSION_START_KEY] || 0;
+      _sessionId = data[SESSION_ID_KEY] || null;
+      if (!_sessionId || (now - _sessionStart) > SESSION_TIMEOUT_MS) {
+        _sessionId = String(now); _sessionStart = now;
+        await new Promise(r => chrome.storage.local.set({ [SESSION_ID_KEY]: _sessionId, [SESSION_START_KEY]: _sessionStart }, r));
+      }
+    } catch (e) {
+      _clientId = _clientId || _genId();
+      _sessionId = _sessionId || String(Date.now());
+    }
+  }
+
+  async function sendEvent(name, params = {}) {
+    if (!_apiSecret || _apiSecret === '__GA_API_SECRET__') return;
+    if (!_clientId) await init();
+    const url = `${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${_apiSecret}`;
+    try {
+      await fetch(url, { method: 'POST', body: JSON.stringify({
+        client_id: _clientId,
+        events: [{ name, params: { session_id: _sessionId, engagement_time_msec: '100', ...params } }]
+      })});
+    } catch (e) { /* analytics must never break the extension */ }
+  }
+
+  function _genId() { const a = new Uint8Array(16); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); }
+
+  return {
+    init,
+    sendEvent,
+    trackInstall: (v) => sendEvent('extension_install', { extension_version: v }),
+    trackClassification: (mode, n, c) => sendEvent('email_classified', { analysis_mode: mode, email_count: String(n), category_count: String(c) }),
+    trackSecurityScan: (score, level) => sendEvent('security_scan', { safety_score: String(score), safety_level: level }),
+    trackDomainAnalysis: (domain, score, level) => sendEvent('domain_analysis', { domain, domain_score: String(score), domain_level: level }),
+    trackUrlPageView: (cat) => sendEvent('url_page_view', { url_category: cat || 'uncategorized' }),
+    trackCategoryAction: (action, cat) => sendEvent('category_action', { action_type: action, category_id: cat }),
+    trackSettingsChange: (setting, val) => sendEvent('settings_change', { setting_name: setting, setting_value: String(val) }),
+  };
+})();
 
 // ---- Aegis API feedback ----
 
@@ -1498,6 +1545,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ entry });
       }
     });
+    return true;
+  }
+
+  if (message.type === 'GA_TRACK') {
+    AegisTracker.sendEvent(message.event, message.params || {});
+    sendResponse({ ok: true });
     return true;
   }
 });

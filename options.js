@@ -15,7 +15,15 @@ function debouncedSaveKeywords() {
   }, 500);
 }
 
+// ---- GA tracking helper ----
+function gaTrack(event, params) {
+  try { chrome.runtime.sendMessage({ type: 'GA_TRACK', event, params }); } catch (e) { /* ignore */ }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  // Track page view
+  gaTrack('page_view', { page_title: 'Settings', page_location: 'options.html' });
+
   // Apply i18n translations to static HTML elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n);
@@ -56,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.checked = true;
     }
     input.addEventListener('change', () => {
+      gaTrack('click', { element: 'analysis_mode', value: input.value });
       const nanoStatusSection = document.getElementById('nanoStatusSection');
       const nanoFlagsGuide = document.getElementById('nanoFlagsGuide');
       if (input.value === 'nano') {
@@ -151,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function testAiConnection() {
+  gaTrack('click', { element: 'test_ai_connection' });
   const statusEl = document.getElementById('testAiStatus');
   const btn = document.getElementById('testAiBtn');
 
@@ -465,6 +475,7 @@ async function saveSettings() {
   await new Promise(resolve => chrome.storage.sync.set(newSettings, resolve));
 
   settings = { ...settings, ...newSettings };
+  gaTrack('click', { element: 'save_settings', analysis_mode: mode });
 
   const status = document.getElementById('saveStatus');
   status.textContent = '✓ ' + t('optSettingsSaved');
@@ -531,6 +542,7 @@ async function updateWhitelistNow() {
 // Category Management Functions
 
 function showAddCategoryDialog() {
+  gaTrack('click', { element: 'add_category' });
   if (!window.CategoryDialog) {
     showErrorMessage('CategoryDialog module not loaded');
     return;
@@ -579,6 +591,7 @@ function editCategory(categoryId) {
 }
 
 async function deleteCategory(categoryId) {
+  gaTrack('click', { element: 'delete_category', category_id: categoryId });
   const category = settings.categories.find(c => c.id === categoryId);
   if (!category) {
     showErrorMessage(t('optCategoryNotFound'));

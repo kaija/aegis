@@ -66,9 +66,9 @@ dev: ## Copy extension files to dist/ for local unpacked loading
 inject-secrets: ## Inject build-time secrets from .env into dist/
 	@if [ -f .env ]; then \
 	. ./.env && \
-	if [ -n "$$GA_API_SECRET" ] && [ -f $(OUT_DIR)/src/analytics/tracker.js ]; then \
-	sed -i '' "s/__GA_API_SECRET__/$$GA_API_SECRET/g" $(OUT_DIR)/src/analytics/tracker.js 2>/dev/null || \
-	sed -i "s/__GA_API_SECRET__/$$GA_API_SECRET/g" $(OUT_DIR)/src/analytics/tracker.js; \
+	if [ -n "$$GA_API_SECRET" ]; then \
+	find $(OUT_DIR) -name '*.js' -exec sed -i '' "s/__GA_API_SECRET__/$$GA_API_SECRET/g" {} + 2>/dev/null || \
+	find $(OUT_DIR) -name '*.js' -exec sed -i "s/__GA_API_SECRET__/$$GA_API_SECRET/g" {} + ; \
 	echo "  ✓ Injected GA_API_SECRET"; \
 	fi; \
 	else \

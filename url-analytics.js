@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ---- GA tracking helper (sends events via background service worker) ----
+function gaTrack(event, params) {
+  try { chrome.runtime.sendMessage({ type: 'GA_TRACK', event, params }); } catch (e) { /* ignore */ }
+}
+
 // ---- Storage helpers (direct, no module dependency) ----
 
 const STORAGE_KEY = 'aegis_url_history';
@@ -787,6 +792,9 @@ async function exportHistoryAsCsv() {
 // ---- Main ----
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Track page view
+  gaTrack('page_view', { page_title: 'URL Analytics', page_location: 'url-analytics.html' });
+
   const trendCanvas = document.getElementById('trendChart');
   const timeTrendCanvas = document.getElementById('timeTrendChart');
   const pieCanvas = document.getElementById('categoryPieChart');
@@ -903,6 +911,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const s = await getSettings();
     s.feedbackEnabled = feedbackToggle.checked;
     await saveSettings(s);
+    gaTrack('click', { element: 'feedback_toggle', value: String(feedbackToggle.checked) });
     await updateUncategorizedSection();
   });
 
@@ -943,6 +952,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Export dialog
   exportBtn.addEventListener('click', () => {
     exportDialog.style.display = 'flex';
+    gaTrack('click', { element: 'export_dialog_open' });
   });
 
   exportCloseBtn.addEventListener('click', () => {
@@ -955,16 +965,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   exportLabelsBtn.addEventListener('click', async () => {
     await exportLabelsAsJson();
+    gaTrack('click', { element: 'export_labels' });
     exportDialog.style.display = 'none';
   });
 
   exportHistoryBtn.addEventListener('click', async () => {
     await exportHistoryAsCsv();
+    gaTrack('click', { element: 'export_history' });
     exportDialog.style.display = 'none';
   });
 
   // Sync categories button
   syncCategoriesBtn.addEventListener('click', async () => {
+    gaTrack('click', { element: 'sync_categories' });
     const svg = syncCategoriesBtn.querySelector('svg');
     syncCategoriesBtn.disabled = true;
     svg.style.animation = 'spin 0.8s linear infinite';

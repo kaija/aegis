@@ -185,3 +185,6 @@ var AegisTracker = (() => {
 if (typeof window !== 'undefined') {
   window.AegisTracker = AegisTracker;
 }
+if (typeof self !== 'undefined') {
+  self.AegisTracker = AegisTracker;
+}
