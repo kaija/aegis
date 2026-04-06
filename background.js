@@ -226,48 +226,66 @@ function evictExpiredDomainCache(cache) {
 }
 
 async function fetchRdapData(domain) {
-  try {
-    const res = await fetch(`https://rdap.org/domain/${domain}`, {
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!res.ok) {
-      return { registrationDate: null, registrant: null, rdapError: true, rdapNoDate: false };
-    }
-    const data = await res.json();
+  // Try multiple RDAP sources for reliability
+  const tld = domain.split('.').pop();
+  const rdapUrls = [];
 
-    let registrationDate = null;
-    if (Array.isArray(data.events)) {
-      const regEvent = data.events.find(e => e.eventAction === 'registration');
-      if (regEvent && regEvent.eventDate) {
-        registrationDate = regEvent.eventDate;
-      }
-    }
+  // Direct registrar RDAP servers (faster, no redirect)
+  if (['com', 'net'].includes(tld)) {
+    rdapUrls.push(`https://rdap.verisign.com/${tld}/v1/domain/${domain}`);
+  } else if (tld === 'org') {
+    rdapUrls.push(`https://rdap.org/domain/${domain}`);
+  } else if (['tw', 'jp', 'uk', 'au', 'de', 'fr'].includes(tld)) {
+    rdapUrls.push(`https://rdap.org/domain/${domain}`);
+  }
+  // Fallback: rdap.org (redirect service)
+  rdapUrls.push(`https://rdap.org/domain/${domain}`);
 
-    let registrant = null;
-    if (Array.isArray(data.entities)) {
-      const regEntity = data.entities.find(e =>
-        Array.isArray(e.roles) && e.roles.includes('registrant')
-      );
-      if (regEntity && Array.isArray(regEntity.vcardArray)) {
-        const vcard = regEntity.vcardArray[1] || [];
-        const fnEntry = vcard.find(prop => prop[0] === 'fn');
-        if (fnEntry) registrant = fnEntry[3] || null;
-        if (registrant && /redacted|privacy|protected/i.test(registrant)) {
-          registrant = 'Redacted for Privacy';
+  for (const url of rdapUrls) {
+    try {
+      const res = await fetch(url, {
+        redirect: 'follow',
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+
+      let registrationDate = null;
+      if (Array.isArray(data.events)) {
+        const regEvent = data.events.find(e => e.eventAction === 'registration');
+        if (regEvent && regEvent.eventDate) {
+          registrationDate = regEvent.eventDate;
         }
       }
-    }
 
-    return {
-      registrationDate,
-      registrant,
-      rdapError: false,
-      rdapNoDate: registrationDate === null
-    };
-  } catch (e) {
-    console.warn('[Aegis] RDAP fetch failed for', domain, ':', e.message);
-    return { registrationDate: null, registrant: null, rdapError: true, rdapNoDate: false };
+      let registrant = null;
+      if (Array.isArray(data.entities)) {
+        const regEntity = data.entities.find(e =>
+          Array.isArray(e.roles) && e.roles.includes('registrant')
+        );
+        if (regEntity && Array.isArray(regEntity.vcardArray)) {
+          const vcard = regEntity.vcardArray[1] || [];
+          const fnEntry = vcard.find(prop => prop[0] === 'fn');
+          if (fnEntry) registrant = fnEntry[3] || null;
+          if (registrant && /redacted|privacy|protected/i.test(registrant)) {
+            registrant = 'Redacted for Privacy';
+          }
+        }
+      }
+
+      return {
+        registrationDate,
+        registrant,
+        rdapError: false,
+        rdapNoDate: registrationDate === null
+      };
+    } catch (e) {
+      console.warn('[Aegis] RDAP fetch failed for', domain, 'via', url, ':', e.message);
+      // Try next URL
+    }
   }
+
+  return { registrationDate: null, registrant: null, rdapError: true, rdapNoDate: false };
 }
 
 async function resolveDomainIp(domain) {
@@ -1019,6 +1037,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Schedule daily domain cache cleanup
   chrome.alarms.create('aegis-domain-cache-cleanup', { periodInMinutes: 1440 });
+
+  // Clear domain cache on install/update so RDAP data is refreshed
+  setDomainCache({});
 
   // Initial URL categories sync on install/update
   syncUrlCategories();
