@@ -4,6 +4,7 @@ class AnalysisPanel {
   constructor(platform) {
     this.platform = platform;
     this.panel = null;
+    this._fallbackMessage = null;
   }
 
   show(groups, labels, options = {}) {
@@ -77,6 +78,31 @@ class AnalysisPanel {
     return panel;
   }
 
+  showNotification(message, type = 'info') {
+    this._showNotification(message, type);
+  }
+
+  showFallbackBanner(message) {
+    this._fallbackMessage = message;
+    if (this.panel && document.contains(this.panel)) {
+      const body = this.panel.querySelector('#aegis-panel-body');
+      if (body) {
+        const existing = body.querySelector('.aegis-fallback-banner');
+        if (existing) existing.remove();
+        this._applyFallbackBanner(body);
+      }
+    }
+  }
+
+  _applyFallbackBanner(bodyEl) {
+    if (!this._fallbackMessage || !bodyEl) return;
+    const banner = document.createElement('div');
+    banner.className = 'aegis-fallback-banner';
+    banner.style.cssText = 'background:#fff8e1;border-left:3px solid #f9ab00;color:#7d4e00;padding:7px 12px;font-size:12px;margin:6px 8px 2px;border-radius:4px;';
+    banner.textContent = this._fallbackMessage;
+    bodyEl.insertBefore(banner, bodyEl.firstChild);
+  }
+
   _render(groups, labels, isLoading = false) {
     const body = this.panel.querySelector('#aegis-panel-body');
     const footer = this.panel.querySelector('#aegis-panel-footer');
@@ -103,6 +129,7 @@ class AnalysisPanel {
         `;
         footer.textContent = t('footerZeroEmails');
       }
+      this._applyFallbackBanner(body);
       return;
     }
 
@@ -125,6 +152,7 @@ class AnalysisPanel {
     }
 
     footer.textContent = t('panelFooterStats', totalEmails, groups.size);
+    this._applyFallbackBanner(body);
   }
 
   _createCategoryGroup(category, emails, labels) {
