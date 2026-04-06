@@ -285,10 +285,16 @@
             }
           });
 
-          // Warn if any batches failed
-          const failedBatches = results.filter(r => r && r.error).length;
-          if (failedBatches > 0) {
-            analysisPanel.showNotification(t('aiBatchPartialError'), 'warning');
+          // Warn if any batches failed, with specific message for network errors
+          const failedResults = results.filter(r => r && r.error);
+          if (failedResults.length > 0) {
+            const isNetworkOffline = failedResults.some(r => r.error === 'network_offline');
+            if (isNetworkOffline) {
+              analysisPanel.showNotification(t('networkOfflineFallback'), 'warning');
+              analysisPanel.showFallbackBanner(t('fallbackModeKeyword'));
+            } else {
+              analysisPanel.showNotification(t('aiBatchPartialError'), 'warning');
+            }
           }
 
           // Final render after all chunks
@@ -369,8 +375,11 @@
                   nanoFailedBatches++;
                   // Continue to next batch
                 }
+                const completedEmails = Math.min((ci + 1) * NANO_BATCH_SIZE, emails.length);
+                analysisPanel.updateBatchProgress(completedEmails, emails.length);
                 renderCurrentState(ci < chunks.length - 1); // true = still loading, false = final
               }
+              analysisPanel.updateBatchProgress(null, 0);
 
               // If some batches failed but others succeeded, show partial failure warning
               if (nanoFailedBatches > 0 && nanoSuccessCount > 0) {

@@ -1250,7 +1250,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })
         .catch((error) => {
           console.error('[Aegis] Fetch error:', error);
-          sendResponse({ error: error.message });
+          const isOffline = error instanceof TypeError && (error.message === 'Failed to fetch' || error.message.includes('network'));
+          sendResponse({ error: isOffline ? 'network_offline' : error.message });
         });
     });
     return true;
@@ -1326,7 +1327,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })
         .catch((error) => {
           console.error('[Aegis] Fetch error:', error);
-          sendResponse({ error: error.message });
+          const isOffline = error instanceof TypeError && (error.message === 'Failed to fetch' || error.message.includes('network'));
+          sendResponse({ error: isOffline ? 'network_offline' : error.message });
         });
     });
     return true;
