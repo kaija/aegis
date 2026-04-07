@@ -84,6 +84,23 @@ class EulaDialog {
         <p>${t('eulaClause5')}</p>
         <p>${t('eulaClause6')}</p>
       </div>
+      <div class="aegis-eula-disclosure">
+        <h3 class="aegis-eula-disclosure-title">${t('eulaDisclosureTitle')}</h3>
+        <p>${t('eulaDisclosureIntro')}</p>
+        <ul class="aegis-eula-disclosure-list">
+          <li>${t('eulaDisclosureItem1')}</li>
+          <li>${t('eulaDisclosureItem2')}</li>
+          <li>${t('eulaDisclosureItem3')}</li>
+          <li>${t('eulaDisclosureItem4')}</li>
+        </ul>
+        <p>${t('eulaDisclosureNever')}</p>
+        <p>${t('eulaDisclosureThirdParty')}</p>
+        <p class="aegis-eula-privacy-link">${t('eulaDisclosurePrivacyLink')}</p>
+      </div>
+      <label class="aegis-eula-consent-checkbox">
+        <input type="checkbox" id="aegis-eula-feedback-consent">
+        <span>${t('eulaConsentCheckbox')}</span>
+      </label>
       <p class="aegis-eula-notice">${t('eulaNotice')}</p>
       <div class="aegis-eula-actions">
         <button class="aegis-eula-btn aegis-eula-btn-decline">${t('eulaDecline')}</button>
@@ -108,10 +125,13 @@ class EulaDialog {
    * @param {Function} onAccept
    */
   _handleAccept(onAccept) {
+    const checkbox = this._overlay
+      ? this._overlay.querySelector('#aegis-eula-feedback-consent')
+      : null;
     const data = {
       eulaAccepted: true,
       eulaAcceptedAt: new Date().toISOString(),
-      dataFeedbackEnabled: true
+      dataFeedbackEnabled: !!(checkbox && checkbox.checked)
     };
 
     chrome.storage.sync.set(data, () => {

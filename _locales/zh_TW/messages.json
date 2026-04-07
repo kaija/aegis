@@ -526,8 +526,38 @@
   "eulaClause6": {
     "message": "6. 條款修改。我們保留隨時修改這些條款的權利。繼續使用本擴充功能即表示接受修改後的條款。"
   },
+  "eulaDisclosureTitle": {
+    "message": "📋 資料收集揭露"
+  },
+  "eulaDisclosureIntro": {
+    "message": "若您選擇啟用匿名資料回饋（可選，預設關閉），以下資料可能會傳送至 Aegis 伺服器 (aegis.penrose.services) 以改善社群 URL 分類資料庫："
+  },
+  "eulaDisclosureItem1": {
+    "message": "郵件寄件者網域（例如 notifications.amazon.com — 絕不會收集完整電子郵件地址）"
+  },
+  "eulaDisclosureItem2": {
+    "message": "郵件連結中的 URL 網域（例如 amazon.com）"
+  },
+  "eulaDisclosureItem3": {
+    "message": "與寄件者相關的公司名稱（如有）"
+  },
+  "eulaDisclosureItem4": {
+    "message": "您透過回饋小工具提交的 URL 分類修正"
+  },
+  "eulaDisclosureNever": {
+    "message": "我們絕不收集：郵件主旨、郵件內容、完整電子郵件地址、收件人資訊、附件、密碼、瀏覽紀錄或任何個人身份資訊。"
+  },
+  "eulaDisclosureThirdParty": {
+    "message": "若您啟用 AI 模式並提供自己的 API 金鑰，郵件中繼資料（主旨與寄件者）將傳送至您選擇的 AI 供應商。此功能完全可選，需要您明確設定。"
+  },
+  "eulaDisclosurePrivacyLink": {
+    "message": "完整隱私政策：<a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+  },
+  "eulaConsentCheckbox": {
+    "message": "我同意分享匿名網域層級資料以幫助改善 Aegis（可選 — 您可隨時在設定中變更）"
+  },
   "eulaNotice": {
-    "message": "接受後，匿名分類資料回饋將預設啟用。您可隨時在設定中停用。"
+    "message": "點擊接受即表示您同意上述條款。匿名資料回饋預設為關閉，除非您勾選上方選項。"
   },
   "eulaDecline": {
     "message": "拒絕"

@@ -97,11 +97,30 @@ describe('EulaDialog', () => {
   });
 
   describe('Accept button', () => {
-    test('should call chrome.storage.sync.set with correct data', () => {
+    test('should call chrome.storage.sync.set with correct data (feedback off by default)', () => {
       const onAccept = jest.fn();
       chrome.storage.sync.set.mockImplementation((data, cb) => cb());
 
       dialog.show({ onAccept, onDecline: jest.fn() });
+
+      const acceptBtn = document.querySelector('.aegis-eula-btn-accept');
+      acceptBtn.click();
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      const storedData = chrome.storage.sync.set.mock.calls[0][0];
+      expect(storedData.eulaAccepted).toBe(true);
+      expect(storedData.dataFeedbackEnabled).toBe(false);
+    });
+
+    test('should set dataFeedbackEnabled true when consent checkbox is checked', () => {
+      const onAccept = jest.fn();
+      chrome.storage.sync.set.mockImplementation((data, cb) => cb());
+
+      dialog.show({ onAccept, onDecline: jest.fn() });
+
+      // Check the consent checkbox before accepting
+      const checkbox = document.getElementById('aegis-eula-feedback-consent');
+      checkbox.checked = true;
 
       const acceptBtn = document.querySelector('.aegis-eula-btn-accept');
       acceptBtn.click();
@@ -437,12 +456,13 @@ describe('Property 2: Acceptance persists correct state', () => {
     if (overlay) overlay.remove();
   });
 
-  test('acceptance handler always persists eulaAccepted: true, valid ISO 8601 eulaAcceptedAt, and dataFeedbackEnabled: true', () => {
+  test('acceptance handler always persists eulaAccepted: true, valid ISO 8601 eulaAcceptedAt, and dataFeedbackEnabled matching checkbox state', () => {
     fc.assert(
       fc.property(
         // Generate random timestamps spanning a wide range (1970 to ~2033)
         fc.integer({ min: 0, max: 2000000000000 }),
-        (timestamp) => {
+        fc.boolean(),
+        (timestamp, checkboxChecked) => {
           // Reset mocks for each iteration
           chrome.storage.sync.set.mockReset();
           chrome.runtime.lastError = null;
@@ -463,6 +483,10 @@ describe('Property 2: Acceptance persists correct state', () => {
           dialog = new window.EulaDialog();
           dialog.show({ onAccept: jest.fn(), onDecline: jest.fn() });
 
+          // Set checkbox state before accepting
+          const checkbox = document.getElementById('aegis-eula-feedback-consent');
+          if (checkbox) checkbox.checked = checkboxChecked;
+
           const acceptBtn = document.querySelector('.aegis-eula-btn-accept');
           acceptBtn.click();
 
@@ -474,8 +498,8 @@ describe('Property 2: Acceptance persists correct state', () => {
           // Requirement 1.4 / 2.1: eulaAccepted must be strictly true
           expect(storedData.eulaAccepted).toBe(true);
 
-          // Requirement 3.1: dataFeedbackEnabled must be strictly true
-          expect(storedData.dataFeedbackEnabled).toBe(true);
+          // dataFeedbackEnabled must match the checkbox state (opt-in)
+          expect(storedData.dataFeedbackEnabled).toBe(checkboxChecked);
 
           // Requirement 2.1: eulaAcceptedAt must be a valid ISO 8601 string
           expect(typeof storedData.eulaAcceptedAt).toBe('string');

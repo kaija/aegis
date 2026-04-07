@@ -526,8 +526,38 @@
   "eulaClause6": {
     "message": "6. Modifications. We reserve the right to modify these terms at any time. Continued use of the extension constitutes acceptance of modified terms."
   },
+  "eulaDisclosureTitle": {
+    "message": "📋 Data Collection Disclosure"
+  },
+  "eulaDisclosureIntro": {
+    "message": "If you opt in to anonymous data feedback (optional, off by default), the following data may be sent to Aegis servers (aegis.penrose.services) to improve the community URL category database:"
+  },
+  "eulaDisclosureItem1": {
+    "message": "Email sender domains (e.g. notifications.amazon.com — never full email addresses)"
+  },
+  "eulaDisclosureItem2": {
+    "message": "URL domains found in email links (e.g. amazon.com)"
+  },
+  "eulaDisclosureItem3": {
+    "message": "Company names associated with senders (if available)"
+  },
+  "eulaDisclosureItem4": {
+    "message": "URL category corrections you submit via the feedback widget"
+  },
+  "eulaDisclosureNever": {
+    "message": "We NEVER collect: email subject lines, email body content, full email addresses, recipient information, attachments, passwords, browsing history, or any personal identification information."
+  },
+  "eulaDisclosureThirdParty": {
+    "message": "If you enable AI Mode and provide your own API key, email metadata (subject and sender) will be sent to your chosen AI provider. This is entirely optional and requires your explicit configuration."
+  },
+  "eulaDisclosurePrivacyLink": {
+    "message": "Full privacy policy: <a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+  },
+  "eulaConsentCheckbox": {
+    "message": "I agree to share anonymous domain-level data to help improve Aegis (optional — you can change this anytime in Settings)"
+  },
   "eulaNotice": {
-    "message": "By accepting, anonymous category data feedback will be enabled by default. You can disable this in Settings at any time."
+    "message": "By clicking Accept, you agree to the terms above. Anonymous data feedback is OFF by default unless you check the box above."
   },
   "eulaDecline": {
     "message": "Decline"

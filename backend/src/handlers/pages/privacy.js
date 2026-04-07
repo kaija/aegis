@@ -33,11 +33,24 @@ a:hover{text-decoration:underline}
 <div class="container">
 
 <h1>Aegis — Privacy Policy</h1>
-<p class="subtitle">Last updated: March 29, 2026</p>
+<p class="subtitle">Last updated: April 7, 2026</p>
 
 <h2>1. Overview</h2>
-<p>Aegis is a Chrome extension that provides email categorization, email security analysis, and browsing analytics. This policy explains what data the extension collects, how it is used, and how you can control it.</p>
+<p>Aegis is a Chrome extension that provides email categorization, email security analysis, domain trust checking, and browsing analytics. This policy explains what data the extension collects, how it is used, and how you can control it.</p>
 <p>We are committed to transparency and minimal data collection. The extension is designed with a privacy-first approach: all core functionality works locally in your browser without sending data to any server.</p>
+
+<h2>2. Prominent Disclosure</h2>
+<p><strong>Aegis collects the following user data only when you explicitly opt in to anonymous data feedback during initial setup or in Settings:</strong></p>
+<ul>
+<li><strong>Email sender domains</strong> (e.g. <code>notifications.amazon.com</code>) — never full email addresses</li>
+<li><strong>URL domains from email links</strong> (e.g. <code>amazon.com</code>) — never full URLs or page content</li>
+<li><strong>Company names</strong> associated with email senders (if available)</li>
+<li><strong>URL category corrections</strong> you submit via the feedback widget</li>
+<li><strong>Extension version</strong> for compatibility tracking</li>
+</ul>
+<p>This data is transmitted securely over HTTPS to <code>aegis.penrose.services</code> and is used solely to improve the community URL category database that all users can benefit from. <strong>No data is collected unless you explicitly consent.</strong></p>
+<p>Additionally, if you choose to enable AI Mode and configure your own API key, email metadata (subject line and sender name) is sent to your chosen third-party AI provider for classification. This requires your explicit configuration and is entirely optional.</p>
+<p><strong>Browsing history, email content, full email addresses, passwords, and personal identification information are never collected or transmitted.</strong></p>
 
 <h2>2. Data We Collect</h2>
 
@@ -53,8 +66,8 @@ a:hover{text-decoration:underline}
 <li>EULA acceptance status and timestamp</li>
 </ul>
 
-<h3>2.2 Data transmitted to Aegis servers (opt-out)</h3>
-<p>When anonymous data feedback is enabled (opt-out, controlled in Settings), the extension sends the following to <code>aegis.penrose.services</code>:</p>
+<h3>2.2 Data transmitted to Aegis servers (opt-in)</h3>
+<p>When anonymous data feedback is enabled (opt-in, disabled by default, controlled in Settings), the extension sends the following to <code>aegis.penrose.services</code>:</p>
 
 <table>
 <tr><th>Data</th><th>Example</th><th>Purpose</th></tr>
@@ -99,7 +112,7 @@ a:hover{text-decoration:underline}
 
 <table>
 <tr><th>Control</th><th>How</th></tr>
-<tr><td>Disable anonymous feedback</td><td>Settings page → toggle off "Anonymous Data Feedback"</td></tr>
+<tr><td>Disable anonymous feedback</td><td>Settings page → toggle off "Anonymous Data Feedback" (disabled by default — only enabled if you opted in)</td></tr>
 <tr><td>Disable AI mode</td><td>Settings page → select "Local Rules" analysis engine</td></tr>
 <tr><td>Export your data</td><td>URL Analytics page → Export button (JSON labels or CSV history)</td></tr>
 <tr><td>Delete all local data</td><td>Uninstall the extension, or clear site data for the extension in Chrome settings</td></tr>

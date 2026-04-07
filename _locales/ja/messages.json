@@ -526,8 +526,38 @@
   "eulaClause6": {
     "message": "6. 変更。当社はいつでもこれらの条項を変更する権利を留保します。本拡張機能の継続使用は、変更された条項の承諾とみなされます。"
   },
+  "eulaDisclosureTitle": {
+    "message": "📋 データ収集に関する開示"
+  },
+  "eulaDisclosureIntro": {
+    "message": "匿名データフィードバックを有効にした場合（任意、デフォルトはオフ）、以下のデータがコミュニティ URL カテゴリデータベースの改善のため Aegis サーバー (aegis.penrose.services) に送信される場合があります："
+  },
+  "eulaDisclosureItem1": {
+    "message": "メール送信者のドメイン（例: notifications.amazon.com — 完全なメールアドレスは収集しません）"
+  },
+  "eulaDisclosureItem2": {
+    "message": "メール内リンクの URL ドメイン（例: amazon.com）"
+  },
+  "eulaDisclosureItem3": {
+    "message": "送信者に関連する企業名（利用可能な場合）"
+  },
+  "eulaDisclosureItem4": {
+    "message": "フィードバックウィジェットから送信した URL カテゴリの修正"
+  },
+  "eulaDisclosureNever": {
+    "message": "以下のデータは一切収集しません：メールの件名、メール本文、完全なメールアドレス、受信者情報、添付ファイル、パスワード、閲覧履歴、個人を特定する情報。"
+  },
+  "eulaDisclosureThirdParty": {
+    "message": "AI モードを有効にして独自の API キーを設定した場合、メールのメタデータ（件名と送信者）が選択した AI プロバイダーに送信されます。これは完全に任意であり、明示的な設定が必要です。"
+  },
+  "eulaDisclosurePrivacyLink": {
+    "message": "プライバシーポリシー全文: <a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+  },
+  "eulaConsentCheckbox": {
+    "message": "Aegis の改善のため、匿名のドメインレベルデータの共有に同意します（任意 — 設定からいつでも変更できます）"
+  },
   "eulaNotice": {
-    "message": "同意すると、匿名カテゴリデータフィードバックがデフォルトで有効になります。設定からいつでも無効にできます。"
+    "message": "「同意」をクリックすると、上記の条項に同意したことになります。匿名データフィードバックは、上のチェックボックスをオンにしない限り、デフォルトでオフです。"
   },
   "eulaDecline": {
     "message": "拒否"
