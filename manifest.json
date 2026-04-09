@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_appName__",
-  "version": "1.5.3",
+  "version": "1.6.1",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "permissions": ["storage", "activeTab", "scripting", "alarms", "webNavigation", "idle", "tabs"],
@@ -16,6 +16,7 @@
         "src/analysis/email-analyzer.js",
         "src/analysis/ai-analyzer.js",
         "src/analysis/nano-analyzer.js",
+        "src/analysis/quick-reply-generator.js",
         "src/platforms/base-platform.js",
         "src/platforms/gmail-platform.js",
         "src/platforms/outlook-platform.js",

@@ -38,6 +38,18 @@ function buildOptionsDOM() {
     <section id="dataFeedbackSection" style="display:none;">
       <input type="checkbox" id="dataFeedbackToggle">
     </section>
+    <div id="nanoStatusSection" style="display:none;">
+      <div id="nanoStatus"></div>
+      <button id="nanoDownloadBtn" style="display:none;"></button>
+      <div id="nanoProgressContainer" style="display:none;">
+        <div id="nanoProgressBar"></div>
+      </div>
+    </div>
+    <label class="toggle-option" id="quickReplyToggleLabel" style="display:none; margin-top: 12px;">
+      <input type="checkbox" id="nanoQuickReplyToggle">
+      <span>Enable Quick Reply suggestions</span>
+    </label>
+    <div id="nanoFlagsGuide" style="display:none;"></div>
     <button id="saveBtn"></button>
     <span id="saveStatus"></span>
   `;

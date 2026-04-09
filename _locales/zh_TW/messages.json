@@ -551,7 +551,7 @@
     "message": "若您啟用 AI 模式並提供自己的 API 金鑰，郵件中繼資料（主旨與寄件者）將傳送至您選擇的 AI 供應商。此功能完全可選，需要您明確設定。"
   },
   "eulaDisclosurePrivacyLink": {
-    "message": "完整隱私政策：<a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+    "message": "完整隱私政策：<a href='https://aegis.penrose.services/privacy' target='_blank'>aegis.penrose.services/privacy</a>"
   },
   "eulaConsentCheckbox": {
     "message": "我同意分享匿名網域層級資料以幫助改善 Aegis（可選 — 您可隨時在設定中變更）"

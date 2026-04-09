@@ -551,7 +551,7 @@
     "message": "AI モードを有効にして独自の API キーを設定した場合、メールのメタデータ（件名と送信者）が選択した AI プロバイダーに送信されます。これは完全に任意であり、明示的な設定が必要です。"
   },
   "eulaDisclosurePrivacyLink": {
-    "message": "プライバシーポリシー全文: <a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+    "message": "プライバシーポリシー全文: <a href='https://aegis.penrose.services/privacy' target='_blank'>aegis.penrose.services/privacy</a>"
   },
   "eulaConsentCheckbox": {
     "message": "Aegis の改善のため、匿名のドメインレベルデータの共有に同意します（任意 — 設定からいつでも変更できます）"

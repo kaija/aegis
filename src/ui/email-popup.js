@@ -208,6 +208,56 @@ class EmailPopup {
     });
   }
 
+  showReplyOptions(replyData, onOptionClick) {
+    this.hideReplyOptions();
+    if (!this.popup) return;
+
+    const panel = document.createElement('div');
+    panel.className = 'aegis-reply-panel';
+
+    const typeLabel = document.createElement('div');
+    typeLabel.className = 'aegis-reply-type-label';
+    typeLabel.textContent = '\u{1F4E7} ' + replyData.emailType.toUpperCase();
+    panel.appendChild(typeLabel);
+
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'aegis-reply-btn-container';
+
+    replyData.replyOptions.forEach(option => {
+      const btn = document.createElement('button');
+      btn.className = 'aegis-reply-btn';
+      btn.textContent = option.label;
+      btn.addEventListener('click', () => {
+        onOptionClick(option.prefix, btn);
+      });
+      btnContainer.appendChild(btn);
+    });
+
+    panel.appendChild(btnContainer);
+    this.popup.appendChild(panel);
+  }
+
+  showReplyLoading() {
+    this.hideReplyOptions();
+    if (!this.popup) return;
+
+    const panel = document.createElement('div');
+    panel.className = 'aegis-reply-panel';
+
+    const loading = document.createElement('div');
+    loading.className = 'aegis-reply-loading';
+    loading.textContent = 'Generating reply suggestions...';
+    panel.appendChild(loading);
+
+    this.popup.appendChild(panel);
+  }
+
+  hideReplyOptions() {
+    if (!this.popup) return;
+    const existing = this.popup.querySelector('.aegis-reply-panel');
+    if (existing) existing.remove();
+  }
+
   _escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }

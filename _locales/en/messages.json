@@ -551,7 +551,7 @@
     "message": "If you enable AI Mode and provide your own API key, email metadata (subject and sender) will be sent to your chosen AI provider. This is entirely optional and requires your explicit configuration."
   },
   "eulaDisclosurePrivacyLink": {
-    "message": "Full privacy policy: <a href='https://aegis.penrose.services/pages/privacy' target='_blank'>aegis.penrose.services/pages/privacy</a>"
+    "message": "Full privacy policy: <a href='https://aegis.penrose.services/privacy' target='_blank'>aegis.penrose.services/privacy</a>"
   },
   "eulaConsentCheckbox": {
     "message": "I agree to share anonymous domain-level data to help improve Aegis (optional — you can change this anytime in Settings)"

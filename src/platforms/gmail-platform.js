@@ -1,5 +1,12 @@
 'use strict';
 
+const REPLY_SELECTORS = {
+  ariaLabels: ['Reply', '回覆'],
+  tooltips: ['Reply', '回覆'],
+  classes: ['.T-I.J-J5-Ji[data-tooltip]'],
+  tooltipContains: ['Reply', '回覆']
+};
+
 const GMAIL_ACTIONS = {
   trash: {
     tooltips: ['Move to Trash', '移至垃圾桶'],
@@ -260,6 +267,38 @@ class GmailPlatform extends BasePlatform {
 
   _sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  clickReplyButton() {
+    const selectors = [];
+    (REPLY_SELECTORS.ariaLabels || []).forEach(l => selectors.push(`[aria-label="${l}"]`));
+    (REPLY_SELECTORS.tooltips || []).forEach(t => selectors.push(`[data-tooltip="${t}"]`));
+    (REPLY_SELECTORS.classes || []).forEach(cls => selectors.push(cls));
+    (REPLY_SELECTORS.tooltipContains || []).forEach(t => selectors.push(`[data-tooltip*="${t}"]`));
+
+    for (const sel of selectors) {
+      const els = document.querySelectorAll(sel);
+      for (const el of els) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          this._clickElement(el);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  waitForComposeBox(timeout = 3000) {
+    return this._waitForElement(
+      ['[role="textbox"][aria-label]', 'div[contenteditable="true"]'],
+      timeout
+    );
+  }
+
+  insertReplyContent(composeBox, text) {
+    composeBox.innerHTML = text;
+    composeBox.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
 

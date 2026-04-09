@@ -149,11 +149,21 @@
     // Load settings from background
     async function getSettings() {
       return new Promise((resolve) => {
-        chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
-          const result = response || {};
-          window.__aegisDebug = !!result.analysisDebug;
-          resolve(result);
-        });
+        try {
+          chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.warn('[Aegis] getSettings failed:', chrome.runtime.lastError.message);
+              resolve({});
+              return;
+            }
+            const result = response || {};
+            window.__aegisDebug = !!result.analysisDebug;
+            resolve(result);
+          });
+        } catch (err) {
+          console.warn('[Aegis] Extension context invalidated, returning empty settings:', err.message);
+          resolve({});
+        }
       });
     }
 
@@ -423,6 +433,16 @@
       }
     }
 
+    // Quick Reply notification helper
+    function showQuickReplyNotification(message) {
+      const notif = document.createElement('div');
+      notif.className = 'aegis-notification aegis-notification-warning';
+      notif.innerHTML = '<span class="aegis-notification-icon">⚠️</span><span class="aegis-notification-text">' + message + '</span>';
+      document.body.appendChild(notif);
+      setTimeout(() => notif.classList.add('aegis-notification-show'), 10);
+      setTimeout(() => { notif.classList.remove('aegis-notification-show'); setTimeout(() => notif.remove(), 300); }, 5000);
+    }
+
     // Analyze open email and show popup
     async function analyzeOpenEmail() {
       try {
@@ -544,6 +564,60 @@
 
         console.log('[Aegis] Analysis complete. Showing popup. safetyScore:', analysis.safetyScore, 'category:', analysis.category?.name);
         emailPopup.show(analysis);
+
+        // Quick Reply integration
+        console.log('[Aegis] Quick Reply check: nanoQuickReplyEnabled=', settings.nanoQuickReplyEnabled, 'analysisMode=', settings.analysisMode);
+        if (settings.nanoQuickReplyEnabled === true && (settings.analysisMode === 'nano' || settings.analysisMode === 'ai')) {
+          console.log('[Aegis] Quick Reply: enabled, generating options...');
+          if (typeof QuickReplyGenerator !== 'undefined') {
+            emailPopup.showReplyLoading();
+            const replyResult = await QuickReplyGenerator.generateReplyOptions({
+              subject: emailData.subject,
+              sender: emailData.sender,
+              body: emailData.body
+            });
+            if (replyResult) {
+              emailPopup.showReplyOptions(replyResult, async (prefix, buttonEl) => {
+                // Disable clicked button and show spinner
+                buttonEl.disabled = true;
+                buttonEl.classList.add('aegis-reply-btn-loading');
+
+                // Click Gmail Reply button
+                const replyClicked = platform.clickReplyButton();
+                if (!replyClicked) {
+                  showQuickReplyNotification('Could not find the reply button. Please click Reply manually.');
+                  buttonEl.disabled = false;
+                  buttonEl.classList.remove('aegis-reply-btn-loading');
+                  return;
+                }
+
+                // Wait for compose box to appear
+                const composeBox = await platform.waitForComposeBox(3000);
+                if (!composeBox) {
+                  showQuickReplyNotification('Reply compose area did not open. Please try again.');
+                  buttonEl.disabled = false;
+                  buttonEl.classList.remove('aegis-reply-btn-loading');
+                  return;
+                }
+
+                // Generate full reply
+                const fullReply = await QuickReplyGenerator.generateFullReply(emailData, prefix);
+                if (fullReply) {
+                  platform.insertReplyContent(composeBox, fullReply);
+                } else {
+                  // Fallback: insert the prefix text
+                  platform.insertReplyContent(composeBox, prefix);
+                }
+
+                buttonEl.disabled = false;
+                buttonEl.classList.remove('aegis-reply-btn-loading');
+              });
+            } else {
+              emailPopup.hideReplyOptions();
+            }
+          }
+        }
+
         updateStats(0, 1);
         AegisTracker.trackSecurityScan(analysis.safetyScore, analysis.safetyLevel);
 
@@ -663,13 +737,30 @@
     // Check initial state on load
     console.log('[Aegis] Initial state check. Platform:', platform.getName(), 'pathname:', window.location.pathname, 'isEmailDetailView:', isEmailDetailView());
     if (isEmailDetailView()) {
-      setTimeout(analyzeOpenEmail, 1200);
+      // Poll for email content to be rendered before analyzing (Gmail may still be loading)
+      let retries = 0;
+      const maxRetries = 5;
+      const tryAnalyze = () => {
+        retries++;
+        const detail = platform.getEmailDetail();
+        if (detail && (detail.subject || detail.body)) {
+          analyzeOpenEmail();
+        } else if (retries < maxRetries) {
+          setTimeout(tryAnalyze, 800);
+        } else {
+          console.warn('[Aegis] Email content not available after retries, skipping analysis');
+        }
+      };
+      setTimeout(tryAnalyze, 1200);
     }
 
     // Cleanup Nano AI session on page unload
     window.addEventListener('beforeunload', () => {
       if (typeof NanoAnalyzer !== 'undefined' && NanoAnalyzer.destroy) {
         NanoAnalyzer.destroy();
+      }
+      if (typeof QuickReplyGenerator !== 'undefined' && QuickReplyGenerator.destroy) {
+        QuickReplyGenerator.destroy();
       }
     });
   }

@@ -1103,3 +1103,57 @@
 .aegis-eula-btn-accept:active {
   background: #1765cc;
 }
+
+/* ========== Reply Options Panel ========== */
+.aegis-reply-panel {
+  border-top: 1px solid #e0e0e0;
+  padding: 12px 16px 14px;
+}
+
+.aegis-reply-type-label {
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #5f6368;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+
+.aegis-reply-btn-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aegis-reply-btn {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--aegis-font);
+  transition: all 0.15s;
+}
+
+.aegis-reply-btn:hover {
+  background: #1a73e8;
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+.aegis-reply-loading {
+  font-size: 12px;
+  color: #5f6368;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aegis-reply-btn-loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  position: relative;
+}

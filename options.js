@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load debug toggle
   document.getElementById('analysisDebug').checked = !!settings.analysisDebug;
 
+  // Load Quick Reply toggle (default false)
+  document.getElementById('nanoQuickReplyToggle').checked = !!settings.nanoQuickReplyEnabled;
+
   // Handle data feedback section visibility and toggle state
   const dataFeedbackSection = document.getElementById('dataFeedbackSection');
   const dataFeedbackToggle = document.getElementById('dataFeedbackToggle');
@@ -67,20 +70,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       gaTrack('click', { element: 'analysis_mode', value: input.value });
       const nanoStatusSection = document.getElementById('nanoStatusSection');
       const nanoFlagsGuide = document.getElementById('nanoFlagsGuide');
+      const quickReplyLabel = document.getElementById('quickReplyToggleLabel');
       if (input.value === 'nano') {
         document.getElementById('aiSettingsSection').style.display = 'none';
         document.getElementById('categoriesSection').style.display = 'none';
         nanoStatusSection.style.display = 'block';
         nanoFlagsGuide.style.display = 'flex';
+        if (quickReplyLabel) quickReplyLabel.style.display = '';
         checkNanoAvailability();
       } else if (input.value === 'ai') {
         document.getElementById('aiSettingsSection').style.display = 'block';
         document.getElementById('categoriesSection').style.display = 'none';
         nanoStatusSection.style.display = 'none';
+        if (quickReplyLabel) quickReplyLabel.style.display = '';
       } else {
         document.getElementById('aiSettingsSection').style.display = 'none';
         document.getElementById('categoriesSection').style.display = 'block';
         nanoStatusSection.style.display = 'none';
+        if (quickReplyLabel) quickReplyLabel.style.display = 'none';
       }
     });
   });
@@ -94,6 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nanoStatusSection').style.display = 'block';
     document.getElementById('nanoFlagsGuide').style.display = 'flex';
     checkNanoAvailability();
+  }
+
+  // Show Quick Reply toggle when nano or ai mode is active
+  const quickReplyLabelInit = document.getElementById('quickReplyToggleLabel');
+  if (quickReplyLabelInit) {
+    quickReplyLabelInit.style.display = (settings.analysisMode === 'nano' || settings.analysisMode === 'ai') ? '' : 'none';
   }
 
   // Set AI settings values
@@ -467,6 +480,7 @@ async function saveSettings() {
     whitelistUrl: document.getElementById('whitelistUrl').value.trim(),
     analysisDebug: document.getElementById('analysisDebug').checked,
     dataFeedbackEnabled: document.getElementById('dataFeedbackToggle').checked,
+    nanoQuickReplyEnabled: document.getElementById('nanoQuickReplyToggle').checked,
     categories: settings.categories
   };
 
