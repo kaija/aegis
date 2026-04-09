@@ -5,6 +5,10 @@ Chrome Web Store Submission — Aegis
 
 == What's New!!! (English) ==
 
+v1.6.1
+*Quick Reply* - Open any email and get 2–3 smart reply suggestions powered by Gemini Nano, right below the security analysis. Click one to auto-compose a full reply — no typing needed. Requires Nano AI mode and the new Quick Reply toggle in Settings.
+*Privacy Policy Update* - Comprehensive privacy policy rewrite with detailed data collection, processing, storage, and third-party sharing disclosures to meet Chrome Web Store requirements.
+
 v1.5.0
 *Multi-Language Support* - Aegis now speaks your language! Full support for English, Traditional Chinese, and Japanese — switches automatically based on your browser language.
 *Domain Analyzer* - Browse with confidence! Aegis instantly checks every website you visit and shows a trust score right on the icon. Is this site legit? How old is the domain? Where's the server? Now you'll know before you click.
@@ -17,6 +21,10 @@ v1.3.0
 
 == 最新消息!!! (繁體中文) ==
 
+v1.6.1
+*快速回覆* - 開啟任何郵件，安全分析下方即顯示 2–3 個由 Gemini Nano 生成的智慧回覆建議。點擊即可自動撰寫完整回覆，無需手動輸入。需啟用 Nano AI 模式並在設定頁開啟快速回覆功能。
+*隱私政策更新* - 全面改寫隱私政策，詳細說明資料收集、處理、儲存及第三方分享方式，符合 Chrome Web Store 審核要求。
+
 v1.5.0
 *多語系支援* - Aegis 現在會說您的語言！完整支援英文、繁體中文和日文，根據瀏覽器語言自動切換。
 *網域安全分析* - 安心瀏覽每一個網站！Aegis 即時檢查您造訪的每個網站，並在圖示上顯示信任評分。這個網站可靠嗎？網域註冊多久了？伺服器在哪裡？點一下就知道。
@@ -28,6 +36,10 @@ v1.3.0
 
 
 == 最新情報!!! (日本語) ==
+
+v1.6.1
+*クイックリプライ* - メールを開くと、セキュリティ分析の下に Gemini Nano が生成した 2〜3 件のスマート返信候補が表示されます。クリックするだけで完全な返信が自動作成され、入力不要です。Nano AI モードと設定ページのクイックリプライトグルの有効化が必要です。
+*プライバシーポリシー更新* - データの収集・処理・保存・第三者共有について詳細に記載し、Chrome Web Store の要件に準拠するようプライバシーポリシーを全面改訂しました。
 
 v1.5.0
 *多言語対応* - Aegis があなたの言語で使えるようになりました！英語・繁体字中国語・日本語に完全対応、ブラウザの言語設定に合わせて自動切り替え。
