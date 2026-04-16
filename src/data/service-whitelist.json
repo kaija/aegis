@@ -223,7 +223,8 @@
         "google.com",
         "gmail.com",
         "gstatic.com",
-        "goo.gl"
+        "goo.gl",
+        "c.gle"
       ],
       "senderDomains": [
         "google.com",
