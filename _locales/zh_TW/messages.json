@@ -197,6 +197,24 @@
     "message": "不支援"
   },
 
+  "_comment_label_suggestion": { "message": "--- 標籤建議 ---" },
+
+  "labelSuggestionBtn": {
+    "message": "建議標籤"
+  },
+  "labelSuggestionTitle": {
+    "message": "建議的標籤"
+  },
+  "labelSuggestionLoading": {
+    "message": "正在分析您的收件匣..."
+  },
+  "labelSuggestionEmpty": {
+    "message": "未找到新的標籤建議。"
+  },
+  "labelSuggestionError": {
+    "message": "無法產生建議，請重試。"
+  },
+
   "_comment_options": { "message": "--- 設定頁面 ---" },
 
   "optAnalysisEngine": {

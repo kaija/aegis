@@ -44,6 +44,24 @@
           <span data-i18n="popupRunClassification">RUN CLASSIFICATION</span>
         </button>
 
+        <button class="run-btn" id="suggestLabelsBtn" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 18h6" />
+            <path d="M10 22h4" />
+            <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z" />
+          </svg>
+          <span data-i18n="labelSuggestionBtn">SUGGEST LABELS</span>
+        </button>
+
+        <div id="suggestionResults" style="display:none">
+          <div class="suggestion-header" data-i18n="labelSuggestionTitle">Suggested Labels</div>
+          <div class="suggestion-loading" data-i18n="labelSuggestionLoading" style="display:none">Analyzing your inbox...</div>
+          <div id="suggestionChips" class="suggestion-chips"></div>
+          <div class="suggestion-empty" data-i18n="labelSuggestionEmpty" style="display:none">No new label suggestions found.</div>
+          <div class="suggestion-error" data-i18n="labelSuggestionError" style="display:none">Unable to generate suggestions. Please try again.</div>
+        </div>
+
         <div class="info-card">
           <div class="info-row">
             <div class="info-label">

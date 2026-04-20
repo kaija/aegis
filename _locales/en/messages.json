@@ -197,6 +197,24 @@
     "message": "Not Supported"
   },
 
+  "_comment_label_suggestion": { "message": "--- Label Suggestion ---" },
+
+  "labelSuggestionBtn": {
+    "message": "SUGGEST LABELS"
+  },
+  "labelSuggestionTitle": {
+    "message": "Suggested Labels"
+  },
+  "labelSuggestionLoading": {
+    "message": "Analyzing your inbox..."
+  },
+  "labelSuggestionEmpty": {
+    "message": "No new label suggestions found."
+  },
+  "labelSuggestionError": {
+    "message": "Unable to generate suggestions. Please try again."
+  },
+
   "_comment_options": { "message": "--- Options Page ---" },
 
   "optAnalysisEngine": {

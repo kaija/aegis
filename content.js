@@ -716,6 +716,53 @@
       } else if (message.type === 'ANALYZE') {
         runAnalysis();
         sendResponse({ status: 'ok' });
+      } else if (message.type === 'SUGGEST_LABELS') {
+        (async () => {
+          try {
+            if (!platform) {
+              sendResponse({ suggestions: [] });
+              return;
+            }
+            const emails = platform.getEmails(false);
+            const platformLabels = platform.getLabels().map(l => l.name);
+            const currentSettings = await getSettings();
+            const categories = currentSettings.categories || [];
+            const existingLabels = [...platformLabels, ...categories.map(c => c.name)];
+            const result = await LabelSuggester.generateSuggestions(
+              emails, existingLabels, currentSettings.analysisMode, currentSettings.aiSettings
+            );
+            sendResponse({ suggestions: result });
+          } catch (err) {
+            console.warn('[Aegis] SUGGEST_LABELS error:', err);
+            sendResponse({ suggestions: [] });
+          }
+        })();
+        return true;
+      } else if (message.type === 'CREATE_SUGGESTED_LABEL') {
+        (async () => {
+          try {
+            const { name } = message;
+            const Dialog = window.CategoryDialog;
+            const Manager = window.CategoryManager;
+            if (!Dialog || !Manager) {
+              sendResponse({ success: false, error: 'CategoryDialog or CategoryManager not available' });
+              return;
+            }
+            Dialog.show('create', { name, emoji: 'tag' }, async (formData) => {
+              try {
+                await Manager.createCategory(formData);
+                sendResponse({ success: true });
+              } catch (err) {
+                console.warn('[Aegis] CREATE_SUGGESTED_LABEL save error:', err);
+                sendResponse({ success: false, error: err.message || 'Failed to create category' });
+              }
+            });
+          } catch (err) {
+            console.warn('[Aegis] CREATE_SUGGESTED_LABEL error:', err);
+            sendResponse({ success: false, error: err.message || 'Unknown error' });
+          }
+        })();
+        return true;
       }
       return true;
     });

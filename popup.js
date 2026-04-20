@@ -1,3 +1,53 @@
+// Client-side color palette for suggestion chip styling (index-based rotation)
+const CHIP_COLORS = [
+  { color: '#1565c0', bg: '#e3f2fd' },
+  { color: '#2e7d32', bg: '#e8f5e9' },
+  { color: '#e65100', bg: '#fff3e0' },
+  { color: '#6a1b9a', bg: '#f3e5f5' },
+  { color: '#c62828', bg: '#ffebee' },
+];
+
+// Render suggestion chips into the container
+function renderSuggestionChips(suggestions, container, tab) {
+  container.innerHTML = '';
+  suggestions.forEach((name, index) => {
+    const chip = document.createElement('button');
+    chip.className = 'suggestion-chip';
+    chip.textContent = name;
+    chip.dataset.index = index;
+
+    // Apply color palette rotation
+    const palette = CHIP_COLORS[index % CHIP_COLORS.length];
+    chip.style.color = palette.color;
+    chip.style.backgroundColor = palette.bg;
+
+    chip.addEventListener('click', async () => {
+      chip.disabled = true;
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'CREATE_SUGGESTED_LABEL', name });
+        if (response && response.success) {
+          chip.classList.add('suggestion-chip-created');
+          chip.innerHTML = `✓ ${name}`;
+        } else {
+          chip.disabled = false;
+        }
+      } catch (e) {
+        console.error('[Aegis] Failed to create suggested label:', e);
+        chip.disabled = false;
+      }
+    });
+    container.appendChild(chip);
+  });
+}
+
+// Visibility gate: show suggestion button only when on email platform with AI capabilities
+function shouldShowSuggestionButton(isEmailPlatform, analysisMode, aiSettings) {
+  if (!isEmailPlatform) return false;
+  if (analysisMode === 'nano') return true;
+  if (analysisMode === 'ai' && aiSettings && aiSettings.apiKey) return true;
+  return false;
+}
+
 // Ping content script; if no response, inject all scripts then wait for them to settle.
 async function ensureContentScript(tab) {
   const alive = await chrome.tabs.sendMessage(tab.id, { type: 'PING' }).catch(() => null);
@@ -12,6 +62,7 @@ async function ensureContentScript(tab) {
       'src/analysis/email-analyzer.js',
       'src/analysis/ai-analyzer.js',
       'src/analysis/nano-analyzer.js',
+      'src/analysis/label-suggester.js',
       'src/platforms/base-platform.js',
       'src/platforms/gmail-platform.js',
       'src/platforms/outlook-platform.js',
@@ -91,8 +142,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     showDomainSecurityInfo(tab, url);
   }
 
-  // Show current mode
-  chrome.storage.sync.get(['analysisMode'], (result) => {
+  // Show current mode and apply suggestion button visibility gate
+  chrome.storage.sync.get(['analysisMode', 'aiSettings'], (result) => {
     if (result.analysisMode === 'ai') {
       modeBadge.textContent = t('popupModeAi');
       modeDot.className = 'status-dot';
@@ -105,6 +156,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       modeBadge.textContent = t('popupModeLocal');
       modeDot.className = 'status-dot inactive';
       modeDot.style.background = 'var(--text-muted)';
+    }
+
+    // Show/hide suggestion button based on visibility gate
+    const suggestBtn = document.getElementById('suggestLabelsBtn');
+    if (suggestBtn && shouldShowSuggestionButton(isEmailPlatform, result.analysisMode, result.aiSettings)) {
+      suggestBtn.style.display = '';
     }
   });
 
@@ -145,6 +202,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }
   });
+
+  // Suggestion button click handler
+  const suggestLabelsBtn = document.getElementById('suggestLabelsBtn');
+  if (suggestLabelsBtn) {
+    suggestLabelsBtn.addEventListener('click', async () => {
+      const suggestionResults = document.getElementById('suggestionResults');
+      const suggestionLoading = suggestionResults.querySelector('.suggestion-loading');
+      const suggestionChips = document.getElementById('suggestionChips');
+      const suggestionEmpty = suggestionResults.querySelector('.suggestion-empty');
+      const suggestionError = suggestionResults.querySelector('.suggestion-error');
+
+      // Disable button and show loading state
+      suggestLabelsBtn.disabled = true;
+      const btnSvg = suggestLabelsBtn.querySelector('svg');
+      if (btnSvg) btnSvg.style.animation = 'aegis-spin 1s linear infinite';
+
+      // Show results container with loading state
+      suggestionResults.style.display = '';
+      suggestionLoading.style.display = '';
+      suggestionChips.style.display = 'none';
+      suggestionEmpty.style.display = 'none';
+      suggestionError.style.display = 'none';
+
+      try {
+        await ensureContentScript(tab);
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'SUGGEST_LABELS' });
+
+        // Hide loading
+        suggestionLoading.style.display = 'none';
+
+        if (response && response.suggestions && response.suggestions.length > 0) {
+          suggestionChips.style.display = '';
+          renderSuggestionChips(response.suggestions, suggestionChips, tab);
+        } else if (response && response.suggestions && response.suggestions.length === 0) {
+          suggestionEmpty.style.display = '';
+        } else {
+          suggestionError.style.display = '';
+        }
+      } catch (e) {
+        console.error('[Aegis] Failed to get label suggestions:', e);
+        suggestionLoading.style.display = 'none';
+        suggestionError.style.display = '';
+      }
+
+      // Re-enable button
+      suggestLabelsBtn.disabled = false;
+      if (btnSvg) btnSvg.style.animation = '';
+    });
+  }
 
   settingsBtn.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();

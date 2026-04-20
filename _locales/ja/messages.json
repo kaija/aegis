@@ -197,6 +197,24 @@
     "message": "非対応"
   },
 
+  "_comment_label_suggestion": { "message": "--- ラベル提案 ---" },
+
+  "labelSuggestionBtn": {
+    "message": "ラベルを提案"
+  },
+  "labelSuggestionTitle": {
+    "message": "提案されたラベル"
+  },
+  "labelSuggestionLoading": {
+    "message": "受信トレイを分析中..."
+  },
+  "labelSuggestionEmpty": {
+    "message": "新しいラベルの提案はありません。"
+  },
+  "labelSuggestionError": {
+    "message": "提案を生成できませんでした。もう一度お試しください。"
+  },
+
   "_comment_options": { "message": "--- 設定ページ ---" },
 
   "optAnalysisEngine": {

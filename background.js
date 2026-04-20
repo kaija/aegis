@@ -1593,6 +1593,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'AI_SUGGEST_LABELS') {
+    const { systemPrompt, userPrompt, settings } = message;
+    const { baseUrl, apiKey, model } = settings;
+    fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: model || 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_completion_tokens: 2000
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        const content = data.choices?.[0]?.message?.content || '';
+        sendResponse({ content });
+      })
+      .catch(error => {
+        console.warn('[Aegis] AI_SUGGEST_LABELS error:', error.message);
+        sendResponse({ error: error.message || 'Network error' });
+      });
+    return true;
+  }
+
   if (message.type === 'GA_TRACK') {
     AegisTracker.sendEvent(message.event, message.params || {});
     sendResponse({ ok: true });

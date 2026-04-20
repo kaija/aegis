@@ -362,3 +362,111 @@ body {
   height: 14px;
   fill: currentColor;
 }
+
+/* Suggestion Button */
+#suggestLabelsBtn {
+  margin-top: 12px;
+  background: #f8f9fa;
+  color: var(--text-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#suggestLabelsBtn:hover:not(:disabled) {
+  background: #f1f3f4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+#suggestLabelsBtn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+#suggestLabelsBtn:disabled {
+  background: #f1f3f4;
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+#suggestLabelsBtn svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--primary);
+}
+
+/* Suggestion Results */
+#suggestionResults {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.suggestion-header {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-chip {
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  border: none;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+
+.suggestion-chip:hover:not(:disabled) {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.suggestion-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.suggestion-chip-created {
+  opacity: 0.5;
+  text-decoration: line-through;
+  pointer-events: none;
+}
+
+.suggestion-loading {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.suggestion-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.suggestion-error {
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+/* Spin animation for loading states */
+@keyframes aegis-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
